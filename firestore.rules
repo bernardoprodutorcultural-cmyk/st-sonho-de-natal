@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // O papel de cada pessoa fica em usuarios/{e-mail em minúsculas}: { papel: "admin" | "editor" | "leitura", nome: "..." }
+    function email() { return request.auth.token.email.lower(); }
+    function logado() { return request.auth != null && exists(/databases/$(database)/documents/usuarios/$(email())); }
+    function papel() { return get(/databases/$(database)/documents/usuarios/$(email())).data.papel; }
+    function editor() { return logado() && papel() in ['admin', 'editor']; }
+    function admin() { return logado() && papel() == 'admin'; }
+
+    match /usuarios/{id} {
+      allow get: if request.auth != null && (id == email() || admin());
+      allow list: if admin();
+      allow write: if admin();
+    }
+    match /contratados/{id} { allow read: if logado(); allow write: if editor(); }
+    match /pagamentos/{id}  { allow read: if logado(); allow write: if editor(); }
+    match /ocorrencias/{id} { allow read: if logado(); allow write: if editor(); }
+    match /config/{id}      { allow read: if logado(); allow write: if editor(); }
+    match /{outro=**}       { allow read, write: if false; }
+  }
+}

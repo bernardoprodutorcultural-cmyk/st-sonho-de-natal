@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ST Solutions · Sonho de Natal Canela</title>
+<script src="firebase-config.js"></script>
+<script type="module" src="backend.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  /* ST Solutions · painel de contrato. Barra lateral de módulos + área de trabalho; resumo antes do detalhe */
+  --bg:#070B16; --bg1:#0E1527; --bg2:#162038; --line:#1F2A44; --line2:#2E3B5C;
+  --ink:#EEF1F6; --ink2:#C3CAD8; --muted:#8A93A8;
+  --volt:#19E3C4; --volt-ink:#04211C;
+  --ok:#2BD38B; --warn:#E8B54A; --bad:#FF6B70; --info:#6EA8FF;
+  --s-rider:#4C8DF6; --s-staff:#19E3C4; --s-lic:#B58CFF; --s-art:#F27A54; --s-est:#E46FB0;
+  --f-display:"Space Grotesk","Inter",system-ui,sans-serif;
+  --f-sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:10px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.55 var(--f-sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--volt);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--f-mono)}
+.label{font:500 10.5px/1.4 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);letter-spacing:-.02em;text-wrap:balance;margin:0}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+.side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 14px;gap:14px;overflow-y:auto}
+.brand{display:flex;align-items:flex-end;gap:10px;padding:2px 6px}
+.brand svg{height:22px;width:auto}
+.brand span{font:400 17px/1 var(--f-display)}.brand b{font-weight:600}
+.ctr{border:1px solid var(--line);border-radius:var(--r);padding:12px;background:var(--bg1);display:flex;flex-direction:column;gap:3px}
+.ctr strong{font:600 15px/1.25 var(--f-display)}
+.tabs{display:flex;flex-direction:column;gap:2px}
+.tab{display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:7px;padding:8px 10px;color:var(--ink2);text-decoration:none;font-size:13.5px}
+.tab:hover{background:var(--bg1);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--bg2);color:var(--ink)}
+.tab[aria-current="page"] .ix{color:var(--volt)}
+.tab .ix{font:500 10px var(--f-mono);color:var(--muted);width:18px}
+.tab .badge{margin-left:auto;font:500 10px var(--f-mono);padding:2px 6px;border-radius:999px;background:rgba(255,107,112,.14);color:var(--bad)}
+.tab .grp{display:block;font:500 9.5px var(--f-mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.navsep{font:500 9.5px var(--f-mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase;padding:10px 10px 2px}
+.conn{font-size:11.5px;color:var(--muted);padding:0 6px;display:flex;gap:8px;align-items:flex-start}
+.conn i{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--muted)}
+.conn.on i{background:var(--ok)}.conn.local i{background:var(--warn)}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.who{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg1);font-size:12px}
+.who .av{width:26px;height:26px;border-radius:50%;background:var(--volt);color:#06110F;display:grid;place-items:center;font:700 11px var(--f-mono);flex:none}
+.who .em{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who .em b{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#login{z-index:90;background:var(--bg)}
+#login[hidden]{display:none}
+#login .modal{width:min(420px,calc(100% - 32px))}
+#login .brand{margin-bottom:4px}
+body.ro form.form,body.ro .btn.p,body.ro [data-pay],body.ro [data-up],body.ro [data-v],body.ro .chk,body.ro #ocMultaNew,body.ro #ocFoto,body.ro .in-num,body.ro .in-real{pointer-events:none;opacity:.45}
+body:not(.admin) .tab[href="#usuarios"]{display:none}
+
+.main{min-width:0;padding:22px clamp(16px,3vw,36px) 80px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.topbar h1{font-size:clamp(24px,3vw,32px);line-height:1.1}
+.topbar p{margin:6px 0 0;color:var(--ink2);max-width:72ch}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;font:500 11px/1 var(--f-mono);letter-spacing:.04em;padding:6px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--ink2);white-space:nowrap}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.pill.ok{color:var(--ok);border-color:rgba(43,211,139,.35)}
+.pill.warn{color:var(--warn);border-color:rgba(232,181,74,.4)}
+.pill.bad{color:var(--bad);border-color:rgba(255,107,112,.4)}
+.pill.info{color:var(--info);border-color:rgba(110,168,255,.35)}
+.pill.volt{color:var(--volt);border-color:rgba(25,227,196,.4)}
+.chip{display:inline-block;font:500 9.5px/1 var(--f-mono);letter-spacing:.08em;padding:4px 6px;border-radius:3px;border:1px solid var(--line2);color:var(--ink2);margin:2px 4px 2px 0;white-space:nowrap;text-transform:uppercase}
+.chip.v{border-color:rgba(25,227,196,.4);color:var(--volt)}
+.chip.w{border-color:rgba(232,181,74,.5);color:var(--warn)}
+.chip.b{border-color:rgba(255,107,112,.5);color:var(--bad)}
+.chip.g{border-color:rgba(43,211,139,.45);color:var(--ok)}
+.sdot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+
+.view{display:none;flex-direction:column;gap:16px}
+.view.on{display:flex}
+.grid{display:grid;gap:14px}
+.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.g6{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media (max-width:1480px){.g6{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--bg1);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.card h2{font-size:17px;line-height:1.2}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.kpi .v{font:600 clamp(19px,1.7vw,24px)/1.1 var(--f-display);letter-spacing:-.03em;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .label{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08em}
+.kpi{min-width:0}
+.kpi .s{color:var(--muted);font-size:12.5px;margin-top:4px}
+.kpi.alert{border-color:rgba(255,107,112,.45)}.kpi.alert .v{color:var(--bad)}
+.kpi.warnb{border-color:rgba(232,181,74,.45)}
+
+.bar{height:8px;background:var(--bg2);border-radius:3px;position:relative;overflow:hidden;display:flex}
+.bar>i{height:100%;display:block}
+.bigbar{height:30px;border-radius:6px;background:var(--bg2);display:flex;overflow:hidden;gap:2px}
+.bigbar>i{height:100%;display:block;min-width:0}
+.hatch{background:repeating-linear-gradient(135deg,rgba(238,241,246,.28) 0 5px,rgba(238,241,246,.08) 5px 10px)}
+.pie{display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr);gap:22px;align-items:center;min-height:250px}
+.pie svg{width:100%;max-width:250px;height:auto;display:block}
+.pie ul{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+.pie li{display:flex;align-items:center;gap:9px;font-size:13px;line-height:1.25;min-width:0}
+.pie li b{width:11px;height:11px;border-radius:3px;flex:none}
+.pie li span{min-width:0}
+.pie li.zero{color:var(--muted)}
+@media (max-width:560px){.pie{grid-template-columns:minmax(0,1fr)}.pie svg{margin:0 auto}}
+.mes{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 10px;align-items:end}
+.mes .plot,.mes .fts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;position:relative}
+.mes .plot{height:200px;border-bottom:1px solid var(--line2)}
+.mes .fts{grid-column:2}
+.mes .ax{position:relative;height:200px}
+.mes .ax span{position:absolute;right:0;transform:translateY(50%);font:500 10px var(--f-mono);color:var(--muted)}
+.mes .col{position:relative;height:200px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;border-radius:6px}
+.mes .col:hover{background:rgba(255,255,255,.025)}
+.mes .col:focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+.mes .gl{position:absolute;left:0;right:0;height:1px;background:var(--line);pointer-events:none}
+.mes .stk{position:relative;width:min(64px,60%);display:flex;flex-direction:column-reverse;gap:2px;z-index:1}
+.mes .stk i{display:block;width:100%}
+.mes .stk i:last-child{border-radius:4px 4px 0 0}
+.mes .stk i:first-child{border-radius:0}
+.mes .stk i:only-child{border-radius:4px 4px 0 0}
+.mes .top{position:relative;z-index:1;font:600 13px var(--f-mono);margin-bottom:6px;white-space:nowrap}
+.mes .ft{text-align:center;padding-top:10px;min-width:0}
+.mes .ft b{display:block;font:600 13px var(--f-display)}
+.mes .ft span{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend b{width:11px;height:11px;border-radius:2px;display:inline-block}
+.sect{display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.sect:first-child{border-top:0}
+.sect .v{text-align:right;font:500 12px var(--f-mono);color:var(--ink2);white-space:nowrap}
+
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font:500 10px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 9px;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:bottom}
+td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+tbody tr:hover td{background:rgba(22,32,56,.45)}
+tr.click{cursor:pointer}
+tr.subt td{background:var(--bg2);font-weight:600}
+tr.tot td{border-top:2px solid var(--line2);font-weight:600}
+.sub{color:var(--muted);font-size:11.5px;display:block;margin-top:1px}
+.pos{color:var(--ok)}.neg{color:var(--bad)}.wtxt{color:var(--warn)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 14px;border-radius:7px;border:1px solid var(--line2);background:var(--bg2);cursor:pointer;font-weight:500;font-size:13px;text-decoration:none;color:var(--ink);white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.p{background:var(--volt);color:var(--volt-ink);border-color:var(--volt)}
+.btn.d{color:var(--bad);border-color:rgba(255,107,112,.4);background:transparent}
+.btn.sm{min-height:30px;padding:0 10px;font-size:12px}
+.btn.ghost{background:transparent}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 11px;font:500 11.5px var(--f-sans);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button[aria-pressed="true"]{background:var(--bg2);color:var(--ink)}
+.seg button[aria-pressed="true"].s-ok{background:rgba(43,211,139,.16);color:var(--ok)}
+.seg button[aria-pressed="true"].s-pend{background:rgba(232,181,74,.16);color:var(--warn)}
+.seg button[aria-pressed="true"].s-prob{background:rgba(255,107,112,.16);color:var(--bad)}
+input[type="text"],input[type="number"],input[type="date"],input[type="datetime-local"],input[type="tel"],input[type="search"],select,textarea{background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:7px 9px;min-width:0;width:100%}
+input:disabled,input[readonly]{color:var(--ink2);background:var(--bg2)}
+textarea{resize:vertical;min-height:64px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--ink2)}
+label.f .hint{font-size:11px;color:var(--muted)}
+.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end}
+.form .w2{grid-column:span 2}
+#cForm{align-items:start}.form .w4{grid-column:1/-1}
+.err{color:var(--bad);font-size:12.5px}
+.okmsg{color:var(--ok);font-size:12.5px}
+.in-num{text-align:right;max-width:150px}
+.chk{width:18px;height:18px;flex:none;margin:1px 0 0;accent-color:var(--volt)}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--bg2);border:1px solid var(--line2);position:relative;cursor:pointer;flex:none;padding:0}
+.toggle::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .2s}
+.toggle[aria-pressed="true"]{background:rgba(25,227,196,.22);border-color:rgba(25,227,196,.5)}
+.toggle[aria-pressed="true"]::after{transform:translateX(18px);background:var(--volt)}
+
+.alerts{display:flex;flex-direction:column;gap:8px}
+.al{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.al .d{width:8px;height:8px;border-radius:50%;margin-top:6px}
+.al .d.hi{background:var(--bad)}.al .d.md{background:var(--warn)}.al .d.lo{background:var(--info)}
+.al b{font-weight:600}.al p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.empty{border:1px dashed var(--line2);border-radius:8px;padding:18px;color:var(--muted);text-align:center;font-size:13px}
+.note{border:1px dashed var(--line2);border-radius:8px;padding:10px 12px;color:var(--ink2);font-size:12.5px}
+.note b{color:var(--ink)}
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.subtabs a{padding:10px 14px;color:var(--muted);text-decoration:none;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
+.subtabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--volt)}
+
+/* calendário */
+.cal-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .dw{font:500 10px var(--f-mono);color:var(--muted);text-align:center;padding:4px 0;letter-spacing:.08em}
+.cal button{min-height:68px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:6px;text-align:left;display:flex;flex-direction:column;gap:3px;cursor:pointer;color:var(--ink2)}
+.cal button:hover{border-color:var(--line2)}
+.cal button.out{opacity:.35}
+.cal button.today{border-color:rgba(25,227,196,.6)}
+.cal button.sel{background:var(--bg2);border-color:var(--volt)}
+.cal .dn{font:500 12px var(--f-mono)}
+.cal .dots{display:flex;gap:3px;flex-wrap:wrap}
+.cal .dots span{font:500 9.5px/1 var(--f-mono);padding:2px 4px;border-radius:3px}
+.cal .dots .a{background:rgba(255,107,112,.18);color:var(--bad)}
+.cal .dots .p{background:rgba(232,181,74,.18);color:var(--warn)}
+.cal .dots .r{background:rgba(43,211,139,.16);color:var(--ok)}
+.cal .dots .m{background:var(--bad);color:#fff}
+.kan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.kcol{background:var(--bg1);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.kcol h3{font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kcol.a{border-top:3px solid var(--bad)}.kcol.p{border-top:3px solid var(--warn)}.kcol.r{border-top:3px solid var(--ok)}
+.pay{border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:10px 11px;display:flex;flex-direction:column;gap:6px}
+.pay .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.pay .val{font:600 15px var(--f-display)}
+.pay .who{font-weight:600}
+.pay .meta{font-size:11.5px;color:var(--muted)}
+.pay .acts{display:flex;gap:6px;flex-wrap:wrap}
+.pay.multa{border-color:rgba(255,107,112,.45);background:rgba(255,107,112,.05)}
+
+/* drawer / modal */
+.ovl{position:fixed;inset:0;background:rgba(3,6,14,.7);z-index:60;display:flex;justify-content:flex-end}
+.drawer{width:min(640px,100%);height:100%;background:var(--bg1);border-left:1px solid var(--line2);overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px}
+.modal{margin:auto;width:min(480px,calc(100% - 32px));background:var(--bg1);border:1px solid var(--line2);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.ovl.center{justify-content:center;align-items:center}
+.dh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.parc{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--volt);color:var(--volt-ink);padding:10px 14px;border-radius:8px;font-weight:600;font-size:13px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;z-index:80;max-width:min(420px,calc(100% - 36px))}
+.toast.on{opacity:1;transform:none}
+.toast.bad{background:var(--bad);color:#2a0507}
+.cmp{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,2fr) minmax(0,2fr);border-top:1px solid var(--line)}
+.cmp>div{padding:9px 10px;border-bottom:1px solid var(--line);font-size:12.5px}
+.cmp .hd{font:500 10px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cmp .rq{font-weight:600}
+.cmp label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.rep{background:#F6F7F9;color:#0B1020;border-radius:8px;padding:24px 26px;max-width:820px}
+.rep h3{font-size:20px;margin-bottom:4px}
+.rep .rl{color:#5A6275;font:500 10px var(--f-mono);letter-spacing:.12em;text-transform:uppercase}
+.rep th{color:#5A6275;border-bottom-color:#C9CFDA}
+.rep td{border-bottom-color:#DDE1E8}
+.rep tbody tr:hover td{background:transparent}
+.rep .ft{margin-top:16px;display:flex;justify-content:space-between;gap:10px;color:#5A6275;font-size:11px;flex-wrap:wrap}
+
+@media (max-width:1180px){.g5{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.form{grid-template-columns:repeat(2,minmax(0,1fr))}.kan{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;height:auto;z-index:20;padding:10px 16px;gap:8px;border-right:0;border-bottom:1px solid var(--line);background:var(--bg)}
+  .ctr,.side-foot,.navsep{display:none}
+  .tabs{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;width:auto}
+  .g2,.g3,.g4,.g5,.g6{grid-template-columns:minmax(0,1fr)}
+  .form{grid-template-columns:minmax(0,1fr)}.form .w2{grid-column:span 1}
+  .sect{grid-template-columns:minmax(0,1fr) auto}.sect .bar{grid-column:1/-1;grid-row:2}
+  .cmp{grid-template-columns:minmax(0,1fr)}.cmp .hd{display:none}
+  .cal button{min-height:52px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="login" class="ovl center" hidden>
+    <form class="modal" id="loginForm" aria-labelledby="loginT">
+      <div class="brand" aria-label="ST Solutions"><svg viewBox="0 0 96 64" aria-hidden="true"><path d="M88 12H18A10 10 0 0 0 18 32H30A10 10 0 0 1 30 52H8M64 12V52" fill="none" stroke="#EEF1F6" stroke-width="8" stroke-linecap="square"/><rect x="76" y="44" width="8" height="8" fill="#19E3C4"/></svg><span><b>ST</b> Solutions</span></div>
+      <div><span class="label">39º Sonho de Natal · Canela/RS</span><h2 id="loginT" style="font-size:20px;margin-top:4px">Entrar no sistema</h2><p class="muted" id="loginSub" style="font-size:12.5px;margin:6px 0 0">Use o e-mail cadastrado pelo administrador.</p></div>
+      <label class="f" for="lgEmail">E-mail<input type="email" id="lgEmail" autocomplete="username" required></label>
+      <label class="f" for="lgPw">Senha<input type="password" id="lgPw" autocomplete="current-password" minlength="6" required></label>
+      <span class="err" id="lgMsg" role="alert"></span>
+      <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <button class="btn sm ghost" type="button" id="lgReset">Esqueci a senha</button>
+        <div class="row" style="gap:8px"><button class="btn" type="button" id="lgNew">Criar minha conta</button><button class="btn p" type="submit" id="lgOk">Entrar</button></div>
+      </div>
+      <div id="lgNoAccess" class="note" hidden></div>
+    </form>
+  </div>
+  <aside class="side">
+    <div class="brand" aria-label="ST Solutions">
+      <svg viewBox="0 0 96 64" aria-hidden="true"><path d="M88 12H18A10 10 0 0 0 18 32H30A10 10 0 0 1 30 52H8M64 12V52" fill="none" stroke="#EEF1F6" stroke-width="8" stroke-linecap="square"/><rect x="76" y="44" width="8" height="8" fill="#19E3C4"/></svg>
+      <span><b>ST</b> Solutions</span>
+    </div>
+    <div class="ctr">
+      <span class="label">Contrato ativo</span>
+      <strong>39º Sonho de Natal</strong>
+      <span class="sub">Canela/RS · Pregão Eletrônico 60/2026</span>
+      <span class="sub mono">Homologado R$ 269.500,00</span>
+      <span class="sub">Programação e datas: a confirmar</span>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Módulos do painel"></nav>
+    <div class="side-foot">
+      <div class="who" id="who" hidden><span class="av" id="whoAv"></span><span class="em"><b id="whoPapel"></b><span id="whoEmail"></span></span><button class="btn sm ghost" type="button" id="btnSair">Sair</button></div>
+      <div class="conn" id="conn"><i></i><span>Conectando ao banco de dados…</span></div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+
+  <!-- ================= PAINEL ================= -->
+  <section class="view" id="v-painel">
+    <div class="topbar">
+      <div><span class="label">Painel</span><h1>Visão geral do contrato</h1><p>Teto do contrato, quanto já foi pago, o que vence nos próximos dias e o que ainda falta contratar. Atualiza na hora a cada cadastro ou pagamento.</p></div>
+      <div class="row"><span class="label">Próximos</span><div class="seg" id="pnlWin" role="group" aria-label="Janela de dias"><button type="button" data-n="7" aria-pressed="true">7 dias</button><button type="button" data-n="15" aria-pressed="false">15 dias</button><button type="button" data-n="30" aria-pressed="false">30 dias</button></div></div>
+    </div>
+    <div class="grid g6" id="pnlKpis"></div>
+    <div class="card">
+      <div class="card-h"><h2>Teto do projeto · valor homologado</h2><span class="label" id="pnlTetoLbl"></span></div>
+      <div class="bigbar" id="pnlTeto" aria-label="Uso do teto do contrato"></div>
+      <div class="legend" id="pnlTetoLeg"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="card-h"><h2>Divisão do orçamento</h2><span class="label">fatias do homologado</span></div>
+        <div class="pie" id="pnlPie"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>Pagamentos por mês</h2><span class="label" id="pnlMesLbl"></span></div>
+        <div id="pnlMes"></div>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="card-h"><h2>Orçamento por setor</h2><span class="label">pago × previsto × proposta</span></div>
+        <div id="pnlSet"></div>
+        <div class="legend"><span><b style="background:var(--ok)"></b>Pago</span><span><b style="background:#5B6580"></b>Previsto a pagar</span><span><b style="background:var(--bg2);border:1px solid var(--line2)"></b>Saldo da proposta</span></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>Pagamentos dos próximos dias</h2><a class="btn sm" href="#pagamentos">Abrir pagamentos</a></div>
+        <div id="pnlNext"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Alertas</h2><span class="label">calculados dos dados</span></div>
+      <div class="alerts" id="pnlAlerts"></div>
+    </div>
+  </section>
+
+  <!-- ================= CONTRATADOS ================= -->
+  <section class="view" id="v-contratados">
+    <div class="topbar">
+      <div><span class="label">Contratados</span><h1>Artistas e prestadores</h1><p>Cada contratado ocupa uma função fixa da proposta, com limite de diárias, horas ou cachês. O valor total é calculado sozinho; depois do cadastro, agende as datas de pagamento até completar o valor.</p></div>
+      <div class="row"><button class="btn" type="button" id="expContr">Baixar planilha (.csv)</button></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 id="cfTitle">Cadastrar contratado</h2><span class="label">campos com * são obrigatórios</span></div>
+      <form class="form" id="cForm" novalidate>
+        <label class="f w2" for="cNome">Nome *<input type="text" id="cNome" autocomplete="off" required></label>
+        <label class="f" for="cDoc">CPF ou CNPJ *<input type="text" id="cDoc" inputmode="numeric" placeholder="000.000.000-00" required></label>
+        <label class="f" for="cTipo">Tipo de contratação *<select id="cTipo"><option>Pessoa física (recibo/RPA)</option><option>MEI</option><option>Pessoa jurídica</option><option>Associação ou cooperativa</option></select></label>
+        <label class="f" for="cTel">Telefone<input type="tel" id="cTel" placeholder="(54) 99999-9999"></label>
+        <label class="f w2" for="cFunc">Função *<select id="cFunc"></select><span class="hint" id="cFuncHint"></span></label>
+        <label class="f" for="cServ">Situação do serviço<select id="cServ"><option value="a_prestar">A prestar</option><option value="prestado">Prestado</option></select></label>
+        <label class="f" for="cDiaria"><span id="cDiariaLbl">Valor da diária (R$) *</span><input type="number" id="cDiaria" min="0" step="0.01" class="in-num" style="max-width:none" required></label>
+        <label class="f" for="cQtd"><span id="cQtdLbl">Diárias contratadas *</span><input type="number" id="cQtd" min="0" step="1" class="in-num" style="max-width:none" required></label>
+        <label class="f" for="cTotal">Valor total (calculado)<input type="text" id="cTotal" readonly tabindex="-1"></label>
+        <label class="f" for="cData"><span id="cDataLbl">Data do serviço</span><input type="date" id="cData"></label>
+        <label class="f w4" for="cObs">Observações<input type="text" id="cObs" placeholder="Ex.: grupo de 5 músicos, rider próprio"></label>
+        <div class="w4 row" style="justify-content:space-between">
+          <span id="cMsg" class="err" role="alert"></span>
+          <div class="row"><button class="btn p" type="submit">Salvar e agendar pagamentos</button></div>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Ocupação das funções</h2><span class="label">contratado × limite da proposta</span></div>
+      <div class="tw"><table><thead><tr><th>Função</th><th>Setor</th><th class="r">Limite</th><th class="r">Contratado</th><th class="r">Disponível</th><th style="min-width:140px">Ocupação</th><th class="r" style="min-width:130px">Previsto · pago</th></tr></thead><tbody id="funcBody"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Lista de contratados</h2>
+        <div class="row"><input type="search" id="cSearch" placeholder="Buscar nome ou documento" style="width:220px" aria-label="Buscar contratado"><select id="cSetF" style="width:auto" aria-label="Filtrar por setor"></select></div>
+      </div>
+      <div class="tw"><table><thead><tr><th>Contratado</th><th>Função</th><th>Tipo</th><th class="r">Diária × qtd</th><th class="r">Total</th><th class="r">Agendado</th><th class="r">Pago</th><th>Serviço</th><th>Pagamento</th></tr></thead><tbody id="cBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ================= FINANCEIRO: PLANILHA ================= -->
+  <section class="view" id="v-planilha">
+    <div class="topbar">
+      <div><span class="label">Financeiro</span><h1>Financeiro</h1><p>Guia: proposta readequada. Lance o <b>Valor Real</b> total de cada item; o sistema calcula a diária real. <b>Contratado</b> e <b>Valor Pago</b> vêm sozinhos das abas Contratados e Pagamentos.</p></div>
+      <div class="row"><label class="f" for="aliq" style="flex-direction:row;align-items:center;gap:8px">Impostos estimados (%)<input type="number" id="aliq" min="0" max="40" step="0.1" class="in-num" style="width:90px"></label><button class="btn sm" type="button" id="expPlan">Exportar planilha</button></div>
+    </div>
+    <nav class="subtabs" aria-label="Seções do financeiro"><a href="#planilha" aria-current="page">Planilha de custo</a><a href="#pagamentos">Pagamentos</a></nav>
+    <div class="grid g4" id="plKpis"></div>
+    <div class="card">
+      <div class="tw"><table><thead><tr><th>Item</th><th class="r">Qtd</th><th class="r">Diária<br>proposta</th><th class="r">Valor da<br>proposta</th><th class="r" style="min-width:150px">Valor Real<br>(total)</th><th class="r">Diária<br>real</th><th class="r">Contratado</th><th class="r">Valor<br>pago</th><th>Situação</th></tr></thead><tbody id="plBody"></tbody></table></div>
+      <div class="note" style="margin-top:12px">Item 6.1 da proposta: 1 × R$ 2.000,00 lançado como R$ 2.500,00. A planilha usa R$ 2.500,00, que é o valor que compõe os R$ 269.500,00 homologados.</div>
+    </div>
+  </section>
+
+  <!-- ================= FINANCEIRO: PAGAMENTOS ================= -->
+  <section class="view" id="v-pagamentos">
+    <div class="topbar">
+      <div><span class="label">Financeiro</span><h1>Financeiro</h1><p>Calendário de pagamentos ligado a cada contrato (CPF ou CNPJ). Ao registrar um pagamento, ele sai de pendentes, entra em realizados e abate o setor no painel.</p></div>
+      <div class="row"><button class="btn" type="button" id="expPag">Baixar pagamentos (.csv)</button><button class="btn p" type="button" id="newPay">Agendar pagamento</button></div>
+    </div>
+    <nav class="subtabs" aria-label="Seções do financeiro"><a href="#planilha">Planilha de custo</a><a href="#pagamentos" aria-current="page">Pagamentos</a></nav>
+    <div class="grid g5" id="pgKpis"></div><div id="pgMultaNote"></div>
+    <div class="card">
+      <div class="cal-h"><button class="btn sm ghost" type="button" id="calPrev" aria-label="Mês anterior">‹</button><h2 id="calTitle"></h2><button class="btn sm ghost" type="button" id="calNext" aria-label="Próximo mês">›</button></div>
+      <div class="cal" id="cal"></div>
+      <div class="legend"><span><b style="background:rgba(255,107,112,.5)"></b>Atrasado</span><span><b style="background:rgba(232,181,74,.5)"></b>Pendente</span><span><b style="background:rgba(43,211,139,.5)"></b>Realizado</span><span><b style="background:var(--bad)"></b>Multa</span><span id="calSelLbl"></span></div>
+    </div>
+    <div class="kan">
+      <div class="kcol a"><h3>Atrasados <span class="pill bad" id="kA"></span></h3><div id="colA" class="alerts"></div></div>
+      <div class="kcol p"><h3>Pendentes <span class="pill warn" id="kP"></span></h3><div id="colP" class="alerts"></div></div>
+      <div class="kcol r"><h3>Realizados <span class="pill ok" id="kR"></span></h3><div id="colR" class="alerts"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= PROGRAMAÇÃO ================= -->
+  <section class="view" id="v-programacao">
+    <div class="topbar">
+      <div><span class="label">Programação</span><h1>Shows e verba artística</h1><p>A grade sai dos artistas cadastrados em Contratados. Precisa haver pelo menos 35 contratações somando exatamente R$ 50.000,00.</p></div>
+      <div class="row"><a class="btn p" href="#contratados" id="prNew">Cadastrar artista</a></div>
+    </div>
+    <div class="grid g4" id="prKpis"></div>
+    <div class="card"><div class="card-h"><h2>Grade artística</h2><span class="label">ordenada pela data do serviço</span></div>
+      <div class="tw"><table><thead><tr><th>Data</th><th>Artista</th><th>Documento</th><th class="r">Cachê</th><th>Serviço</th><th>Pagamento</th><th>Comprovantes</th></tr></thead><tbody id="prBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ================= OPERAÇÃO ================= -->
+  <!-- ================= RIDERS ================= -->
+  <section class="view" id="v-riders">
+    <div class="topbar">
+      <div><span class="label">Riders técnicos</span><h1>Coreto e Praça da Matriz</h1><p>Diárias contratadas e checklist conferido com o Memorial Descritivo (itens 1 e 3) e o Termo de Referência. Os riders itinerantes (itens 9 e 10) foram suprimidos. Tudo precisa estar montado, ligado e testado antes da 1ª NF (20%).</p></div>
+    </div>
+    <div class="grid g2" id="rdKpis"></div>
+    <div class="card"><div class="card-h"><h2>Checklist de conferência</h2><span class="label" id="rdCount"></span></div><div class="cmp" id="rdCmp"></div></div>
+  </section>
+
+  <!-- ================= DOCUMENTOS ================= -->
+  <section class="view" id="v-documentos">
+    <div class="topbar">
+      <div><span class="label">Documentos</span><h1>Licenças e prazos documentais</h1><p>Situação, responsável e anexo de cada documento exigido pelo Edital, pelo TR e pelo Memorial, na ordem em que vencem.</p></div>
+      <span class="pill bad"><i></i>Faltar licença: multa de 15%</span>
+    </div>
+    <div class="card"><div class="tw"><table><thead><tr><th>Documento</th><th>Prazo</th><th>Risco se faltar</th><th>Responsável</th><th>Situação</th><th>Anexo</th></tr></thead><tbody id="dcBody"></tbody></table></div></div>
+  </section>
+
+  <!-- ================= OCORRÊNCIAS ================= -->
+  <section class="view" id="v-ocorrencias">
+    <div class="topbar">
+      <div><span class="label">Ocorrências</span><h1>Chamados, prazos e multas</h1><p>O prazo começa na hora da mensagem no grupo oficial de WhatsApp: 12h para risco grave, 24h para integridade e 48h para manutenção regular. Se a SMTC aplicar multa, registre aqui: ela entra na planilha, nos pagamentos e no painel.</p></div>
+      <span class="pill bad"><i></i>Limite de multas: 30% do contrato</span>
+    </div>
+    <div class="grid g4" id="ocKpis"></div>
+    <div class="card"><div class="card-h"><h2>Registrar chamado</h2><span class="label">campos com * são obrigatórios</span></div>
+      <form class="form" id="ocForm">
+        <label class="f w2" for="ocDesc">O que aconteceu *<input type="text" id="ocDesc" required placeholder="Ex.: refletor apagado no Coreto"></label>
+        <label class="f" for="ocT">Hora da mensagem no WhatsApp *<input type="datetime-local" id="ocT" required></label>
+        <label class="f" for="ocGrav">Gravidade e prazo<select id="ocGrav"><option value="12">Risco grave · 12h</option><option value="24">Integridade · 24h</option><option value="48">Manutenção regular · 48h</option></select></label>
+        <label class="f" for="ocLocal">Local<select id="ocLocal"><option>Coreto · Aldeia do Sonho</option><option>Praça da Matriz</option><option>Casinhas</option><option>Área geral</option></select></label>
+        <label class="f w2" for="ocResp">Contratado responsável<select id="ocResp"></select></label>
+        <div class="row" style="justify-content:flex-end;align-items:end"><button class="btn p" type="submit">Registrar chamado</button></div>
+      </form>
+    </div>
+    <div class="card"><div class="card-h"><h2>Chamados</h2><span class="label" id="ocCount"></span></div>
+      <div class="tw"><table><thead><tr><th>Mensagem</th><th>Chamado</th><th>Local</th><th>Prazo</th><th>Situação</th><th>Providência</th><th class="r">Multa</th><th></th></tr></thead><tbody id="ocBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ================= RELATÓRIOS ================= -->
+  <section class="view" id="v-relatorios">
+    <div class="topbar">
+      <div><span class="label">Relatórios</span><h1>Relatórios para o fiscal e a direção</h1><p>Montados a partir dos contratados, pagamentos e comprovantes. Copie o texto ou baixe a planilha.</p></div>
+      <div class="seg" id="rpType" role="group" aria-label="Tipo de relatório"><button type="button" data-t="verba" aria-pressed="true">Verba artística</button><button type="button" data-t="setor" aria-pressed="false">Gastos por setor</button><button type="button" data-t="nf" aria-pressed="false">Medição da NF</button></div>
+    </div>
+    <div class="rep" id="rpBox"></div>
+    <div class="row"><button class="btn p" id="rpCopy" type="button">Copiar texto do relatório</button></div>
+  </section>
+
+  <!-- ================= EDITAL ================= -->
+  <section class="view" id="v-edital">
+    <div class="topbar"><div><span class="label">Edital</span><h1>Itens, regras e pontos a formalizar</h1><p>Referência fixa do TR, do Memorial Descritivo e da proposta readequada.</p></div></div>
+    <div class="card"><div class="tw"><table><thead><tr><th>Item</th><th>Serviço</th><th>Setor</th><th class="r">Qtd</th><th>Unid.</th><th class="r">Unitário</th><th class="r">Total</th><th>Limite no sistema</th></tr></thead><tbody id="edBody"></tbody></table></div></div>
+    <div class="grid g2">
+      <div class="card"><div class="card-h"><h2>Regras de valor</h2></div><div class="alerts">
+        <div class="al"><span class="d md"></span><div><b>Único item fixo: cachês dos artistas</b><p>R$ 50.000,00 em no mínimo 35 contratações. Saldo não repassado é glosado.</p></div><span class="chip w">Fixo</span></div>
+        <div class="al"><span class="d lo"></span><div><b>Quantidades do Memorial</b><p>Diárias, horas e serviços além do contratado não são pagos pela Prefeitura.</p></div><span class="chip">Limite</span></div>
+        <div class="al"><span class="d lo"></span><div><b>Subcontratação até 25% (R$ 67.375,00)</b><p>Só vigia, limpeza, bombeiro civil, ambulância e seguro.</p></div><span class="chip">25%</span></div>
+      </div></div>
+      <div class="card"><div class="card-h"><h2>Pontos a formalizar com a SMTC</h2></div><div class="alerts">
+        <div class="al"><span class="d md"></span><div><b>ECAD da Descida do Papai Noel</b><p>O item 7.1 do Memorial se contradiz sobre quem paga.</p></div><span class="chip w">Pendente</span></div>
+        <div class="al"><span class="d md"></span><div><b>Horas de ambulância e bombeiro</b><p>Dependem do PPCI. Se passarem de 18h e 108h, pedir aditivo antes.</p></div><span class="chip w">Pendente</span></div>
+        <div class="al"><span class="d lo"></span><div><b>Correção do item 6.1 da proposta</b><p>1 × R$ 2.000 lançado como R$ 2.500.</p></div><span class="chip">Corrigir</span></div>
+      </div></div>
+    </div>
+  </section>
+
+    <section class="view" id="v-usuarios">
+    <div class="topbar">
+      <div><span class="label">Usuários</span><h1>Quem acessa o sistema</h1><p>Cadastre o e-mail de cada pessoa e o papel dela. A pessoa cria a própria senha na tela de entrada, em "Criar minha conta", com o mesmo e-mail.</p></div>
+    </div>
+    <div class="card"><div class="card-h"><h2>Cadastrar acesso</h2><span class="label">campos com * são obrigatórios</span></div>
+      <form class="form" id="usForm">
+        <label class="f" for="usEmail">E-mail *<input type="email" id="usEmail" required placeholder="nome@empresa.com.br"></label>
+        <label class="f" for="usNome">Nome<input type="text" id="usNome" placeholder="Como aparece na equipe"></label>
+        <label class="f" for="usPapel">Papel *<select id="usPapel"><option value="editor">Editor: registra e anexa</option><option value="leitura">Leitura: só consulta</option><option value="admin">Administrador: tudo + usuários</option></select></label>
+        <div class="row" style="justify-content:flex-end;align-items:end"><button class="btn p" type="submit">Salvar acesso</button></div>
+      </form>
+    </div>
+    <div class="card"><div class="card-h"><h2>Acessos cadastrados</h2><span class="label" id="usCount"></span></div>
+      <div class="tw"><table><thead><tr><th>E-mail</th><th>Nome</th><th>Papel</th><th>Cadastrado por</th><th></th></tr></thead><tbody id="usBody"></tbody></table></div>
+      <div class="note" style="margin-top:12px"><b>Papéis.</b> Administrador: tudo, inclusive esta aba. Editor: cadastra, paga, anexa e registra chamados. Leitura: vê tudo, não altera nada. Remover um acesso impede a entrada na hora seguinte; a senha da pessoa continua existindo no Firebase, mas sem permissão.</div>
+    </div>
+  </section>
+</main>
+</div>
+<div id="ovl"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const brl=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const brl0=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+const pct=v=>(isFinite(v)?v*100:0).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const r2=v=>Math.round((+v||0)*100)/100;
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const TODAY=iso(new Date());
+const fd=s=>{if(!s)return"—";const [y,m,d]=s.split("-");return `${d}/${m}/${y.slice(2)}`;};
+const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d);};
+const digits=s=>String(s||"").replace(/\D/g,"");
+function fmtDoc(s){const d=digits(s);if(d.length===11)return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");if(d.length===14)return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,"$1.$2.$3/$4-$5");return s||"";}
+function toast(m,bad){const t=$("#toast");t.textContent=m;t.classList.toggle("bad",!!bad);t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("on"),2600);}
+
+/* ================= CONTRATO (proposta readequada) ================= */
+const TETO=269500, VERBA=50000, ART_MIN=35, ART_MAX=100;
+const SETORES=[
+ {k:"rider",n:"Rider técnico",c:"var(--s-rider)"},
+ {k:"staff",n:"Staff",c:"var(--s-staff)"},
+ {k:"licencas",n:"Licenças",c:"var(--s-lic)"},
+ {k:"artistico",n:"Artístico",c:"var(--s-art)"},
+ {k:"estrutura",n:"Estrutura e acessibilidade",c:"var(--s-est)"}];
+const SET=Object.fromEntries(SETORES.map(s=>[s.k,s]));
+// lim: "qtd" soma das quantidades ≤ q · "count" nº de contratações ≤ max · "art" regra dos artistas · "sem" sem previsão na proposta
+const FUNCS=[
+ {k:"rider_coreto",n:"Rider Coreto",s:"rider",it:"1",un:"diária",q:32,d:2000,lim:"qtd",det:"Som, luz, estrutura, energia e operação · FOH obrigatório"},
+ {k:"rider_matriz",n:"Rider Matriz",s:"rider",it:"3",un:"diária",q:40,d:2000,lim:"qtd",det:"Som, luz, tablado, box truss, energia e operação"},
+ {k:"vigia",n:"Vigia noturno",s:"staff",it:"2.1",un:"diária 12h",q:93,d:160,lim:"qtd",sub:true},
+ {k:"limpeza",n:"Limpeza",s:"staff",it:"2.2",un:"diária 6h",q:60,d:110,lim:"qtd",sub:true},
+ {k:"ambulancia",n:"Ambulância Tipo B",s:"staff",it:"2.3",un:"hora",q:18,d:110,lim:"qtd",sub:true},
+ {k:"bombeiro",n:"Bombeiro civil",s:"staff",it:"2.4",un:"hora",q:108,d:22,lim:"qtd",sub:true},
+ {k:"producao",n:"Produção",s:"staff",it:"—",un:"diária",q:0,d:0,lim:"sem",det:"Sem linha na proposta"},
+ {k:"ppci",n:"PPCI parcial e ART/RRT",s:"licencas",it:"5",un:"serviço",q:1,d:9500,lim:"count",max:1},
+ {k:"ecad",n:"Licenciamento ECAD",s:"licencas",it:"7.1",un:"serviço",q:1,d:32000,lim:"count",max:1},
+ {k:"seguro",n:"Seguro de responsabilidade civil",s:"licencas",it:"7.2",un:"serviço",q:1,d:3564,lim:"count",max:1,sub:true},
+ {k:"alvaras",n:"Alvarás e taxas",s:"licencas",it:"—",un:"serviço",q:0,d:0,lim:"sem",det:"Sem linha na proposta"},
+ {k:"artista",n:"Artista (cachê)",s:"artistico",it:"4",un:"cachê",q:100,d:500,lim:"art",det:"Mín. 35 contratações · soma exata de R$ 50.000"},
+ {k:"casinhas_transp",n:"Transporte das 12 casinhas",s:"estrutura",it:"6.1",un:"serviço",q:1,d:2500,lim:"count",max:1,det:"Ida e volta, com pequenos reparos"},
+ {k:"casinhas_pint",n:"Pintura dos telhados",s:"estrutura",it:"6.2",un:"serviço",q:1,d:600,lim:"count",max:1,det:"Antes do transporte"},
+ {k:"acessibilidade",n:"Acessibilidade",s:"estrutura",it:"8",un:"serviço",q:1,d:1500,lim:"count",max:3,det:"Libras (3 datas), 2 mapas táteis, áreas reservadas"}];
+FUNCS.forEach(f=>f.tot=f.q*f.d);
+const FN=Object.fromEntries(FUNCS.map(f=>[f.k,f]));
+const unitWord=f=>f.un.startsWith("diária")?"diárias":(f.un==="hora"?"horas":(f.un==="cachê"?"apresentações":"serviço"));
+const setBudget=k=>FUNCS.filter(f=>f.s===k).reduce((a,f)=>a+f.tot,0);
+
+const DOCS=[
+ {k:"decl",n:"Declaração Conjunta de pré-contratação",d:"Responsável técnico com contato direto com a SMTC · garantia de funcionamento e manutenção preventiva e corretiva de som e luz · descarte adequado de resíduos e limpeza final",pz:"48h úteis após a convocação",r:"Perda do direito à contratação"},
+ {k:"crono",n:"Cronograma físico-financeiro aprovado",pz:"Pré-contratação (48h úteis)",r:"Base das multas por atraso: 1% por dia"},
+ {k:"os",n:"Contrato assinado e Ordem de Serviço",pz:"Antes de executar",r:"Diárias só contam após a OS"},
+ {k:"prep",n:"Indicação formal do preposto e do substituto",d:"Disponível em Canela no horário comercial e acessível por e-mail e WhatsApp fora dele",pz:"Antes do início",r:"Multa de 0,5% por dia de ausência"},
+ {k:"rt",n:"Responsável técnico (CREA/CAU) e substituto",d:"Indicação formal, com ART/RRT de execução no início dos serviços",pz:"Antes do início",r:"Multa de 2% por dia sem RT"},
+ {k:"art",n:"ART/RRT de execução registrada",pz:"Antes do início",r:"Multa de 15% (R$ 40.425)"},
+ {k:"amb",n:"Licença ambiental ou dispensa (Município)",pz:"Antes do início",r:"Multa de 15% (R$ 40.425)"},
+ {k:"ppci_pac",n:"Pacote do PPCI parcial protocolado no CBMRS",d:"ARTs/RRTs · memoriais descritivos · planta baixa com estruturas, circulação e rotas de fuga · cronograma das medidas de segurança · protocolo e acompanhamento no CBMRS de Canela",pz:"Prazo do cronograma dos Bombeiros",r:"Multa de 10% (R$ 26.950) e risco de interdição"},
+ {k:"ppci",n:"PPCI parcial aprovado (CBMRS)",pz:"Antes do início",r:"Multa de 10% (R$ 26.950)"},
+ {k:"ecad",n:"Protocolo de pagamento do ECAD",pz:"1 dia antes do início",r:"Multa de 15% (R$ 40.425)"},
+ {k:"seg",n:"Apólice de seguro RC ≥ R$ 300 mil",d:"Cobrindo montagem e desmontagem, danos materiais e corporais a terceiros",pz:"1 dia antes do início",r:"Sinistro sem cobertura"},
+ {k:"aterr",n:"Laudo de aterramento e medições elétricas",d:"Apresentar sempre que a fiscalização pedir",pz:"Antes da energização",r:"Multa de 5% por infração"},
+ {k:"energ",n:"Aprovação da SMTC das instalações elétricas",d:"A SMTC testa e aprova a instalação e o aterramento antes de liberar a energização definitiva de som e luz",pz:"Antes de ligar som e luz",r:"Sem aprovação não há energização"},
+ {k:"simples",n:"Declaração do Simples Nacional (Anexo VIII, IN RFB 1234)",d:"Só se a contratada for optante; vai junto com cada nota fiscal",pz:"Com cada NF",r:"Retenção de tributos na NF"},
+ {k:"cert",n:"Certidões de regularidade",pz:"Todo o contrato",r:"Pagamento retido"}];
+const RIDER=[
+ ["Sistema principal","Colunas line array compactas L/R, full-range, dispersão ≥ 90° H, alcance útil de 15 m; sub 12–15\" opcional (até 1 por lado); DSP com crossover, delay e limiter","Igual ao Coreto"],
+ ["Mesa de áudio","Mesa digital ~16 canais (TF1, Si Impact, XR18, Ui24 ou equivalente) com EQ, dinâmica e efeitos, mín. 4 auxiliares; operação discreta com controle remoto; stagebox integrado","Igual ao Coreto, operada ao lado ou atrás do minipalco"],
+ ["Monitores","Até 4 wedges 10–12\" independentes (mín. 2), EQ gráfico de 31 bandas nas vias","Não previsto no Memorial"],
+ ["Microfones sem fio","2 UHF de mão cardioides (scanner RF e distribuidor de antenas) + 4 headset/lapela UHF, 2 cápsulas reserva, pilhas recarregáveis e carregadores","Igual ao Coreto"],
+ ["Instrumentos e D.I.","2 microfones dinâmicos, 4 DIs (2 passivos + 2 ativos), mín. 8 pedestais (retos e girafa) com contrapesos, cabos XLR/P10 organizados","Não previsto no Memorial"],
+ ["Playback","Reprodução por USB direto na mesa, entrada minijack/DI e notebook de apoio quando o artista pedir","Igual ao Coreto"],
+ ["Alinhamento e testes","Checagem com RTA e ruído rosa, EQ global e controle de microfonia; passagem de som de 30–45 min por atração ou bloco","Igual ao Coreto"],
+ ["Housemix (FOH)","Obrigatória: até 2,0 × 2,0 m (ou 1,5 × 2,0 m), altura máx. 2,20 m; fechamento transparente; piso nivelado e antiderrapante; tomadas com disjuntor, DR e DPS + nobreak; luz interna; balizadores; extintor PQS 4 kg","Não prevista no Memorial"],
+ ["Iluminação","8 uplights LED nos pilares (de preferência IP65/bateria, 2700–3200 K ou RGBW); 4 PAR LED RGBW; 2 perfis LED 200–300 W com shutters (~3200 K) frontais","Igual, com os uplights nas treliças do minipalco"],
+ ["Controle de luz","Controlador DMX compacto com cenas Fala, Voz & Violão e Entardecer; cabo DMX 120 Ω e terminadores; sem haze ou fumaça","Igual ao Coreto"],
+ ["Estrutura e acabamento","Estruturas leves e trechos curtos de truss; capas e toldos para mesa, caixas e FOH; saias, tapetes, canaletas e rampas; coreto sem cabos soltos","Tablado ≥ 2 × 2 m, altura 10–20 cm, carpete preto ou linóleo, saia e testeira pretas; kit trave box truss Q20 (torres de 2,5 m, contrapesos sem furo, viga de 2,5 m); mesmo acabamento do Coreto"],
+ ["Energia e segurança","Ponto 110/220 V estabilizado; disjuntores, DR e DPS; aterramento e polaridade verificados; NBR 5410/5419; sinalização de cabos e EPIs da equipe","Igual ao Coreto"],
+ ["Operação","1 operador(a) de áudio e luz em todas as apresentações (montagem, passagem, operação e desmontagem), com 2 eventos similares nos últimos 36 meses e prática em mixagem de fala e sistemas sem fio","Igual ao Coreto"]];
+const RIDER_INFO={rider_coreto:"Aldeia do Sonho · público de 50–70 pessoas",rider_matriz:"Praça da Matriz (Catedral de Pedra) · público de 50–100 pessoas"};
+// multas do item 6.3.1 do TR (sobre o valor do contrato) · dia=true: multa diária, máx. 10 dias
+const MULTAS=[
+ {k:"p12",n:"Prazo de 12h estourado (risco grave iminente)",pct:.05,h:12},
+ {k:"p24",n:"Prazo de 24h estourado (integridade do elemento)",pct:.02,h:24},
+ {k:"p48",n:"Prazo de 48h estourado (manutenção regular)",pct:.01,h:48},
+ {k:"a",n:"Atraso no cronograma ou descumprimento da proposta (a, b)",pct:.01,dia:true},
+ {k:"c",n:"Despesas operacionais, EPI/EPC, encargos (c)",pct:.02},
+ {k:"d",n:"Mora em sanar irregularidade apontada (d)",pct:.005,dia:true},
+ {k:"e",n:"Danos ao Município ou a terceiros (e)",pct:.10},
+ {k:"fg",n:"Normas de segurança do trabalho / falta de informações (f, g)",pct:.03},
+ {k:"h",n:"Cabeamento fora das normas (h)",pct:.01},
+ {k:"i",n:"Não fornecer o PPCI parcial (i)",pct:.10},
+ {k:"j",n:"Falta de licença, ART/RRT ou ECAD (j)",pct:.15},
+ {k:"k",n:"Ausência de responsável técnico (k)",pct:.02,dia:true},
+ {k:"l",n:"Preposto ausente no horário comercial (l)",pct:.005,dia:true},
+ {k:"m",n:"Preposto inacessível fora do horário (m)",pct:.005},
+ {k:"n",n:"Falha na infraestrutura elétrica (n)",pct:.03},
+ {k:"o",n:"Normas elétricas NBR 5410/5419, NR-10 (o)",pct:.05},
+ {k:"p",n:"Aterramento inadequado (p)",pct:.05},
+ {k:"q",n:"Atraso em ajustes pedidos pela fiscalização (q)",pct:.005,dia:true},
+ {k:"s",n:"Áreas não entregues limpas (s)",pct:.02},
+ {k:"t",n:"Falha de qualidade, estabilidade ou segurança (t)",pct:.10},
+ {k:"u",n:"Sinistro sem reposição em 24h (u)",pct:.02},
+ {k:"glosa",n:"Glosa definida pela SMTC (uniforme, crachá, EPI, desorganização)",pct:0,livre:true}];
+const MULTA_TETO=r2(TETO*.30),MULTA_DIAS_MAX=10;
+const MK=Object.fromEntries(MULTAS.map(m=>[m.k,m]));
+/* ================= ESTADO ================= */
+const S={contratados:{},pagamentos:{},ocorrencias:{},config:{}};
+const cfg=k=>S.config[k]||{};
+const aliq=()=>{const a=cfg("planilha").aliquota;return a==null?0.125:+a;};
+
+/* ================= ARMAZENAMENTO ================= */
+const COLS=["contratados","pagamentos","ocorrencias","config"];
+S.usuarios={};
+const LKEY="st-sonho-natal-v2";
+const Store={mode:"loading",db:null,assets:null,downloads:null,canWrite:true,
+  newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);},
+  user:null,B:null,
+  async set(col,id,data){if(this.mode==="web"){if(!this.canWrite){toast("Seu acesso é só de leitura.",true);throw new Error("ro");}const d={...data,_por:this.user.email,_em:Date.now()};const prev=S[col][id];S[col][id]=d;schedule();try{await this.B.set(col,id,d);}catch(e){if(prev)S[col][id]=prev;else delete S[col][id];schedule();this.fail(e);throw e;}return;}
+    S[col][id]=data;schedule();if(this.mode==="db"){try{await this.db.collection(col).doc(id).set(data);}catch(e){this.fail(e);throw e;}}else this.saveLocal();},
+  async del(col,id){if(this.mode==="web"){if(!this.canWrite){toast("Seu acesso é só de leitura.",true);throw new Error("ro");}const prev=S[col][id];delete S[col][id];schedule();try{await this.B.del(col,id);}catch(e){if(prev)S[col][id]=prev;schedule();this.fail(e);throw e;}return;}
+    delete S[col][id];schedule();if(this.mode==="db"){try{await this.db.collection(col).doc(id).delete();}catch(e){this.fail(e);throw e;}}else this.saveLocal();},
+  fail(e){const code=e&&e.code;if(code==="invalid_argument"||code==="permission-denied"){toast("Sem permissão para alterar os dados. Peça acesso de editor ao administrador.",true);}else if(code==="quota_exceeded"||code==="resource-exhausted"){toast("O banco de dados atingiu o limite de hoje.",true);}else if(code==="unavailable"){toast("Sem conexão. A alteração será enviada quando a internet voltar.");}else toast("Não foi possível salvar. Tente de novo.",true);},
+  saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(S));}catch(e){}},
+  loadLocal(){try{const raw=localStorage.getItem(LKEY);if(raw){const o=JSON.parse(raw);COLS.forEach(c=>S[c]=o[c]||{});}}catch(e){}},
+  setConn(cls,txt){const c=$("#conn");c.className="conn "+cls;c.querySelector("span").textContent=txt;}
+};
+function blobSaver(){return{save:async({filename,data})=>{const bl=new Blob([data],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(bl);const a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);}};}
+const cfgOk=()=>{const c=window.ST_FIREBASE;return !!(c&&c.apiKey&&!/COLE_AQUI/.test(c.apiKey)&&c.projectId&&!/SEU-PROJETO/.test(c.projectId));};
+async function initStore(){
+  if(window.claude&&typeof window.claude.use==="function")return initClaude();
+  if(cfgOk()&&window.STBackend===undefined){await new Promise(r=>{window.addEventListener("st-backend-ready",r,{once:true});setTimeout(r,8000);});}
+  Store.downloads=blobSaver();
+  const B=window.STBackend;
+  if(!B){Store.mode="local";Store.loadLocal();Store.setConn("local",cfgOk()?"Não foi possível carregar o Firebase. Modo local: dados só neste navegador.":"Firebase não configurado (firebase-config.js). Modo local: dados só neste navegador.");schedule();return;}
+  Store.mode="web";Store.B=B;
+  B.onAuth(async user=>{
+    stopSubs();document.body.classList.remove("ro","admin");Store.canWrite=true;Store.assets=null;
+    if(!user){Store.user=null;showLogin();Store.setConn("local","Entre com seu e-mail para acessar os dados.");return;}
+    const papel=await B.papel(user.email);
+    if(!papel){Store.user=null;showLogin("semacesso",user.email);Store.setConn("local","E-mail sem acesso liberado.");return;}
+    Store.user={email:user.email,papel};Store.canWrite=papel!=="leitura";
+    document.body.classList.toggle("ro",!Store.canWrite);document.body.classList.toggle("admin",papel==="admin");
+    Store.assets=(B.storageAvailable&&Store.canWrite)?{upload:(file,o)=>B.upload(file,(o||{}).type)}:null;
+    hideLogin();renderWho();startSubs(papel==="admin");
+  });
+}
+let SUBS=[];
+function stopSubs(){SUBS.forEach(u=>{try{u();}catch(e){}});SUBS=[];}
+function startSubs(admin){
+  const cols=admin?COLS.concat(["usuarios"]):COLS;let pending=cols.length;
+  const timer=setTimeout(()=>{if(pending>0)Store.setConn("local","Banco demorando a responder. Os dados podem estar desatualizados.");},10000);
+  cols.forEach(col=>{let first=true;
+    SUBS.push(Store.B.subscribe(col,(o,fromCache)=>{S[col]=o;if(first&&!fromCache){first=false;pending--;if(pending===0){clearTimeout(timer);Store.setConn("on",Store.canWrite?"Banco de dados conectado. Alterações salvas para toda a equipe.":"Conectado em modo leitura.");}}schedule();},
+      err=>{clearTimeout(timer);console.error(err);Store.setConn("local",(err&&err.code)==="permission-denied"?"Sem permissão para ler os dados. Fale com o administrador.":"Conexão com o banco perdida. Recarregue a página.");}));
+  });
+}
+async function initClaude(){
+  let db=null;
+  try{db=await window.claude.use("db");}catch(e){db=null;}
+  try{Store.assets=await window.claude.use("assets");}catch(e){}
+  try{Store.downloads=await window.claude.use("downloads");}catch(e){}
+  try{const u=await window.claude.use("user");if(u&&typeof u.can==="function"){const w=await u.can("data.write");if(w===false)Store.canWrite=false;}}catch(e){}
+  if(!db){Store.mode="local";Store.loadLocal();Store.setConn("local","Modo local: os dados ficam só neste navegador.");schedule();return;}
+  Store.mode="db";Store.db=db;
+  let pending=COLS.length;const timer=setTimeout(()=>{if(pending>0)Store.setConn("local","Banco demorando a responder. Os dados podem estar desatualizados.");},10000);
+  COLS.forEach(col=>{let first=true;
+    db.collection(col).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data();});S[col]=o;
+      if(first&&!snap.metadata.fromCache){first=false;pending--;if(pending===0){clearTimeout(timer);Store.setConn("on",Store.canWrite?"Banco de dados conectado. Alterações salvas para toda a equipe.":"Conectado em modo leitura.");}}
+      schedule();},
+    err=>{clearTimeout(timer);Store.setConn("local","Conexão com o banco perdida. Recarregue a página.");});
+  });
+}
+/* ================= LOGIN ================= */
+const AUTH_MSG={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/wrong-password":"E-mail ou senha incorretos.","auth/user-not-found":"Não existe conta com este e-mail. Use \"Criar minha conta\".","auth/invalid-email":"E-mail inválido.","auth/email-already-in-use":"Já existe conta com este e-mail. Use \"Entrar\" ou \"Esqueci a senha\".","auth/weak-password":"A senha precisa ter pelo menos 6 caracteres.","auth/too-many-requests":"Muitas tentativas. Aguarde alguns minutos.","auth/network-request-failed":"Sem conexão com a internet.","auth/missing-password":"Digite a senha."};
+const authMsg=e=>AUTH_MSG[(e&&e.code)||""]||"Não foi possível entrar. Tente de novo.";
+let lgMode="in";
+function showLogin(mode,email){const L=$("#login");L.hidden=false;document.body.style.overflow="hidden";$("#who").hidden=true;
+  const na=$("#lgNoAccess");if(mode==="semacesso"){na.hidden=false;na.innerHTML=`<b>${esc(email)}</b> ainda não tem acesso liberado. Peça ao administrador para cadastrar este e-mail na aba Usuários e entre de novo.`;$("#loginSub").textContent="Sua conta existe, mas o acesso ainda não foi liberado.";$("#lgEmail").value=email||"";}else{na.hidden=true;}
+  setLgMode("in");}
+function hideLogin(){$("#login").hidden=true;document.body.style.overflow="";}
+function setLgMode(m){lgMode=m;$("#loginT").textContent=m==="new"?"Criar minha conta":"Entrar no sistema";$("#lgOk").textContent=m==="new"?"Criar conta":"Entrar";$("#lgNew").textContent=m==="new"?"Já tenho conta":"Criar minha conta";$("#lgPw").autocomplete=m==="new"?"new-password":"current-password";$("#lgMsg").textContent="";if(m==="new")$("#loginSub").textContent="Use o mesmo e-mail que o administrador cadastrou e escolha uma senha de pelo menos 6 caracteres.";}
+$("#lgNew").onclick=()=>setLgMode(lgMode==="new"?"in":"new");
+$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const B=Store.B;if(!B)return;const em=$("#lgEmail").value.trim(),pw=$("#lgPw").value;const btn=$("#lgOk");btn.disabled=true;$("#lgMsg").textContent="";
+  try{if(lgMode==="new")await B.signUp(em,pw);else await B.signIn(em,pw);}catch(x){$("#lgMsg").textContent=authMsg(x);}
+  btn.disabled=false;});
+$("#lgReset").onclick=async()=>{const em=$("#lgEmail").value.trim();if(!em){$("#lgMsg").textContent="Digite o e-mail para receber o link de redefinição.";return;}try{await Store.B.reset(em);$("#lgMsg").textContent="Enviamos um e-mail com o link para criar uma nova senha.";}catch(x){$("#lgMsg").textContent=authMsg(x);}};
+$("#btnSair").onclick=()=>confirmBox("Sair do sistema?","Você precisará entrar de novo com e-mail e senha.","Sair",async()=>{try{await Store.B.signOut();}catch(e){}COLS.forEach(c=>S[c]={});S.usuarios={};if(location.hash==="#usuarios")location.hash="painel";schedule();});
+const PAPEL={admin:"Administrador",editor:"Editor",leitura:"Leitura"};
+function renderWho(){const u=Store.user;if(!u){$("#who").hidden=true;return;}$("#who").hidden=false;$("#whoAv").textContent=u.email.slice(0,2).toUpperCase();$("#whoEmail").textContent=u.email;$("#whoEmail").title=u.email;$("#whoPapel").textContent=PAPEL[u.papel]||u.papel;}
+/* ================= USUÁRIOS ================= */
+function rUsers(){const L=Object.entries(S.usuarios||{}).map(([email,u])=>({email,...u})).sort((a,b)=>a.email.localeCompare(b.email));
+  $("#usCount").textContent=`${L.length} acesso(s)`;
+  $("#usBody").innerHTML=L.length?L.map(u=>`<tr><td class="mono">${esc(u.email)}</td><td>${esc(u.nome||"—")}</td><td><span class="chip ${u.papel==="admin"?"g":(u.papel==="leitura"?"":"b")}">${esc(PAPEL[u.papel]||u.papel)}</span></td><td class="muted">${esc(u._por||"—")}${u._em?`<span class="sub">${fd(iso(new Date(u._em)))}</span>`:""}</td><td class="r">${u.email===(Store.user||{}).email?'<span class="muted">você</span>':`<button class="btn sm ghost" type="button" data-usdel="${esc(u.email)}">Remover</button>`}</td></tr>`).join(""):`<tr><td colspan="5"><div class="empty">Nenhum acesso cadastrado além do seu.</div></td></tr>`;
+  $$("#usBody [data-usdel]").forEach(b=>b.onclick=()=>confirmBox("Remover acesso?",`${b.dataset.usdel} não conseguirá mais entrar.`,"Remover",async()=>{try{await Store.B.delUsuario(b.dataset.usdel);toast("Acesso removido");}catch(e){Store.fail(e);}}));}
+$("#usForm").addEventListener("submit",async e=>{e.preventDefault();const em=$("#usEmail").value.trim().toLowerCase();if(!em)return;const prev=S.usuarios[em]||{};
+  try{await Store.B.setUsuario(em,{...prev,papel:$("#usPapel").value,nome:$("#usNome").value.trim(),_por:Store.user.email,_em:prev._em||Date.now()});e.target.reset();toast(`Acesso de ${em} salvo`);}catch(x){Store.fail(x);}});
+
+/* ================= CÁLCULOS ================= */
+const contrList=()=>Object.entries(S.contratados).map(([id,c])=>({id,...c}));
+const payList=()=>Object.entries(S.pagamentos).map(([id,p])=>({id,...p}));
+const cTotal=c=>r2((+c.diaria||0)*(+c.qtd||0));
+function payStatus(p){if(p.status==="pago")return"pago";return p.data<TODAY?"atrasado":"pendente";}
+function cPays(id){return payList().filter(p=>p.cid===id).sort((a,b)=>a.data.localeCompare(b.data));}
+function cAgg(c){const ps=cPays(c.id);const ag=ps.reduce((a,p)=>a+(+p.valor||0),0);const pg=ps.filter(p=>p.status==="pago").reduce((a,p)=>a+(+p.valor||0),0);const at=ps.filter(p=>payStatus(p)==="atrasado").length;return{total:cTotal(c),agendado:r2(ag),pago:r2(pg),falta:r2(cTotal(c)-ag),atrasados:at,n:ps.length,semComp:ps.filter(p=>p.status==="pago"&&!p.comp).length};}
+function funcUse(k,excludeId){const cs=contrList().filter(c=>c.funcao===k&&c.id!==excludeId);return{n:cs.length,qtd:cs.reduce((a,c)=>a+(+c.qtd||0),0),valor:r2(cs.reduce((a,c)=>a+cTotal(c),0))};}
+function itemAgg(f){const cs=contrList().filter(c=>c.funcao===f.k);let contratado=0,pago=0,qtd=0;cs.forEach(c=>{contratado+=cTotal(c);qtd+=+c.qtd||0;pago+=cAgg(c).pago;});const realRaw=(cfg("planilha").real||{})[f.k];let real=(realRaw===""||realRaw==null||isNaN(+realRaw))?null:+realRaw;if(real==null&&f.k==="artista")real=VERBA;const prev=r2(Math.max(real||0,contratado));return{n:cs.length,qtd,contratado:r2(contratado),pago:r2(pago),real,prev,aPagar:r2(Math.max(0,prev-pago))};}
+function setAgg(k){let orc=setBudget(k),contr=0,pago=0,agend=0,real=0,prev=0;contrList().filter(c=>FN[c.funcao]&&FN[c.funcao].s===k).forEach(c=>{const a=cAgg(c);agend+=a.agendado-a.pago;});FUNCS.filter(f=>f.s===k).forEach(f=>{const a=itemAgg(f);contr+=a.contratado;pago+=a.pago;real+=a.real||0;prev+=a.prev;});return{orc,real:r2(real),prev:r2(prev),contr:r2(contr),pago:r2(pago),aPagar:r2(Math.max(0,prev-pago)),agend:r2(agend)};}
+function totals(){let contr=0,pago=0,agend=0,atr=0,atrV=0;contrList().forEach(c=>{const a=cAgg(c);contr+=a.total;pago+=a.pago;});payList().forEach(p=>{const st=payStatus(p);if(st!=="pago")agend+=+p.valor||0;if(st==="atrasado"){atr++;atrV+=+p.valor||0;}});const imp=r2(TETO*aliq());const prev=r2(FUNCS.reduce((a,f)=>a+itemAgg(f).prev,0));const mt=multaTotals();return{contr:r2(contr),pago:r2(pago),agend:r2(agend),atr,atrV:r2(atrV),imp,prev,aPagar:r2(Math.max(0,prev-pago)),multas:mt.tot,multasPend:mt.pend,multasPagas:mt.pag,margem:r2(TETO-imp-prev-mt.tot),livre:r2(TETO-imp-prev-mt.tot)};}
+function previsto(){return totals().prev;}
+const ocSt=o=>o.st||(o.ok?"resolvido":"aberto");
+const ocList=()=>Object.entries(S.ocorrencias).map(([id,o])=>({id,...o}));
+const ocDeadline=o=>o.t+o.h*3600e3;
+const ocEstourou=o=>ocSt(o)!=="resolvido"&&ocDeadline(o)<Date.now();
+const multaList=()=>ocList().filter(o=>o.multa).map(o=>({id:o.id,desc:o.desc,loc:o.loc,...o.multa}));
+function multaTotals(){let tot=0,pend=0,pag=0,np=0;multaList().forEach(m=>{const v=+m.valor||0;tot+=v;if(m.st==="quitada")pag+=v;else{pend+=v;np++;}});return{tot:r2(tot),pend:r2(pend),pag:r2(pag),np,n:multaList().length};}
+// barra financeira padrão: verde = pago · cinza = previsto a pagar · sem cor = saldo
+const GRAY="#5B6580",GRAY2="#3E4762";
+function finBar(pago,prev,base,h,extra){base=Math.max(base||0,prev,pago,1);const ap=Math.max(0,prev-pago);return `<span class="bar" style="height:${h||8}px" title="Pago ${esc(brl(pago))} · previsto a pagar ${esc(brl(ap))}"><i style="width:${Math.min(100,pago/base*100)}%;background:var(--ok)"></i><i style="width:${Math.min(100,ap/base*100)}%;background:${GRAY}"></i>${extra||""}</span>`;}
+function artAgg(){const cs=contrList().filter(c=>c.funcao==="artista");let contr=0,pago=0;cs.forEach(c=>{contr+=cTotal(c);pago+=cAgg(c).pago;});return{n:cs.length,contr:r2(contr),pago:r2(pago),aPagar:r2(contr-pago),falta:r2(VERBA-contr),prest:cs.filter(c=>c.servico==="prestado").length};}
+
+function itemStatus(f,a){const out=[];
+  if(f.lim==="sem"){if(a.n)out.push(["w","Fora da proposta"]);else out.push(["","Sem previsão"]);return out;}
+  if(f.lim==="art"){if(a.n<ART_MIN)out.push(["w",`${a.n}/${ART_MIN} contratações`]);if(a.contratado<VERBA)out.push(["w",`Falta ${brl0(VERBA-a.contratado)}`]);if(a.contratado>VERBA)out.push(["b","Acima de R$ 50 mil"]);if(a.n>=ART_MIN&&a.contratado===VERBA)out.push(["g","Completo"]);return out;}
+  if(!a.n)out.push(["b","Sem contratado"]);
+  else if(f.lim==="qtd"&&a.qtd<f.q)out.push(["w",`Faltam ${f.q-a.qtd} ${unitWord(f)}`]);
+  if(a.real==null)out.push(["","Sem valor real"]);
+  else if(a.n&&Math.abs(a.real-a.contratado)>0.5)out.push(["w","Real ≠ contratado"]);
+  if(a.real!=null&&a.real>f.tot)out.push(["b","Acima da proposta"]);
+  if(!out.length)out.push(["g","OK"]);
+  return out;}
+
+function alerts(){const al=[];const t=totals();
+  const atr=payList().filter(p=>payStatus(p)==="atrasado");
+  if(atr.length)al.push(["hi",`${atr.length} pagamento(s) atrasado(s) · ${brl(atr.reduce((a,p)=>a+(+p.valor||0),0))}`,"Registre o pagamento ou reagende a data.","pagamentos"]);
+  const soon=payList().filter(p=>payStatus(p)==="pendente"&&p.data<=addDays(TODAY,3));
+  if(soon.length)al.push(["md",`${soon.length} pagamento(s) vencem em até 3 dias`,soon.slice(0,3).map(p=>`${fd(p.data)} · ${(S.contratados[p.cid]||{}).nome||"?"}`).join(" · "),"pagamentos"]);
+  const semComp=payList().filter(p=>p.status==="pago"&&!p.comp);
+  if(semComp.length)al.push(["md",`${semComp.length} pagamento(s) realizado(s) sem comprovante`,"Anexe o comprovante para a prestação de contas.","pagamentos"]);
+  const naoAg=contrList().filter(c=>{const a=cAgg(c);return a.falta>0.5;});
+  if(naoAg.length)al.push(["md",`${naoAg.length} contratado(s) com valor não agendado`,naoAg.slice(0,3).map(c=>`${c.nome}: ${brl0(cAgg(c).falta)}`).join(" · "),"contratados"]);
+  if(t.margem<0)al.push(["hi","Previsto + impostos passam do homologado",`${brl(-t.margem)} acima de ${brl(TETO)}.`,"planilha"]);
+  const acimaReal=FUNCS.filter(f=>{const a=itemAgg(f);return a.real!=null&&a.contratado>a.real+0.5;});
+  if(acimaReal.length)al.push(["md","Contratado acima do Valor Real",acimaReal.map(f=>{const a=itemAgg(f);return `${f.n}: ${brl0(a.contratado)} de ${brl0(a.real)}`;}).join(" · ")+". O previsto passa a usar o valor contratado.","planilha"]);
+  const semRealC=FUNCS.filter(f=>{const a=itemAgg(f);return a.real==null&&a.n;});
+  if(semRealC.length)al.push(["lo","Contratado sem Valor Real lançado",semRealC.map(f=>f.n).join(" · ")+". O previsto usa o valor contratado até você lançar o Valor Real.","planilha"]);
+  const aa=artAgg();
+  if(aa.contr>VERBA)al.push(["hi","Cachês acima de R$ 50.000",`${brl(aa.contr-VERBA)} acima da verba fixa.`,"programacao"]);
+  else if(aa.falta>0||aa.n<ART_MIN)al.push(["md",`Verba artística: falta contratar ${brl(Math.max(0,aa.falta))}`,`${aa.n} de no mínimo ${ART_MIN} contratações.`,"programacao"]);
+  const sem=FUNCS.filter(f=>f.lim!=="sem"&&f.lim!=="art"&&!itemAgg(f).n);
+  if(sem.length)al.push(["md",`${sem.length} item(ns) da planilha sem contratado`,sem.map(f=>f.n).join(" · "),"planilha"]);
+  const inc=FUNCS.filter(f=>{if(f.lim!=="qtd")return false;const a=itemAgg(f);return a.n&&a.qtd<f.q;});
+  if(inc.length)al.push(["lo",`${inc.length} item(ns) com diárias ou horas incompletas`,inc.map(f=>{const a=itemAgg(f);return `${f.n}: ${a.qtd}/${f.q}`;}).join(" · "),"planilha"]);
+  const semReal=FUNCS.filter(f=>f.lim!=="sem"&&itemAgg(f).real==null);
+  if(semReal.length)al.push(["lo",`${semReal.length} item(ns) sem Valor Real lançado`,"Preencha na Planilha de custo.","planilha"]);
+  const fora=FUNCS.filter(f=>f.lim==="sem"&&itemAgg(f).n);
+  if(fora.length)al.push(["md","Contratações fora da proposta",fora.map(f=>`${f.n}: ${brl(itemAgg(f).contratado)}`).join(" · "),"planilha"]);
+  const sub=FUNCS.filter(f=>f.sub).reduce((a,f)=>a+itemAgg(f).contratado,0);
+  if(sub>TETO*.25)al.push(["hi","Subcontratação acima de 25%",`${brl(sub)} em serviços subcontratáveis.`,"planilha"]);
+  const ocA=ocList().filter(o=>ocEstourou(o)&&!o.multa);
+  if(ocA.length)al.push(["hi",`${ocA.length} chamado(s) com prazo estourado sem multa registrada`,`Multa prevista: ${brl(ocA.reduce((a,o)=>a+TETO*({12:.05,24:.02,48:.01}[o.h]||0),0))}. Registre a multa se a SMTC aplicar.`,"ocorrencias"]);
+  const mt=multaTotals();
+  if(mt.pend>0)al.push(["hi",`${mt.np} multa(s) pendente(s) · ${brl(mt.pend)}`,"A Prefeitura retém o pagamento das notas fiscais enquanto houver multa não quitada.","ocorrencias"]);
+  if(mt.tot>=MULTA_TETO)al.push(["hi","Multas atingiram o limite de 30% do contrato",`${brl(mt.tot)} de ${brl(MULTA_TETO)}. Acima disso a Prefeitura pode rescindir o contrato.`,"ocorrencias"]);
+  else if(mt.tot>=MULTA_TETO*.5)al.push(["md",`Multas em ${pct(mt.tot/MULTA_TETO)} do limite`,`${brl(mt.tot)} de ${brl(MULTA_TETO)} (30% do contrato).`,"ocorrencias"]);
+  return al;}
+
+/* ================= NAVEGAÇÃO ================= */
+const NAV=[["painel","Painel"],["contratados","Contratados"],["planilha","Financeiro","fin"],["programacao","Programação"],["riders","Riders"],["documentos","Documentos"],["ocorrencias","Ocorrências"],["relatorios","Relatórios"],["edital","Edital"],["usuarios","Usuários"]];
+const VIEWS=["painel","contratados","planilha","pagamentos","programacao","riders","documentos","ocorrencias","relatorios","edital","usuarios"];
+function current(){const h=location.hash.slice(1);if(h==="usuarios"&&!document.body.classList.contains("admin"))return"painel";return VIEWS.includes(h)?h:"painel";}
+function renderNav(){const cur=current();const atr=payList().filter(p=>payStatus(p)==="atrasado").length;const oc=Object.values(S.ocorrencias).filter(o=>!o.ok).length;
+  $("#tabs").innerHTML=NAV.map(([k,l],i)=>{const on=k===cur||(k==="planilha"&&cur==="pagamentos");const b=k==="planilha"?atr:(k==="ocorrencias"?oc:0);return `<a class="tab" href="#${k}" ${on?'aria-current="page"':""}><span class="ix">${pad(i+1)}</span>${l}${b?`<span class="badge" title="${k==="planilha"?"pagamentos atrasados":"chamados abertos"}">${b}</span>`:""}</a>`;}).join("");}
+function show(){const c=current();$$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+c));window.scrollTo(0,0);render();}
+window.addEventListener("hashchange",show);
+let _raf=0;function schedule(){if(_raf)return;_raf=requestAnimationFrame(()=>{_raf=0;render();});}
+function render(){renderNav();const c=current();const fn={painel:rPainel,contratados:rContr,planilha:rPlan,pagamentos:rPag,programacao:rProg,riders:rRiders,documentos:rDocs,ocorrencias:rOc,relatorios:rRep,edital:rEdital,usuarios:rUsers}[c];try{fn();}catch(e){console.error(e);}if(openDrawer)openDrawer.refresh();}
+
+/* ================= PAINEL ================= */
+let WIN=7;
+$$("#pnlWin button").forEach(b=>b.onclick=()=>{WIN=+b.dataset.n;$$("#pnlWin button").forEach(x=>x.setAttribute("aria-pressed",x===b));rPainel();});
+function rPainel(){
+  const t=totals();const lim=addDays(TODAY,WIN);
+  const nextP=payList().filter(p=>payStatus(p)==="pendente"&&p.data<=lim).sort((a,b)=>a.data.localeCompare(b.data));
+  const nextV=nextP.reduce((a,p)=>a+(+p.valor||0),0);
+  const pv=t.prev;const prevAberto=t.aPagar;const margem=t.margem;
+  $("#pnlKpis").innerHTML=[
+   `<div class="card kpi"><span class="label">Homologado</span><div class="v num">${brl0(TETO)}</div><div class="s">Margem livre: <span class="${margem<0?"neg":""}">${brl0(margem)}</span></div></div>`,
+   `<div class="card kpi ${t.multas?"alert":""}"><span class="label">Previsto</span><div class="v num">${brl0(pv+t.imp+t.multas)}</div><div class="s">Real ${brl0(pv)} + impostos ${brl0(t.imp)}${t.multas?` + <span class="neg">multas ${brl0(t.multas)}</span>`:""}</div></div>`,
+   `<div class="card kpi"><span class="label">Pago</span><div class="v num" style="color:var(--ok)">${brl0(t.pago)}</div><div class="s">${pct(pv+t.imp?t.pago/(pv+t.imp):0)} do previsto</div></div>`,
+   `<div class="card kpi"><span class="label">Contratado</span><div class="v num">${brl0(t.contr)}</div><div class="s">A pagar: ${brl0(t.contr-t.pago)}</div></div>`,
+   `<div class="card kpi ${nextV?"warnb":""}"><span class="label">Próximos ${WIN} dias</span><div class="v num">${brl0(nextV)}</div><div class="s">${nextP.length} pagamento(s)</div></div>`,
+   `<div class="card kpi ${t.atr?"alert":""}"><span class="label">Atrasados</span><div class="v num">${brl0(t.atrV)}</div><div class="s">${t.atr} pagamento(s)</div></div>`].join("");
+  // teto: verde = pago · cinza = previsto ainda não pago + impostos · sem cor = margem
+  const segs=[{w:t.pago,c:"var(--ok)",t:`Pago: ${brl(t.pago)}`},{w:prevAberto,c:GRAY,t:`Previsto a pagar: ${brl(prevAberto)}`},{w:t.imp,c:GRAY2,t:`Impostos estimados: ${brl(t.imp)}`},{w:t.multas,c:"var(--bad)",t:`Multas e glosas: ${brl(t.multas)}`}];
+  $("#pnlTeto").innerHTML=segs.filter(x=>x.w>0).map(x=>`<i style="width:${Math.min(100,x.w/TETO*100)}%;background:${x.c}" title="${esc(x.t)}"></i>`).join("");
+  $("#pnlTetoLbl").innerHTML=margem<0?`<span class="neg">${brl0(-margem)} acima do teto</span>`:`margem: ${brl0(margem)}`;
+  $("#pnlTetoLeg").innerHTML=`<span><b style="background:var(--ok)"></b>Pago · ${brl0(t.pago)}</span><span><b style="background:${GRAY}"></b>Previsto a pagar · ${brl0(prevAberto)}</span><span><b style="background:${GRAY2}"></b>Impostos · ${brl0(t.imp)}</span>${t.multas?`<span><b style="background:var(--bad)"></b>Multas · ${brl0(t.multas)}</span>`:""}<span><b style="background:var(--bg2);border:1px solid var(--line2)"></b>Margem · ${brl0(Math.max(0,margem))}</span>`;
+  // setores
+  $("#pnlSet").innerHTML=SETORES.map(s=>{const a=setAgg(s.k);const over=a.prev>a.orc+0.5;return `<div class="sect"><span><span class="sdot" style="background:${s.c}"></span>${s.n}<span class="sub">Previsto ${brl0(a.prev)} · proposta ${brl0(a.orc)}${over?' · <span class="neg">acima da proposta</span>':""}</span></span>${finBar(a.pago,a.prev,a.orc,10)}<span class="v">${a.prev?brl0(a.prev):"—"}<span class="sub" style="text-align:right">pago ${brl0(a.pago)}</span></span></div>`;}).join("");
+  // pizza: previsto (Valor Real) por setor + impostos; o restante fica sem cor
+  {const fat=SETORES.map(x=>({n:x.n,c:x.c,v:setAgg(x.k).prev}));
+   fat.push({n:`Impostos (${pct(aliq())})`,c:"#7C869F",v:t.imp});if(t.multas)fat.push({n:"Multas e glosas",c:"var(--bad)",v:t.multas});
+   const aloc=fat.reduce((a,x)=>a+x.v,0),livre=TETO-aloc;
+   const R=78,C=100,W=40;let ang=-Math.PI/2;
+   const arc=(a0,a1)=>{const ro=R+W/2,ri=R-W/2,lg=(a1-a0)>Math.PI?1:0,P=(r,a)=>`${(C+r*Math.cos(a)).toFixed(2)} ${(C+r*Math.sin(a)).toFixed(2)}`;return `M${P(ro,a0)} A${ro} ${ro} 0 ${lg} 1 ${P(ro,a1)} L${P(ri,a1)} A${ri} ${ri} 0 ${lg} 0 ${P(ri,a0)}Z`;};
+   const kv=v=>v>=1000?`${(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:v<10000?1:0})} mil`:brl0(v);
+   const lbl=(a0,a1,v,dark)=>{if(a1-a0<0.36)return"";const m=(a0+a1)/2,x=C+R*Math.cos(m),y=C+R*Math.sin(m);return `<text x="${x.toFixed(1)}" y="${(y-1).toFixed(1)}" text-anchor="middle" fill="${dark?"var(--muted)":"#0B1020"}" style="font:700 9.5px var(--f-mono);pointer-events:none">${kv(v)}</text><text x="${x.toFixed(1)}" y="${(y+9).toFixed(1)}" text-anchor="middle" fill="${dark?"var(--muted)":"#0B1020"}" style="font:500 7.5px var(--f-mono);opacity:.75;pointer-events:none">${pct(v/TETO)}</text>`;};
+   let paths=`<circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="var(--bg2)" stroke-width="${W}"><title>Não alocado: ${esc(brl(Math.max(0,livre)))}</title></circle>`,texts="";
+   fat.filter(x=>x.v>0).forEach(x=>{const sw=Math.min(1,x.v/TETO)*Math.PI*2;const a1=Math.min(ang+sw,ang+Math.PI*2-0.0001);paths+=`<path d="${arc(ang,a1)}" fill="${x.c}" stroke="var(--bg1)" stroke-width="2"><title>${esc(x.n)}: ${esc(brl(x.v))} · ${pct(x.v/TETO)}</title></path>`;texts+=lbl(ang,a1,x.v);ang=a1;});
+   if(livre>0)texts+=lbl(ang,-Math.PI/2+Math.PI*2,livre,true);
+   const center=`<text x="${C}" y="${C-5}" text-anchor="middle" fill="var(--muted)" style="font:500 8px var(--f-mono);letter-spacing:.12em">ALOCADO</text><text x="${C}" y="${C+13}" text-anchor="middle" fill="var(--ink)" style="font:600 18px var(--f-display)">${pct(aloc/TETO)}</text>`;
+   const leg=fat.map(x=>`<li class="${x.v>0?"":"zero"}" title="${esc(x.n)}: ${esc(brl(x.v))}"><b style="background:${x.c}"></b><span>${esc(x.n)}</span></li>`).join("")+`<li title="${livre<0?"Acima do homologado":"Não alocado"}: ${esc(brl(Math.abs(livre)))}"><b style="background:var(--bg2);border:1px solid var(--line2)"></b><span>${livre<0?'<span class="neg">Acima do homologado</span>':"Não alocado"}</span></li>`;
+   $("#pnlPie").innerHTML=`<svg viewBox="0 0 200 200" role="img" aria-label="Divisão do orçamento homologado por setor">${paths}${texts}${center}</svg><ul>${leg}</ul>`;}
+  // pagamentos por mês (novembro, dezembro, janeiro) · ligado à aba Pagamentos
+  {const MESES=[["2026-11","Novembro","nov/26"],["2026-12","Dezembro","dez/26"],["2027-01","Janeiro","jan/27"]];
+   const M=MESES.map(([k,n,c])=>{let pago=0,pend=0,atr=0,np=0,nq=0;payList().forEach(p=>{const st=payStatus(p);if(st==="pago"){if((p.pagoEm||p.data).slice(0,7)===k){pago+=+p.valor||0;np++;}}else if(p.data.slice(0,7)===k){if(st==="atrasado")atr+=+p.valor||0;else pend+=+p.valor||0;nq++;}});return{k,n,c,pago:r2(pago),pend:r2(pend),atr:r2(atr),np,nq};});
+   const fora=payList().filter(p=>{const k=(p.status==="pago"?(p.pagoEm||p.data):p.data).slice(0,7);return !MESES.some(m=>m[0]===k);});
+   const mx=Math.max(...M.map(m=>m.pago+m.pend+m.atr),0);
+   const step=(()=>{if(!mx)return 25000;const raw=mx/4;const pw=Math.pow(10,Math.floor(Math.log10(raw)));return [1,2,2.5,5,10].map(x=>x*pw).find(x=>x>=raw);})();
+   const top=step*4,H=200,PAD=24,usable=H-PAD;
+   const yk=v=>v>=1000?`${(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})} mil`:String(v);
+   const gl=[0,1,2,3,4].map(i=>`<i class="gl" style="bottom:${i/4*usable}px"></i>`).join("");
+   const ax=`<div class="ax">${[0,1,2,3,4].map(i=>`<span style="bottom:${i/4*usable}px">${yk(step*i)}</span>`).join("")}</div>`;
+   const cols=M.map((m,i)=>{const h=v=>v/top*usable;const segs=[[m.pago,"var(--ok)","Pago"],[m.pend,GRAY,"Agendado"],[m.atr,"var(--bad)","Atrasado"]].filter(x=>x[0]>0);
+     return `<div class="col" role="button" tabindex="0" data-m="${m.k}" aria-label="${m.n}: pago ${esc(brl(m.pago))}, agendado ${esc(brl(m.pend))}, atrasado ${esc(brl(m.atr))}" title="${m.n}: pago ${esc(brl(m.pago))} · agendado ${esc(brl(m.pend))}${m.atr?` · atrasado ${esc(brl(m.atr))}`:""}"><span class="top" style="color:${m.pago?"var(--ok)":"var(--muted)"}">${brl0(m.pago)}</span><span class="stk">${segs.map(x=>`<i style="height:${Math.max(2,h(x[0]))}px;background:${x[1]}"></i>`).join("")||`<i style="height:2px;background:var(--line2)"></i>`}</span></div>`;}).join("");
+   const fts=M.map(m=>`<div class="ft"><b>${m.n}</b>${m.pend+m.atr?`<span title="Agendado no mês">+ ${brl0(m.pend+m.atr)} a pagar</span>`:""}</div>`).join("");
+   const tot=M.reduce((a,m)=>a+m.pago,0);
+   $("#pnlMesLbl").textContent=`pago ${brl0(tot)}`;
+   $("#pnlMes").innerHTML=`<div class="mes">${ax}<div class="plot">${gl}${cols}</div><div class="fts">${fts}</div></div><div class="legend"><span><b style="background:var(--ok)"></b>Pago no mês</span><span><b style="background:${GRAY}"></b>Agendado</span><span><b style="background:var(--bad)"></b>Atrasado</span></div>${fora.length?`<p class="muted" style="font-size:12px;margin:8px 0 0">${fora.length} pagamento(s) fora desses meses: ${brl(fora.reduce((a,p)=>a+(+p.valor||0),0))}.</p>`:""}`;
+   $$("#pnlMes .col").forEach(c=>{const go=()=>{const [y,mm]=c.dataset.m.split("-").map(Number);calM={y,m:mm-1};calSel=null;location.hash="pagamentos";};c.onclick=go;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}};});}
+  // próximos
+  const atr=payList().filter(p=>payStatus(p)==="atrasado").sort((a,b)=>a.data.localeCompare(b.data));
+  const rows=[...atr,...nextP];
+  $("#pnlNext").innerHTML=rows.length?`<div class="tw"><table><thead><tr><th>Data</th><th>Contratado</th><th>Setor</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>${rows.map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return `<tr class="click" data-cid="${esc(p.cid)}"><td class="mono">${fd(p.data)}</td><td><b>${esc(c.nome||"?")}</b><span class="sub">${esc(f.n||"")}</span></td><td>${f.s?`<span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n}`:""}</td><td class="r num">${brl(p.valor)}</td><td>${st==="atrasado"?'<span class="pill bad"><i></i>Atrasado</span>':'<span class="pill warn"><i></i>Pendente</span>'}</td></tr>`;}).join("")}</tbody></table></div>`:`<div class="empty">Nenhum pagamento previsto para os próximos ${WIN} dias.</div>`;
+  $$("#pnlNext tr.click").forEach(tr=>tr.onclick=()=>openContr(tr.dataset.cid));
+  const al=alerts();
+  $("#pnlAlerts").innerHTML=al.length?al.map(a=>`<div class="al"><span class="d ${a[0]}"></span><div><b>${esc(a[1])}</b><p>${esc(a[2])}</p></div><a class="btn sm" href="#${a[3]}">Abrir</a></div>`).join(""):`<div class="empty">Nenhum alerta no momento.</div>`;
+}
+
+/* ================= CONTRATADOS ================= */
+function funcOptions(sel){return SETORES.map(s=>`<optgroup label="${s.n}">${FUNCS.filter(f=>f.s===s.k).map(f=>`<option value="${f.k}" ${f.k===sel?"selected":""}>${f.n}</option>`).join("")}</optgroup>`).join("");}
+function capInfo(f,exclude){const u=funcUse(f.k,exclude);
+  if(f.lim==="qtd")return{txt:`${u.qtd} de ${f.q} ${unitWord(f)} contratadas · disponível ${f.q-u.qtd}`,rest:f.q-u.qtd,u};
+  if(f.lim==="count")return{txt:`${u.n} de ${f.max} contratação(ões) · proposta ${brl(f.tot)}`,rest:f.max-u.n,u};
+  if(f.lim==="art")return{txt:`${u.n} contratações (mín. ${ART_MIN}, máx. ${ART_MAX}) · ${brl(u.valor)} de ${brl(VERBA)} · disponível ${brl(VERBA-u.valor)}`,rest:VERBA-u.valor,u};
+  return{txt:"Sem linha na proposta: será sinalizado como fora da proposta",rest:Infinity,u};}
+function validateC(d,excludeId){
+  if(!d.nome)return"Informe o nome.";
+  const dg=digits(d.doc);if(dg.length!==11&&dg.length!==14)return"CPF deve ter 11 dígitos e CNPJ, 14.";
+  const f=FN[d.funcao];if(!f)return"Escolha a função.";
+  if(!(d.diaria>0))return`Informe o ${f.lim==="art"?"valor do cachê":"valor da "+(f.un==="hora"?"hora":(f.un==="serviço"?"serviço":"diária"))}.`;
+  if(!(d.qtd>0))return`Informe a quantidade de ${unitWord(f)}.`;
+  const ci=capInfo(f,excludeId);
+  if(f.lim==="qtd"&&d.qtd>ci.rest)return`Limite da proposta: restam ${Math.max(0,ci.rest)} ${unitWord(f)} em ${f.n}.`;
+  if(f.lim==="count"&&ci.rest<=0)return`${f.n} já tem ${f.max} contratação(ões), o limite da proposta.`;
+  if(f.lim==="art"){if(ci.u.n+1>ART_MAX)return`Limite de ${ART_MAX} cachês da proposta atingido.`;if(r2(d.diaria*d.qtd)>r2(VERBA-ci.u.valor)+0.001)return`O cachê passa da verba: restam ${brl(VERBA-ci.u.valor)} dos R$ 50.000.`;}
+  const ps=excludeId?cPays(excludeId):[];const ag=ps.reduce((a,p)=>a+(+p.valor||0),0);
+  if(r2(d.diaria*d.qtd)+0.001<ag)return`Já há ${brl(ag)} agendado para este contratado. Reduza as parcelas antes.`;
+  return"";}
+function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim()};}
+function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
+  const ci=capInfo(f);$("#cFuncHint").textContent=ci.txt;
+  const lbl=f.lim==="art"?"Valor do cachê (R$) *":(f.un==="hora"?"Valor da hora (R$) *":(f.un==="serviço"?"Valor do serviço (R$) *":"Valor da diária (R$) *"));
+  $("#cDiariaLbl").textContent=lbl;
+  $("#cQtdLbl").textContent=f.lim==="art"?"Apresentações *":(f.un==="hora"?"Horas contratadas *":(f.un==="serviço"?"Quantidade":"Diárias contratadas *"));
+  const q=$("#cQtd");if(f.un==="serviço"){q.value=1;q.readOnly=true;}else{q.readOnly=false;if(f.lim==="art"&&!q.value)q.value=1;}
+  $("#cDataLbl").textContent=f.lim==="art"?"Data da apresentação":"Data do serviço";
+  if(!$("#cDiaria").value&&f.d&&f.lim!=="art")$("#cDiaria").placeholder="Proposta: "+brl(f.d);else if(f.lim==="art")$("#cDiaria").placeholder="Média: R$ 500,00";
+  calcCTotal();}
+function calcCTotal(){const v=r2((+$("#cDiaria").value||0)*(+$("#cQtd").value||0));$("#cTotal").value=brl(v);}
+$("#cFunc").innerHTML=funcOptions("artista");
+$("#cFunc").onchange=()=>{$("#cDiaria").value="";$("#cQtd").value="";syncCForm();};
+$("#cDiaria").oninput=calcCTotal;$("#cQtd").oninput=calcCTotal;
+$("#cDoc").onblur=()=>{$("#cDoc").value=fmtDoc($("#cDoc").value);};
+$("#cForm").addEventListener("submit",async e=>{e.preventDefault();const d=readCForm();const err=validateC(d);$("#cMsg").textContent=err;if(err)return;
+  const id=Store.newId();d.criadoEm=Date.now();
+  try{await Store.set("contratados",id,d);}catch(x){return;}
+  $("#cForm").reset();$("#cFunc").value=d.funcao;syncCForm();toast("Contratado salvo. Agende os pagamentos.");openContr(id);});
+$("#cSetF").innerHTML=`<option value="">Todos os setores</option>`+SETORES.map(s=>`<option value="${s.k}">${s.n}</option>`).join("");
+$("#cSetF").onchange=()=>rContr();$("#cSearch").oninput=()=>rContr();
+function payBadge(a){if(!a.n)return`<span class="pill warn"><i></i>Não agendado</span>`;if(a.atrasados)return`<span class="pill bad"><i></i>${a.atrasados} atrasado(s)</span>`;if(a.pago>=a.total-0.5&&a.total>0)return`<span class="pill ok"><i></i>Quitado</span>`;if(a.falta>0.5)return`<span class="pill warn"><i></i>Falta agendar ${brl0(a.falta)}</span>`;return`<span class="pill info"><i></i>Em dia</span>`;}
+function rContr(){
+  syncCForm();
+  $("#funcBody").innerHTML=FUNCS.map(f=>{const u=funcUse(f.k);let lim,used,disp,p;
+    if(f.lim==="qtd"){lim=`${f.q} ${unitWord(f)}`;used=`${u.qtd}`;disp=`${f.q-u.qtd}`;p=u.qtd/f.q;}
+    else if(f.lim==="count"){lim=`${f.max} contratação(ões)`;used=`${u.n}`;disp=`${f.max-u.n}`;p=u.n/f.max;}
+    else if(f.lim==="art"){lim=`${brl0(VERBA)} · ${ART_MIN}–${ART_MAX}`;used=`${u.n} · ${brl0(u.valor)}`;disp=brl0(VERBA-u.valor);p=u.valor/VERBA;}
+    else{lim="Sem previsão";used=u.n?`${u.n} · ${brl0(u.valor)}`:"0";disp="—";p=0;}
+    return `<tr><td><b>${f.n}</b><span class="sub">Item ${f.it} · ${f.un}</span></td><td><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n}</td><td class="r">${lim}</td><td class="r num">${used}</td><td class="r num">${disp}</td><td><span class="bar"><i style="width:${Math.min(100,p*100)}%;background:${p>1?"var(--bad)":SET[f.s].c}"></i></span></td><td class="r num">${(()=>{const a=itemAgg(f);return a.prev?`${brl0(a.prev)}<span class="sub">pago ${brl0(a.pago)}</span><span style="display:block;margin-top:4px">${finBar(a.pago,a.prev,0,6)}</span>`:"—";})()}</td></tr>`;}).join("");
+  const q=$("#cSearch").value.trim().toLowerCase(),sf=$("#cSetF").value;
+  const cs=contrList().filter(c=>(!sf||(FN[c.funcao]||{}).s===sf)&&(!q||(c.nome||"").toLowerCase().includes(q)||digits(c.doc).includes(digits(q)||"§"))).sort((a,b)=>(a.nome||"").localeCompare(b.nome||""));
+  $("#cBody").innerHTML=cs.length?cs.map(c=>{const f=FN[c.funcao]||{n:"?",s:"staff",un:""};const a=cAgg(c);return `<tr class="click" data-id="${esc(c.id)}"><td><b>${esc(c.nome)}</b><span class="sub mono">${esc(c.doc)}${c.tel?" · "+esc(c.tel):""}</span></td><td><span class="sdot" style="background:${SET[f.s].c}"></span>${esc(f.n)}</td><td>${esc(c.tipo)}</td><td class="r num">${brl(c.diaria)} × ${c.qtd}</td><td class="r num"><b>${brl(a.total)}</b></td><td class="r num">${brl(a.agendado)}</td><td class="r num">${brl(a.pago)}</td><td>${c.servico==="prestado"?'<span class="chip g">Prestado</span>':'<span class="chip">A prestar</span>'}</td><td>${payBadge(a)}</td></tr>`;}).join(""):`<tr><td colspan="9"><div class="empty">Nenhum contratado cadastrado${q||sf?" com esse filtro":""}. Use o formulário acima.</div></td></tr>`;
+  $$("#cBody tr.click").forEach(tr=>tr.onclick=()=>openContr(tr.dataset.id));
+}
+
+/* ---------- gaveta do contratado ---------- */
+let openDrawer=null;
+function closeOvl(){$("#ovl").innerHTML="";openDrawer=null;}
+function openContr(id){
+  const host=$("#ovl");
+  host.innerHTML=`<div class="ovl" id="dOvl"><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" id="drawer"></div></div>`;
+  $("#dOvl").addEventListener("click",e=>{if(e.target.id==="dOvl")closeOvl();});
+  let editing=false;
+  const draw=()=>{
+    const c0=S.contratados[id];if(!c0){closeOvl();return;}
+    const c={id,...c0};const f=FN[c.funcao]||{n:"?",s:"staff",un:"diária"};const a=cAgg(c);const ps=cPays(id);
+    const el=$("#drawer");if(!el)return;
+    const keepFocus=document.activeElement&&el.contains(document.activeElement)?document.activeElement.id:null;
+    el.innerHTML=`
+      <div class="dh"><div><span class="label"><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n} · ${esc(f.n)}</span><h2 id="dTitle" style="font-size:22px;margin-top:4px">${esc(c.nome)}</h2><span class="sub mono">${esc(c.doc)} · ${esc(c.tipo)}${c.tel?" · "+esc(c.tel):""}</span></div><button class="btn sm ghost" type="button" id="dClose" aria-label="Fechar">Fechar</button></div>
+      <div class="grid g3">
+        <div class="kpi"><span class="label">Valor total</span><div class="v num" style="font-size:20px">${brl(a.total)}</div><div class="s">${brl(c.diaria)} × ${c.qtd} ${unitWord(f)}</div></div>
+        <div class="kpi"><span class="label">Pago</span><div class="v num" style="font-size:20px">${brl(a.pago)}</div><div class="s">${pct(a.total?a.pago/a.total:0)} do total</div></div>
+        <div class="kpi"><span class="label">Falta agendar</span><div class="v num ${a.falta>0.5?"wtxt":""}" style="font-size:20px">${brl(Math.max(0,a.falta))}</div><div class="s">${ps.length} parcela(s)</div></div>
+      </div>
+      <div class="row" style="justify-content:space-between"><div class="row"><span class="label">Serviço</span><div class="seg" role="group" aria-label="Situação do serviço"><button type="button" data-sv="a_prestar" aria-pressed="${c.servico!=="prestado"}">A prestar</button><button type="button" data-sv="prestado" class="s-ok" aria-pressed="${c.servico==="prestado"}">Prestado</button></div>${c.data?`<span class="muted">${f.lim==="art"?"Apresentação":"Serviço"}: ${fd(c.data)}</span>`:""}</div><button class="btn sm" type="button" id="dEdit">${editing?"Cancelar edição":"Editar dados"}</button></div>
+      ${editing?editForm(c):""}
+      <div class="card" style="padding:14px 16px">
+        <div class="card-h" style="margin-bottom:6px"><h2>Datas de pagamento</h2><span class="label">${brl(a.agendado)} agendado de ${brl(a.total)}</span></div>
+        ${ps.length?ps.map(p=>parcRow(p,c)).join(""):`<div class="empty">Nenhuma parcela agendada.</div>`}
+        ${a.falta>0.5?`<form class="form" id="pForm" style="grid-template-columns:1fr 1fr auto;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+          <label class="f" for="pData">Data do pagamento<input type="date" id="pData" required value="${TODAY}"></label>
+          <label class="f" for="pValor">Valor (R$)<input type="number" id="pValor" min="0.01" step="0.01" max="${a.falta}" value="${a.falta}" class="in-num" style="max-width:none" required></label>
+          <button class="btn p" type="submit">Adicionar parcela</button>
+          <span class="err" id="pMsg" style="grid-column:1/-1"></span></form>`:`<p class="okmsg" style="margin:10px 0 0">Valor total agendado.</p>`}
+      </div>
+      ${c.obs?`<div class="note"><b>Observações:</b> ${esc(c.obs)}</div>`:""}
+      <div class="row" style="justify-content:space-between;margin-top:auto"><span class="sub">Cadastrado em ${c.criadoEm?new Date(c.criadoEm).toLocaleDateString("pt-BR"):"—"}</span><button class="btn sm d" type="button" id="dDel">Excluir contratado</button></div>`;
+    $("#dClose").onclick=closeOvl;
+    $("#dEdit").onclick=()=>{editing=!editing;draw();};
+    $$("#drawer [data-sv]").forEach(b=>b.onclick=async()=>{if(c.servico===b.dataset.sv)return;const n={...c0,servico:b.dataset.sv};try{await Store.set("contratados",id,n);toast(b.dataset.sv==="prestado"?"Serviço marcado como prestado":"Serviço marcado como a prestar");}catch(e){}});
+    const pf=$("#pForm");if(pf)pf.addEventListener("submit",async e=>{e.preventDefault();const v=r2($("#pValor").value),dt=$("#pData").value;const rest=r2(cAgg(c).falta);
+      if(!dt){$("#pMsg").textContent="Escolha a data.";return;}if(!(v>0)){$("#pMsg").textContent="Informe o valor.";return;}if(v>rest+0.001){$("#pMsg").textContent=`O valor passa do total. Falta agendar ${brl(rest)}.`;return;}
+      try{await Store.set("pagamentos",Store.newId(),{cid:id,data:dt,valor:v,status:"pendente",criadoEm:Date.now()});toast(`Parcela de ${brl(v)} agendada para ${fd(dt)}`);}catch(x){}});
+    bindParc(el,c);
+    $("#dDel").onclick=()=>confirmBox(`Excluir ${c.nome}?`,ps.length?`As ${ps.length} parcela(s) dele também serão excluídas, inclusive as já pagas.`:"Esta ação não pode ser desfeita.","Excluir",async()=>{try{for(const p of ps)await Store.del("pagamentos",p.id);await Store.del("contratados",id);closeOvl();toast("Contratado excluído");}catch(e){}});
+    if(editing)bindEdit(c);
+    if(keepFocus&&document.getElementById(keepFocus))document.getElementById(keepFocus).focus();
+  };
+  openDrawer={id,refresh:()=>{const el=$("#drawer");if(el&&el.contains(document.activeElement)&&/INPUT|SELECT/.test(document.activeElement.tagName))return;draw();}};
+  draw();setTimeout(()=>{const b=$("#dClose");if(b)b.focus();},30);
+}
+function editForm(c){return `<form class="form card" id="eForm" style="grid-template-columns:1fr 1fr;padding:14px 16px">
+  <label class="f" for="eNome">Nome<input type="text" id="eNome" value="${esc(c.nome)}"></label>
+  <label class="f" for="eDoc">CPF ou CNPJ<input type="text" id="eDoc" value="${esc(c.doc)}"></label>
+  <label class="f" for="eTipo">Tipo de contratação<select id="eTipo">${["Pessoa física (recibo/RPA)","MEI","Pessoa jurídica","Associação ou cooperativa"].map(t=>`<option ${t===c.tipo?"selected":""}>${t}</option>`).join("")}</select></label>
+  <label class="f" for="eTel">Telefone<input type="tel" id="eTel" value="${esc(c.tel)}"></label>
+  <label class="f" for="eFunc">Função<select id="eFunc">${funcOptions(c.funcao)}</select></label>
+  <label class="f" for="eData">Data do serviço<input type="date" id="eData" value="${esc(c.data)}"></label>
+  <label class="f" for="eDiaria">Valor unitário (R$)<input type="number" id="eDiaria" step="0.01" min="0" value="${c.diaria}" class="in-num" style="max-width:none"></label>
+  <label class="f" for="eQtd">Quantidade<input type="number" id="eQtd" step="1" min="0" value="${c.qtd}" class="in-num" style="max-width:none"></label>
+  <label class="f" for="eObs" style="grid-column:1/-1">Observações<input type="text" id="eObs" value="${esc(c.obs)}"></label>
+  <span class="err" id="eMsg" style="grid-column:1/-1"></span>
+  <div style="grid-column:1/-1" class="row"><span class="muted" id="eTot"></span><button class="btn p" type="submit" style="margin-left:auto">Salvar alterações</button></div></form>`;}
+function bindEdit(c){const tot=()=>{$("#eTot").textContent="Novo total: "+brl(r2((+$("#eDiaria").value||0)*(+$("#eQtd").value||0)));};$("#eDiaria").oninput=tot;$("#eQtd").oninput=tot;tot();
+  $("#eForm").addEventListener("submit",async e=>{e.preventDefault();const d={...S.contratados[c.id],nome:$("#eNome").value.trim(),doc:fmtDoc($("#eDoc").value),tipo:$("#eTipo").value,tel:$("#eTel").value.trim(),funcao:$("#eFunc").value,data:$("#eData").value,diaria:r2($("#eDiaria").value),qtd:+$("#eQtd").value||0,obs:$("#eObs").value.trim()};
+    if(FN[d.funcao].un==="serviço")d.qtd=1;const err=validateC(d,c.id);$("#eMsg").textContent=err;if(err)return;try{await Store.set("contratados",c.id,d);toast("Dados atualizados");$("#dEdit").click();}catch(x){}});}
+function compLink(p){return p.comp?`<a class="btn sm" href="${esc(p.comp.url||("/_blob/"+p.comp.id))}" target="_blank" rel="noopener">Ver comprovante</a>`:"";}
+function parcRow(p,c){const st=payStatus(p);const pill=st==="pago"?`<span class="pill ok"><i></i>Pago ${fd(p.pagoEm)}</span>`:(st==="atrasado"?'<span class="pill bad"><i></i>Atrasado</span>':'<span class="pill warn"><i></i>Pendente</span>');
+  return `<div class="parc"><span class="mono">${fd(p.data)}</span><span><b class="num">${brl(p.valor)}</b> ${pill}${st==="pago"&&!p.comp?' <span class="chip w">sem comprovante</span>':""}</span><span class="row" style="justify-content:flex-end">${st!=="pago"?`<button class="btn sm p" type="button" data-pay="${p.id}">Registrar pagamento</button><button class="btn sm ghost" type="button" data-delp="${p.id}" aria-label="Excluir parcela">Excluir</button>`:`${compLink(p)}${!p.comp&&Store.assets?`<button class="btn sm" type="button" data-att="${p.id}">Anexar comprovante</button>`:""}<button class="btn sm ghost" type="button" data-undo="${p.id}">Desfazer</button>`}</span></div>`;}
+function bindParc(root,c){
+  root.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>payModal(b.dataset.pay));
+  root.querySelectorAll("[data-att]").forEach(b=>b.onclick=()=>payModal(b.dataset.att,true));
+  root.querySelectorAll("[data-undo]").forEach(b=>b.onclick=()=>{const p=S.pagamentos[b.dataset.undo];confirmBox("Voltar este pagamento para pendente?",`${brl(p.valor)} em ${fd(p.data)}. O comprovante anexado continua guardado.`,"Voltar para pendente",async()=>{const n={...p,status:"pendente"};delete n.pagoEm;try{await Store.set("pagamentos",b.dataset.undo,n);toast("Pagamento voltou para pendentes");}catch(e){}});});
+  root.querySelectorAll("[data-delp]").forEach(b=>b.onclick=()=>{const p=S.pagamentos[b.dataset.delp];confirmBox("Excluir esta parcela?",`${brl(p.valor)} em ${fd(p.data)}.`,"Excluir",async()=>{try{await Store.del("pagamentos",b.dataset.delp);toast("Parcela excluída");}catch(e){}});});}
+
+/* ---------- modal de pagamento ---------- */
+function modalHost(){let m=$("#mHost");if(!m){m=document.createElement("div");m.id="mHost";document.body.appendChild(m);}return m;}
+function closeModal(){modalHost().innerHTML="";}
+function confirmBox(t,txt,okLbl,fn){const m=modalHost();m.innerHTML=`<div class="ovl center" style="z-index:70"><div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cbT"><h2 id="cbT" style="font-size:18px">${esc(t)}</h2><p class="muted" style="margin:0">${esc(txt)}</p><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="cbN">Cancelar</button><button class="btn d" type="button" id="cbY">${esc(okLbl)}</button></div></div></div>`;$("#cbN").onclick=closeModal;$("#cbY").onclick=async()=>{closeModal();await fn();};$("#cbN").focus();}
+function payModal(pid,onlyAttach){
+  const p=S.pagamentos[pid];if(!p)return;const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};
+  const needServ=c.servico!=="prestado"&&!onlyAttach;
+  const m=modalHost();
+  m.innerHTML=`<div class="ovl center" style="z-index:70"><form class="modal" id="pmF" role="dialog" aria-modal="true" aria-labelledby="pmT">
+    <div><span class="label">${esc(f.n||"")}</span><h2 id="pmT" style="font-size:19px;margin-top:4px">${onlyAttach?"Anexar comprovante":"Registrar pagamento"}</h2><span class="sub">${esc(c.nome||"")} · <span class="mono">${esc(c.doc||"")}</span></span></div>
+    <div class="grid g2"><div class="kpi"><span class="label">Valor</span><div class="v num" style="font-size:20px">${brl(p.valor)}</div></div><div class="kpi"><span class="label">Agendado para</span><div class="v num" style="font-size:20px">${fd(p.data)}</div></div></div>
+    ${needServ?`<div class="note"><b>O serviço ainda está como “a prestar”.</b> Pela regra do sistema, o pagamento é registrado depois do serviço prestado. Ao confirmar, o serviço será marcado como prestado.</div>`:""}
+    ${onlyAttach?"":`<label class="f" for="pmD">Data em que foi pago<input type="date" id="pmD" value="${TODAY}" required></label>`}
+    ${Store.assets?`<label class="f" for="pmFile">Comprovante (PDF ou imagem, até 20 MB)${onlyAttach?"":" · opcional agora"}<input type="file" id="pmFile" accept="application/pdf,image/png,image/jpeg,image/webp" ${onlyAttach?"required":""}></label>`:`<p class="note" style="margin:0">${Store.mode==="local"?"No modo local não é possível anexar arquivos.":"Só editores podem anexar comprovantes. Peça acesso de editor ao dono."}</p>`}
+    <span class="err" id="pmMsg"></span>
+    <div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="pmC">Cancelar</button><button class="btn p" type="submit" id="pmOk">${onlyAttach?"Anexar":(needServ?"Marcar serviço prestado e registrar":"Registrar pagamento")}</button></div>
+  </form></div>`;
+  $("#pmC").onclick=closeModal;
+  $("#pmF").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#pmOk");btn.disabled=true;$("#pmMsg").textContent="";
+    let comp=p.comp||null;const fi=$("#pmFile");
+    if(fi&&fi.files&&fi.files[0]){const file=fi.files[0];const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;
+      if(!["application/pdf","image/png","image/jpeg","image/webp"].includes(type)){$("#pmMsg").textContent="Use PDF, PNG, JPG ou WEBP.";btn.disabled=false;return;}
+      if(file.size>20*1024*1024){$("#pmMsg").textContent="O arquivo passa de 20 MB.";btn.disabled=false;return;}
+      try{btn.textContent="Enviando…";const up=await Store.assets.upload(file,{type});comp={id:up.id,url:up.url,nome:file.name,tipo:type};}
+      catch(x){const code=x&&x.code;$("#pmMsg").textContent=code==="too_large"?"Arquivo grande demais (máx. 20 MB).":code==="unsupported_type"?"Tipo de arquivo não aceito.":code==="quota_or_state"?"O espaço de anexos está cheio.":"Não foi possível enviar o arquivo. Tente de novo.";btn.disabled=false;btn.textContent="Tentar de novo";return;}}
+    else if(onlyAttach){$("#pmMsg").textContent="Escolha o arquivo.";btn.disabled=false;return;}
+    const n={...p};if(comp)n.comp=comp;if(!onlyAttach){n.status="pago";n.pagoEm=$("#pmD").value||TODAY;}
+    try{if(needServ)await Store.set("contratados",p.cid,{...S.contratados[p.cid],servico:"prestado"});await Store.set("pagamentos",pid,n);closeModal();toast(onlyAttach?"Comprovante anexado":`Pagamento de ${brl(p.valor)} registrado`);}catch(x){btn.disabled=false;}
+  });
+  setTimeout(()=>{const d=$("#pmD")||$("#pmFile");if(d)d.focus();},30);
+}
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(modalHost().innerHTML){closeModal();return;}if(openDrawer)closeOvl();});
+
+/* ================= PLANILHA DE CUSTO ================= */
+$("#aliq").addEventListener("change",async()=>{const v=+$("#aliq").value;if(!(v>=0&&v<=40)){toast("Informe uma alíquota entre 0 e 40%.",true);return;}const p={...cfg("planilha"),aliquota:r2(v/100*10000)/10000};try{await Store.set("config","planilha",p);toast("Alíquota atualizada");}catch(e){}});
+function rPlan(){
+  if(document.activeElement!==$("#aliq"))$("#aliq").value=(aliq()*100).toLocaleString("en-US",{maximumFractionDigits:2});
+  const t=totals();let sumReal=0,sumProp=0,sumContr=0,sumPago=0,nReal=0;
+  const rows=[];
+  SETORES.forEach(s=>{const fs=FUNCS.filter(f=>f.s===s.k);let sp=0,sr=0,sc=0,spg=0;
+    rows.push(`<tr class="subt"><td colspan="9"><span class="sdot" style="background:${s.c}"></span>${s.n}</td></tr>`);
+    let spv=0;fs.forEach(f=>{const a=itemAgg(f);spv+=a.prev;sp+=f.tot;sc+=a.contratado;spg+=a.pago;if(a.real!=null){sr+=a.real;nReal++;}
+      const qtdTxt=f.lim==="art"?`${ART_MIN}–${ART_MAX}<span class="sub">cachês</span>`:(f.q?`${f.q}<span class="sub">${f.un}</span>`:"—");
+      const dReal=a.real!=null&&f.q?(f.lim==="art"?(a.n?a.real/a.n:null):a.real/f.q):null;
+      const dCls=dReal==null?"":(dReal>f.d+0.005?"neg":(dReal<f.d-0.005?"pos":""));
+      const st=itemStatus(f,a).map(x=>`<span class="chip ${x[0]}">${x[1]}</span>`).join("");
+      rows.push(`<tr><td><b>${f.n}</b><span class="sub">Item ${f.it}${f.det?" · "+f.det:""}</span></td><td class="r num">${qtdTxt}</td><td class="r num">${f.d?brl(f.d):"—"}${f.lim==="art"?'<span class="sub">média</span>':""}</td><td class="r num"><b>${f.tot?brl(f.tot):"—"}</b>${f.lim==="art"?'<span class="sub">fixo</span>':""}</td>
+        <td class="r"><input type="number" class="in-num" min="0" step="0.01" id="real_${f.k}" data-k="${f.k}" aria-label="Valor real de ${esc(f.n)}" placeholder="—" value="${a.real==null?"":a.real}"${f.k==="artista"?' title="Verba fixa do edital: R$ 50.000"':""}>${a.prev>(a.real||0)+0.5?`<span class="sub wtxt">previsto ${brl(a.prev)} (contratado)</span>`:""}</td>
+        <td class="r num ${dCls}">${dReal==null?"—":brl(dReal)}${dReal!=null&&f.d?`<span class="sub">${dReal>f.d?"+":""}${pct(dReal/f.d-1)}</span>`:""}</td>
+        <td class="r num">${a.n?brl(a.contratado):"—"}<span class="sub">${a.n?`${a.n} contratado(s)${f.lim==="qtd"?` · ${a.qtd}/${f.q}`:""}`:""}</span></td>
+        <td class="r num">${a.pago?brl(a.pago):"—"}${a.prev?`<span style="display:block;margin-top:5px">${finBar(a.pago,a.prev,0,6)}</span><span class="sub">${pct(a.pago/a.prev)} do previsto</span>`:""}</td><td>${st}</td></tr>`);});
+    rows.push(`<tr><td class="muted">Subtotal ${s.n}</td><td></td><td></td><td class="r num"><b>${brl(sp)}</b></td><td class="r num">${sr?brl(sr):"—"}${spv>sr+0.5?`<span class="sub wtxt">previsto ${brl(spv)}</span>`:""}</td><td></td><td class="r num">${brl(sc)}</td><td class="r num">${brl(spg)}</td><td></td></tr>`);
+    sumProp+=sp;sumReal+=sr;sumContr+=sc;sumPago+=spg;});
+  rows.push(`<tr class="tot"><td>Total da proposta</td><td></td><td></td><td class="r num">${brl(sumProp)}</td><td class="r num">${brl(sumReal)}</td><td></td><td class="r num">${brl(sumContr)}</td><td class="r num">${brl(sumPago)}</td><td>${sumProp===TETO?'<span class="chip g">= homologado</span>':""}</td></tr>`);
+  rows.push(`<tr><td class="muted">Impostos estimados (${pct(aliq())} do teto)</td><td></td><td></td><td></td><td class="r num">${brl(t.imp)}</td><td></td><td></td><td></td><td></td></tr>`);
+  rows.push(`<tr><td class="${t.multas?"":"muted"}">Multas e glosas <span class="sub">vêm da aba Ocorrências · limite ${brl(MULTA_TETO)} (30%)</span></td><td></td><td></td><td></td><td class="r num ${t.multas?"neg":""}">${t.multas?brl(t.multas):"—"}</td><td></td><td></td><td class="r num">${t.multasPagas?brl(t.multasPagas):"—"}</td><td>${t.multasPend?`<span class="chip b">${brl0(t.multasPend)} pendente</span>`:(t.multas?'<span class="chip g">Quitadas</span>':'<a class="btn sm" href="#ocorrencias">Ocorrências</a>')}</td></tr>`);
+  const res=t.margem;
+  $("#plBody").innerHTML=rows.join("");
+  $$("#plBody input[data-k]").forEach(inp=>inp.addEventListener("change",async()=>{const k=inp.dataset.k;const v=inp.value===""?"":r2(inp.value);const p={...cfg("planilha")};p.real={...(p.real||{}),[k]:v};try{await Store.set("config","planilha",p);toast(v===""?"Valor real apagado":`Valor real de ${FN[k].n}: ${brl(v)}`);}catch(e){}}));
+  $("#plKpis").innerHTML=[
+   `<div class="card kpi"><span class="label">Valor da proposta</span><div class="v num">${brl0(sumProp)}</div><div class="s">= teto homologado</div></div>`,
+   `<div class="card kpi"><span class="label">Valor real lançado</span><div class="v num">${brl0(sumReal)}</div><div class="s">${nReal} de ${FUNCS.filter(f=>f.lim!=="sem").length} itens · + impostos ${brl0(t.imp)}${t.multas?` · <span class="neg">multas ${brl0(t.multas)}</span>`:""}</div></div>`,
+   `<div class="card kpi"><span class="label">Contratado</span><div class="v num">${brl0(sumContr)}</div><div class="s">vem da aba Contratados</div></div>`,
+   `<div class="card kpi ${res<0?"alert":""}"><span class="label">Margem livre</span><div class="v num">${brl0(res)}</div><div class="s">Homologado − impostos − previsto${t.multas?" − multas":""}</div>${finBar(t.pago,t.prev+t.imp,TETO,6)}</div>`].join("");
+}
+
+/* ================= PAGAMENTOS ================= */
+let calM=(()=>{const d=new Date();return {y:d.getFullYear(),m:d.getMonth()};})();let calSel=null;
+$("#calPrev").onclick=()=>{calM.m--;if(calM.m<0){calM.m=11;calM.y--;}rPag();};
+$("#calNext").onclick=()=>{calM.m++;if(calM.m>11){calM.m=0;calM.y++;}rPag();};
+$("#newPay").onclick=()=>newPayModal();
+function newPayModal(){const cs=contrList().filter(c=>cAgg(c).falta>0.5).sort((a,b)=>a.nome.localeCompare(b.nome));const m=modalHost();
+  m.innerHTML=`<div class="ovl center" style="z-index:70"><form class="modal" id="npF" role="dialog" aria-modal="true" aria-labelledby="npT"><h2 id="npT" style="font-size:19px">Agendar pagamento</h2>
+  ${cs.length?`<label class="f" for="npC">Contratado (CPF/CNPJ)<select id="npC">${cs.map(c=>`<option value="${esc(c.id)}">${esc(c.nome)} · ${esc(c.doc)} · falta ${brl(cAgg(c).falta)}</option>`).join("")}</select></label>
+  <div class="grid g2"><label class="f" for="npD">Data<input type="date" id="npD" value="${calSel||TODAY}" required></label><label class="f" for="npV">Valor (R$)<input type="number" id="npV" step="0.01" min="0.01" class="in-num" style="max-width:none" required></label></div>
+  <span class="err" id="npMsg"></span><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="npX">Cancelar</button><button class="btn p" type="submit">Agendar</button></div>`:`<p class="muted" style="margin:0">Todos os contratados já têm o valor total agendado. Cadastre um novo contratado ou aumente um contrato.</p><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="npX">Fechar</button></div>`}</form></div>`;
+  $("#npX").onclick=closeModal;
+  if(!cs.length)return;
+  const fill=()=>{$("#npV").value=cAgg(S.contratados[$("#npC").value]?{id:$("#npC").value,...S.contratados[$("#npC").value]}:{}).falta||"";};fill();$("#npC").onchange=fill;
+  $("#npF").addEventListener("submit",async e=>{e.preventDefault();const id=$("#npC").value,c={id,...S.contratados[id]};const v=r2($("#npV").value),d=$("#npD").value;const rest=cAgg(c).falta;
+    if(!d||!(v>0)){$("#npMsg").textContent="Informe data e valor.";return;}if(v>rest+0.001){$("#npMsg").textContent=`Passa do total do contrato. Falta agendar ${brl(rest)}.`;return;}
+    try{await Store.set("pagamentos",Store.newId(),{cid:id,data:d,valor:v,status:"pendente",criadoEm:Date.now()});closeModal();toast(`Pagamento agendado para ${fd(d)}`);}catch(x){}});}
+function payCard(p){const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);
+  return `<div class="pay"><div class="top"><span class="mono">${fd(st==="pago"?p.pagoEm:p.data)}${st==="pago"&&p.pagoEm!==p.data?`<span class="sub">previsto ${fd(p.data)}</span>`:""}</span><span class="val num">${brl(p.valor)}</span></div>
+  <div><span class="who">${esc(c.nome||"Contratado removido")}</span><div class="meta"><span class="mono">${esc(c.doc||"")}</span> · ${f.s?`<span class="sdot" style="background:${SET[f.s].c}"></span>${esc(f.n)}`:""}</div></div>
+  <div class="acts">${st!=="pago"?`<button class="btn sm p" type="button" data-pay="${p.id}">Registrar pagamento</button>`:`${compLink(p)}${!p.comp?`<span class="chip w">sem comprovante</span>${Store.assets?`<button class="btn sm" type="button" data-att="${p.id}">Anexar</button>`:""}`:""}<button class="btn sm ghost" type="button" data-undo="${p.id}">Desfazer</button>`}<button class="btn sm ghost" type="button" data-open="${esc(p.cid)}">Contrato</button></div></div>`;}
+function multaCard(m){const tp=MK[m.tipo]||{};const q=m.st==="quitada";
+  return `<div class="pay multa"><div class="top"><span class="mono">${fd(q?(m.quitEm||m.data):m.data)}${q&&m.quitEm&&m.quitEm!==m.data?`<span class="sub">aplicada ${fd(m.data)}</span>`:""}</span><span class="val num neg">− ${brl(m.valor)}</span></div>
+  <div><span class="who"><span class="chip b">Multa</span> ${esc(m.desc||"")}</span><div class="meta">${esc(tp.n||m.tipo||"")}${m.pct?` · ${pct(m.pct)}${m.dias>1?` × ${m.dias} dias`:""}`:""}</div></div>
+  <div class="acts">${q?`${m.anexo?`<a class="btn sm" href="${esc(m.anexo.url||("/_blob/"+m.anexo.id))}" target="_blank" rel="noopener">Ver documento</a>`:""}<button class="btn sm ghost" type="button" data-mundo="${esc(m.id)}">Desfazer</button>`:`<button class="btn sm p" type="button" data-mquit="${esc(m.id)}">Registrar quitação</button>`}<button class="btn sm ghost" type="button" data-moc="${esc(m.id)}">Chamado</button></div></div>`;}
+function multaQuitModal(oid){const o=S.ocorrencias[oid];if(!o||!o.multa)return;const m=modalHost();
+  m.innerHTML=`<div class="ovl center" style="z-index:70"><form class="modal" id="mqF" role="dialog" aria-modal="true" aria-labelledby="mqT"><div><span class="label">Multa · ${esc(o.desc)}</span><h2 id="mqT" style="font-size:19px;margin-top:4px">Registrar quitação ou glosa</h2></div>
+  <div class="grid g2"><div class="kpi"><span class="label">Valor</span><div class="v num" style="font-size:20px">${brl(o.multa.valor)}</div></div><div class="kpi"><span class="label">Aplicada em</span><div class="v num" style="font-size:20px">${fd(o.multa.data)}</div></div></div>
+  <label class="f" for="mqD">Data da quitação ou da glosa na NF<input type="date" id="mqD" value="${TODAY}" required></label>
+  <label class="f" for="mqO">Como foi quitada<select id="mqO"><option value="glosa">Descontada da nota fiscal (glosa)</option><option value="pagamento">Paga diretamente pela ST</option><option value="cancelada">Cancelada após defesa</option></select></label>
+  ${Store.assets?`<label class="f" for="mqFile">Documento (ofício, NF glosada ou comprovante) · opcional<input type="file" id="mqFile" accept="application/pdf,image/png,image/jpeg,image/webp"></label>`:""}
+  <span class="err" id="mqMsg"></span><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="mqC">Cancelar</button><button class="btn p" type="submit" id="mqOk">Confirmar</button></div></form></div>`;
+  $("#mqC").onclick=closeModal;
+  $("#mqF").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#mqOk");btn.disabled=true;const modo=$("#mqO").value;
+    if(modo==="cancelada"){try{const n={...o};delete n.multa;await Store.set("ocorrencias",oid,n);closeModal();toast("Multa cancelada e removida dos totais");}catch(x){btn.disabled=false;}return;}
+    let anexo=o.multa.anexo||null;const fi=$("#mqFile");
+    if(fi&&fi.files&&fi.files[0]){const file=fi.files[0];const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;
+      if(file.size>20*1024*1024){$("#mqMsg").textContent="O arquivo passa de 20 MB.";btn.disabled=false;return;}
+      try{btn.textContent="Enviando…";const up=await Store.assets.upload(file,{type});anexo={id:up.id,url:up.url,nome:file.name,tipo:type};}catch(x){$("#mqMsg").textContent="Não foi possível enviar o arquivo.";btn.disabled=false;btn.textContent="Tentar de novo";return;}}
+    const mu={...o.multa,st:"quitada",quitEm:$("#mqD").value||TODAY,modo};if(anexo)mu.anexo=anexo;
+    try{await Store.set("ocorrencias",oid,{...o,multa:mu});closeModal();toast(`Multa de ${brl(mu.valor)} quitada`);}catch(x){btn.disabled=false;}});}
+function rPag(){
+  const ps=payList();const t=totals();const mt=multaTotals();const ML=multaList();
+  const pend=ps.filter(p=>payStatus(p)==="pendente"),atr=ps.filter(p=>payStatus(p)==="atrasado"),pag=ps.filter(p=>payStatus(p)==="pago");
+  const sum=a=>a.reduce((x,p)=>x+(+p.valor||0),0);
+  $("#pgKpis").innerHTML=[
+   `<div class="card kpi"><span class="label">Homologado</span><div class="v num">${brl0(TETO)}</div><div class="s">Pago ${pct(t.pago/TETO)} · margem ${brl0(t.margem)}</div><div style="margin-top:8px">${finBar(t.pago,t.prev,TETO,8,`<i style="width:${Math.min(100,t.imp/TETO*100)}%;background:${GRAY2}"></i><i style="width:${Math.min(100,t.multas/TETO*100)}%;background:var(--bad)"></i>`)}</div></div>`,
+   `<div class="card kpi"><span class="label">Realizados</span><div class="v num">${brl0(sum(pag))}</div><div class="s">${pag.length} pagamento(s) · ${pag.filter(p=>!p.comp).length} sem comprovante</div></div>`,
+   `<div class="card kpi ${pend.length?"warnb":""}"><span class="label">Pendentes</span><div class="v num">${brl0(sum(pend))}</div><div class="s">${pend.length} pagamento(s)</div></div>`,
+   `<div class="card kpi ${atr.length?"alert":""}"><span class="label">Atrasados</span><div class="v num">${brl0(sum(atr))}</div><div class="s">${atr.length} pagamento(s)</div></div>`,
+   `<div class="card kpi ${mt.pend?"alert":""}"><span class="label">Multas e glosas</span><div class="v num">${brl0(mt.tot)}</div><div class="s">${mt.np?`${mt.np} pendente(s) · ${brl0(mt.pend)}`:(mt.n?"todas quitadas":"nenhuma registrada")}</div></div>`].join("");
+  $("#pgMultaNote").innerHTML=mt.pend?`<div class="note" style="margin-bottom:14px"><b>${brl(mt.pend)} em multas pendentes.</b> Pelo edital, a Prefeitura retém o pagamento das notas fiscais enquanto houver multa não quitada. Quite ou conteste na aba Ocorrências.</div>`:"";
+  // calendário
+  const MN=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  $("#calTitle").textContent=`${MN[calM.m]} de ${calM.y}`;
+  const first=new Date(calM.y,calM.m,1);const start=new Date(first);start.setDate(1-first.getDay());
+  const byDay={};ps.forEach(p=>{const st=payStatus(p);const k=st==="pago"?(p.pagoEm||p.data):p.data;(byDay[k]=byDay[k]||[]).push({st,v:+p.valor||0});});ML.forEach(m=>{const k=m.st==="quitada"?(m.quitEm||m.data):m.data;if(k)(byDay[k]=byDay[k]||[]).push({st:"multa",v:+m.valor||0});});
+  let h=["dom","seg","ter","qua","qui","sex","sáb"].map(d=>`<div class="dw">${d}</div>`).join("");
+  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=iso(d);const L=byDay[k]||[];const cnt=s=>L.filter(x=>x.st===s);
+    const a=cnt("atrasado"),pp=cnt("pendente"),r=cnt("pago"),mm=cnt("multa");
+    h+=`<button type="button" data-d="${k}" class="${d.getMonth()!==calM.m?"out":""} ${k===TODAY?"today":""} ${k===calSel?"sel":""}" aria-label="${d.getDate()} de ${MN[d.getMonth()]}: ${L.length} pagamento(s)"><span class="dn">${d.getDate()}</span><span class="dots">${a.length?`<span class="a">${a.length} · ${brl0(a.reduce((x,y)=>x+y.v,0))}</span>`:""}${pp.length?`<span class="p">${pp.length} · ${brl0(pp.reduce((x,y)=>x+y.v,0))}</span>`:""}${r.length?`<span class="r">${r.length} · ${brl0(r.reduce((x,y)=>x+y.v,0))}</span>`:""}${mm.length?`<span class="m">multa · ${brl0(mm.reduce((x,y)=>x+y.v,0))}</span>`:""}</span></button>`;}
+  $("#cal").innerHTML=h;
+  $$("#cal button").forEach(b=>b.onclick=()=>{calSel=calSel===b.dataset.d?null:b.dataset.d;rPag();});
+  $("#calSelLbl").innerHTML=calSel?`<span class="pill volt"><i></i>Filtrando ${fd(calSel)}</span> <button class="btn sm ghost" type="button" id="calClr">Ver todos</button>`:"";
+  if($("#calClr"))$("#calClr").onclick=()=>{calSel=null;rPag();};
+  const filt=a=>calSel?a.filter(p=>(payStatus(p)==="pago"?(p.pagoEm||p.data):p.data)===calSel):a;
+  const fill=(el,arr,emp,key)=>{arr=filt(arr).sort((x,y)=>key==="pago"?(y.pagoEm||"").localeCompare(x.pagoEm||""):x.data.localeCompare(y.data));$(el).innerHTML=arr.length?arr.map(payCard).join(""):`<div class="empty">${emp}</div>`;};
+  fill("#colA",atr,"Nenhum pagamento atrasado.");fill("#colP",pend,"Nenhum pagamento pendente.");fill("#colR",pag,"Nenhum pagamento realizado ainda.","pago");
+  const mP=ML.filter(m=>m.st!=="quitada"&&(!calSel||m.data===calSel)),mQ=ML.filter(m=>m.st==="quitada"&&(!calSel||(m.quitEm||m.data)===calSel));
+  if(mP.length)$("#colP").insertAdjacentHTML("afterbegin",mP.map(multaCard).join(""));
+  if(mQ.length)$("#colR").insertAdjacentHTML("afterbegin",mQ.map(multaCard).join(""));
+  if(mP.length&&$("#colP .empty"))$("#colP .empty").remove();if(mQ.length&&$("#colR .empty"))$("#colR .empty").remove();
+  $("#kA").textContent=filt(atr).length;$("#kP").textContent=filt(pend).length+mP.length;$("#kR").textContent=filt(pag).length+mQ.length;
+  $$(".kan [data-mquit]").forEach(b=>b.onclick=()=>multaQuitModal(b.dataset.mquit));
+  $$(".kan [data-mundo]").forEach(b=>b.onclick=()=>confirmBox("Desfazer quitação?","A multa volta para pendente.","Desfazer",async()=>{const o=S.ocorrencias[b.dataset.mundo];if(!o||!o.multa)return;const m={...o.multa};m.st="pendente";delete m.quitEm;await Store.set("ocorrencias",b.dataset.mundo,{...o,multa:m});toast("Quitação desfeita");}));
+  $$(".kan [data-moc]").forEach(b=>b.onclick=()=>{location.hash="ocorrencias";setTimeout(()=>openOc(b.dataset.moc),80);});
+  const kan=document.querySelector(".kan");bindParc(kan,null);kan.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openContr(b.dataset.open));
+}
+
+/* ================= PROGRAMAÇÃO ================= */
+$("#prNew").addEventListener("click",()=>{setTimeout(()=>{$("#cFunc").value="artista";syncCForm();$("#cNome").focus();},50);});
+function rProg(){const aa=artAgg();
+  $("#prKpis").innerHTML=[
+   `<div class="card kpi ${aa.n<ART_MIN?"warnb":""}"><span class="label">Contratações</span><div class="v num">${aa.n} <span class="muted" style="font-size:15px">/ mín. ${ART_MIN}</span></div><div class="s">${aa.prest} já apresentadas</div></div>`,
+   `<div class="card kpi"><span class="label">Contratado</span><div class="v num">${brl0(aa.contr)}</div><div class="s">${pct(aa.contr/VERBA)} da verba</div></div>`,
+   `<div class="card kpi ${aa.falta>0?"warnb":(aa.falta<0?"alert":"")}"><span class="label">Falta contratar</span><div class="v num ${aa.falta>0?"wtxt":""}">${brl0(Math.max(0,aa.falta))}</div><div class="s">${aa.falta<0?"acima da verba":"para fechar R$ 50.000"}</div></div>`,
+   `<div class="card kpi"><span class="label">Pago aos artistas</span><div class="v num">${brl0(aa.pago)}</div><div class="s">A pagar: ${brl0(aa.aPagar)}</div></div>`].join("");
+  const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"9").localeCompare(b.data||"9"));
+  $("#prBody").innerHTML=cs.length?cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id);const comp=ps.filter(p=>p.comp).length;return `<tr class="click" data-id="${esc(c.id)}"><td class="mono">${fd(c.data)}</td><td><b>${esc(c.nome)}</b>${c.obs?`<span class="sub">${esc(c.obs)}</span>`:""}</td><td class="mono">${esc(c.doc)}</td><td class="r num">${brl(a.total)}</td><td>${c.servico==="prestado"?'<span class="chip g">Apresentado</span>':'<span class="chip">Previsto</span>'}</td><td>${payBadge(a)}</td><td>${ps.length?`${comp}/${ps.filter(p=>p.status==="pago").length} pagos com comprovante`:"—"}</td></tr>`;}).join(""):`<tr><td colspan="7"><div class="empty">Nenhum artista cadastrado. Use “Cadastrar artista”.</div></td></tr>`;
+  $$("#prBody tr.click").forEach(tr=>tr.onclick=()=>openContr(tr.dataset.id));}
+
+/* ================= RIDERS ================= */
+function rRiders(){const ck=cfg("riders").ck||{};
+  $("#rdKpis").innerHTML=["rider_coreto","rider_matriz"].map(k=>{const f=FN[k];const cs=contrList().filter(c=>c.funcao===k);const a=itemAgg(f);const used=a.qtd;return `<div class="card kpi"><span class="label">${f.n} · ${f.q} diárias</span><div class="s" style="margin-top:2px">${RIDER_INFO[k]}</div><div class="v num">${used} <span class="muted" style="font-size:15px">de ${f.q} diárias contratadas</span></div><div class="s">${cs.length?cs.map(c=>esc(c.nome)).join(", "):"Sem fornecedor cadastrado"} · contratado ${brl(a.contratado)}</div><div class="bar" style="margin-top:10px" title="Diárias contratadas"><i style="width:${Math.min(100,used/f.q*100)}%;background:var(--s-rider)"></i></div><div class="s" style="margin-top:10px">Previsto ${a.prev?brl(a.prev):"—"} · pago ${brl(a.pago)}</div><div style="margin-top:6px">${finBar(a.pago,a.prev,0,8)}</div></div>`;}).join("");
+  let n=0,t=0;
+  $("#rdCmp").innerHTML=`<div class="hd">Requisito</div><div class="hd">Coreto</div><div class="hd">Praça da Matriz</div>`+RIDER.map((r,i)=>{const na=/^Não previst/.test(r[2]);t+=na?1:2;n+=(ck["c"+i]?1:0)+(!na&&ck["m"+i]?1:0);return `<div class="rq">${r[0]}</div><div><label><input class="chk" type="checkbox" data-k="c${i}" ${ck["c"+i]?"checked":""}><span>${r[1]}</span></label></div><div>${na?`<span class="wtxt">${r[2]}</span>`:`<label><input class="chk" type="checkbox" data-k="m${i}" ${ck["m"+i]?"checked":""}><span>${r[2]}</span></label>`}</div>`;}).join("");
+  $("#rdCount").textContent=`${n} de ${t} itens conferidos`;
+  $$("#rdCmp .chk").forEach(c=>c.onchange=async()=>{const p={...cfg("riders")};p.ck={...(p.ck||{}),[c.dataset.k]:c.checked};try{await Store.set("config","riders",p);}catch(e){}});}
+
+/* ================= DOCUMENTOS ================= */
+function rDocs(){const D=cfg("documentos").items||{};const lic=contrList().filter(c=>(FN[c.funcao]||{}).s==="licencas");
+  const opt=[["conf","Confirmado","s-ok"],["pend","Pendente","s-pend"],["prob","Problema","s-prob"]];
+  $("#dcBody").innerHTML=DOCS.map((d)=>{const i=d.k;const x=D[i]||{};return `<tr><td><b>${d.n}</b>${d.d?`<span class="sub">${d.d}</span>`:""}</td><td>${d.pz}</td><td>${d.r}</td><td><select data-resp="${i}" aria-label="Responsável por ${esc(d.n)}" style="min-width:150px"><option value="">—</option>${lic.map(c=>`<option value="${esc(c.id)}" ${x.cid===c.id?"selected":""}>${esc(c.nome)}</option>`).join("")}</select></td><td><div class="seg" role="group" aria-label="Situação de ${esc(d.n)}">${opt.map(o=>`<button type="button" class="${o[2]}" data-i="${i}" data-v="${o[0]}" aria-pressed="${x.st===o[0]}">${o[1]}</button>`).join("")}</div></td><td>${x.anexo?`<a class="btn sm" href="${esc(x.anexo.url||("/_blob/"+x.anexo.id))}" target="_blank" rel="noopener">Ver</a>`:""}${Store.assets?`<label class="btn sm" style="cursor:pointer">${x.anexo?"Trocar":"Anexar"}<input type="file" class="hidden" data-up="${i}" accept="application/pdf,image/png,image/jpeg,image/webp"></label>`:(x.anexo?"":'<span class="muted">—</span>')}</td></tr>`;}).join("");
+  const save=async(i,patch)=>{const c={...cfg("documentos")};c.items={...(c.items||{})};c.items[i]={...(c.items[i]||{}),...patch};try{await Store.set("config","documentos",c);}catch(e){}};
+  $$("#dcBody [data-v]").forEach(b=>b.onclick=()=>save(b.dataset.i,{st:(D[b.dataset.i]||{}).st===b.dataset.v?"":b.dataset.v}));
+  $$("#dcBody [data-resp]").forEach(s=>s.onchange=()=>save(s.dataset.resp,{cid:s.value}));
+  $$("#dcBody [data-up]").forEach(inp=>inp.onchange=async()=>{const file=inp.files[0];if(!file)return;const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;try{toast("Enviando anexo…");const up=await Store.assets.upload(file,{type});await save(inp.dataset.up,{anexo:{id:up.id,url:up.url,nome:file.name}});toast("Anexo salvo");}catch(e){toast("Não foi possível enviar o arquivo.",true);}});}
+
+/* ================= OCORRÊNCIAS ================= */
+function fmtLeft(ms){const neg=ms<0;ms=Math.abs(ms);const h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3);return (neg?"estourou há ":"")+`${h}h${pad(m)}`;}
+const dtLocal=ms=>{const d=new Date(ms);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;};
+const fdt=ms=>new Date(ms).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+const multaPrev=o=>({12:.05,24:.02,48:.01}[o.h]||0);
+function ocPill(o){const st=ocSt(o);if(st==="resolvido")return `<span class="pill ok"><i></i>Resolvido ${o.okEm?fdt(o.okEm):""}</span>`;const l=ocDeadline(o)-Date.now();const cl=l<0?"bad":(l<4*3600e3?"warn":(st==="andamento"?"info":"warn"));return `<span class="pill ${cl}"><i></i>${l<0?"Estourou há "+fmtLeft(l).replace("estourou há ",""):(st==="andamento"?"Em andamento · ":"Aberto · ")+fmtLeft(l)}</span>`;}
+function rOc(){const sel=$("#ocResp");const cur=sel.value;sel.innerHTML=`<option value="">—</option>`+contrList().sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<option value="${esc(c.id)}">${esc(c.nome)} · ${esc((FN[c.funcao]||{}).n||"")}</option>`).join("");sel.value=cur;
+  if(!$("#ocT").value)$("#ocT").value=dtLocal(Date.now());
+  const L=ocList().sort((a,b)=>{const ra=ocSt(a)==="resolvido"?1:0,rb=ocSt(b)==="resolvido"?1:0;return ra-rb||ocDeadline(a)-ocDeadline(b);});
+  const ab=L.filter(o=>ocSt(o)!=="resolvido"),est=ab.filter(ocEstourou),mt=multaTotals();
+  $("#ocKpis").innerHTML=[
+   `<div class="card kpi ${ab.length?"warnb":""}"><span class="label">Chamados abertos</span><div class="v num">${ab.length}</div><div class="s">${L.length-ab.length} resolvido(s)</div></div>`,
+   `<div class="card kpi ${est.length?"alert":""}"><span class="label">Prazo estourado</span><div class="v num">${est.length}</div><div class="s">${est.filter(o=>!o.multa).length?`multa prevista ${brl0(est.filter(o=>!o.multa).reduce((a,o)=>a+TETO*multaPrev(o),0))}`:"nenhum sem multa registrada"}</div></div>`,
+   `<div class="card kpi ${mt.tot>=MULTA_TETO?"alert":""}"><span class="label">Multas acumuladas</span><div class="v num ${mt.tot?"neg":""}">${brl0(mt.tot)}</div><div class="s">${pct(mt.tot/MULTA_TETO)} do limite de ${brl0(MULTA_TETO)}</div>${finBar(0,mt.tot,MULTA_TETO,6,`<i style="width:0"></i>`).replace(`background:${GRAY}`,"background:var(--bad)")}</div>`,
+   `<div class="card kpi ${mt.pend?"alert":""}"><span class="label">Multas pendentes</span><div class="v num">${brl0(mt.pend)}</div><div class="s">${mt.np?`${mt.np} a quitar · NFs retidas`:"nenhuma pendente"}</div></div>`].join("");
+  $("#ocCount").textContent=`${ab.length} abertos · ${L.length-ab.length} resolvidos · ${mt.n} multa(s)`;
+  $("#ocBody").innerHTML=L.length?L.map(o=>{const c=S.contratados[o.cid];const m=o.multa;const estou=ocEstourou(o);
+    return `<tr class="click" data-oc="${esc(o.id)}"><td class="mono">${fdt(o.t)}</td><td><b>${esc(o.desc)}</b><span class="sub">${c?esc(c.nome):"Sem responsável"}${o.fotos&&o.fotos.length?` · ${o.fotos.length} foto(s)`:""}</span></td><td>${esc(o.loc)}</td><td><span class="chip">${o.h}h</span><span class="sub mono">até ${fdt(ocDeadline(o))}</span></td><td>${ocPill(o)}</td><td style="max-width:220px">${o.prov?`<span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px">${esc(o.prov)}</span>`:'<span class="muted">—</span>'}</td><td class="r num">${m?`<span class="neg">${brl(m.valor)}</span><span class="sub">${m.st==="quitada"?'<span class="chip g">quitada</span>':'<span class="chip b">pendente</span>'}</span>`:(estou?`<span class="wtxt">prevista ${brl0(TETO*multaPrev(o))}</span>`:"—")}</td><td><button class="btn sm" type="button" data-open-oc="${esc(o.id)}">Abrir</button></td></tr>`;}).join(""):`<tr><td colspan="8"><div class="empty">Nenhum chamado registrado.</div></td></tr>`;
+  $$("#ocBody [data-open-oc]").forEach(b=>b.onclick=e=>{e.stopPropagation();openOc(b.dataset.openOc);});
+  $$("#ocBody tr.click").forEach(tr=>tr.onclick=()=>openOc(tr.dataset.oc));}
+$("#ocForm").addEventListener("submit",async e=>{e.preventDefault();const d=$("#ocDesc").value.trim();const tv=$("#ocT").value;if(!d||!tv)return;const t=new Date(tv).getTime();if(!(t>0)){toast("Informe a hora da mensagem.",true);return;}
+  try{await Store.set("ocorrencias",Store.newId(),{t,reg:Date.now(),desc:d,loc:$("#ocLocal").value,h:+$("#ocGrav").value,cid:$("#ocResp").value,st:"aberto",prov:"",fotos:[]});e.target.reset();$("#ocT").value=dtLocal(Date.now());toast("Chamado registrado; prazo contando desde a mensagem");}catch(x){}});
+async function ocSave(id,patch){const o=S.ocorrencias[id];if(!o)return;try{await Store.set("ocorrencias",id,{...o,...patch});}catch(e){}}
+function openOc(id){const o=S.ocorrencias[id];if(!o)return;const c=S.contratados[o.cid];const st=ocSt(o);const estou=ocEstourou(o);const m=o.multa;const mp=multaPrev(o);
+  const h=modalHost();const stBtn=(k,l,cls)=>`<button type="button" class="${cls}" data-st="${k}" aria-pressed="${st===k}">${l}</button>`;
+  h.innerHTML=`<div class="ovl center" style="z-index:70"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="ocT2" style="width:min(640px,calc(100% - 32px));max-height:calc(100vh - 32px);overflow-y:auto">
+   <div class="row" style="justify-content:space-between;align-items:flex-start"><div><span class="label">${esc(o.loc)} · prazo de ${o.h}h</span><h2 id="ocT2" style="font-size:19px;margin-top:4px">${esc(o.desc)}</h2><span class="sub">${c?esc(c.nome)+" · "+esc((FN[c.funcao]||{}).n||""):"Sem contratado responsável"}</span></div><button class="btn sm ghost" type="button" id="ocX" aria-label="Fechar">✕</button></div>
+   <div class="grid g2" style="gap:10px"><label class="f" for="ocEt">Hora da mensagem no WhatsApp<input type="datetime-local" id="ocEt" value="${dtLocal(o.t)}"></label><div class="kpi"><span class="label">Vence em</span><div class="v num" style="font-size:16px">${fdt(ocDeadline(o))}</div><div class="s">${ocPill(o)}</div></div></div>
+   <div><span class="label">Andamento</span><div class="seg" role="group" style="margin-top:6px">${stBtn("aberto","Aberto","s-prob")}${stBtn("andamento","Em andamento","s-pend")}${stBtn("resolvido","Resolvido","s-ok")}</div>${o.okEm?`<span class="sub">Resolvido em ${fdt(o.okEm)}${o.okEm>ocDeadline(o)?' · <span class="neg">depois do prazo</span>':' · dentro do prazo'}</span>`:""}</div>
+   <label class="f" for="ocProv">Providência tomada<textarea id="ocProv" rows="3" style="resize:vertical">${esc(o.prov||"")}</textarea></label>
+   <div><span class="label">Fotos e evidências</span><div class="row" style="margin-top:6px;flex-wrap:wrap">${(o.fotos||[]).map((f,i)=>`<span class="pill"><a href="${esc(f.url||("/_blob/"+f.id))}" target="_blank" rel="noopener" style="color:inherit">${esc(f.nome)}</a> <button type="button" class="btn sm ghost" data-delfoto="${i}" aria-label="Remover" style="padding:2px 6px">✕</button></span>`).join("")||'<span class="muted" style="font-size:12.5px">Nenhuma foto anexada.</span>'}${Store.assets?`<label class="btn sm" style="cursor:pointer">Anexar foto ou PDF<input type="file" class="hidden" id="ocFoto" accept="application/pdf,image/png,image/jpeg,image/webp" multiple></label>`:""}</div></div>
+   <div class="card" style="padding:12px 14px;border-color:${m?(m.st==="quitada"?"rgba(43,211,139,.4)":"rgba(255,107,112,.45)"):(estou?"rgba(232,181,74,.5)":"var(--line)")}">
+    <div class="card-h" style="margin-bottom:8px"><h2 style="font-size:15px">Multa</h2>${m?(m.st==="quitada"?'<span class="chip g">Quitada</span>':'<span class="chip b">Pendente</span>'):(estou?'<span class="chip w">Prazo estourado</span>':'<span class="chip">Sem multa</span>')}</div>
+    ${m?`<div class="grid g3" style="gap:10px"><div class="kpi"><span class="label">Valor</span><div class="v num neg" style="font-size:18px">${brl(m.valor)}</div></div><div class="kpi"><span class="label">Aplicada em</span><div class="v num" style="font-size:18px">${fd(m.data)}</div></div><div class="kpi"><span class="label">Base</span><div class="v num" style="font-size:18px">${m.pct?pct(m.pct)+(m.dias>1?` × ${m.dias}d`:""):"glosa"}</div></div></div><p class="muted" style="font-size:12.5px;margin:8px 0 0">${esc((MK[m.tipo]||{}).n||"")}${m.obs?" · "+esc(m.obs):""}${m.st==="quitada"?` · quitada em ${fd(m.quitEm)}${m.modo==="glosa"?" (glosa na NF)":""}`:""}</p><div class="row" style="margin-top:10px">${m.st==="quitada"?"":`<button class="btn sm p" type="button" id="ocQuit">Registrar quitação</button>`}<button class="btn sm ghost" type="button" id="ocMultaDel">Remover multa</button></div>`
+    :`<p class="muted" style="font-size:12.5px;margin:0 0 10px">${estou?`O prazo de ${o.h}h estourou. Se a SMTC aplicar a multa de ${pct(mp)} (${brl(TETO*mp)}), registre abaixo: ela passa a somar na planilha, nos pagamentos e no painel.`:"Registre aqui qualquer multa ou glosa que a SMTC aplicar sobre este chamado."}</p><button class="btn sm ${estou?"p":""}" type="button" id="ocMultaNew">Registrar multa</button><div id="ocMultaForm"></div>`}
+   </div>
+   <span class="err" id="ocMsg"></span>
+  </div></div>`;
+  $("#ocX").onclick=closeModal;
+  const re=()=>openOc(id);
+  $("#ocEt").onchange=async()=>{const t=new Date($("#ocEt").value).getTime();if(!(t>0))return;await ocSave(id,{t});toast("Hora da mensagem atualizada");re();};
+  $$("[data-st]").forEach(b=>b.onclick=async()=>{const k=b.dataset.st;const patch={st:k};if(k==="resolvido"&&!o.okEm)patch.okEm=Date.now();if(k!=="resolvido")patch.okEm=null;patch.ok=k==="resolvido";await ocSave(id,patch);toast(k==="resolvido"?"Chamado resolvido":"Andamento atualizado");re();});
+  let provT;$("#ocProv").oninput=()=>{clearTimeout(provT);provT=setTimeout(()=>ocSave(id,{prov:$("#ocProv").value.trim(),provEm:Date.now()}),600);};
+  $("#ocProv").onblur=()=>{clearTimeout(provT);const v=$("#ocProv").value.trim();if(v!==(o.prov||""))ocSave(id,{prov:v,provEm:Date.now()});};
+  const fi=$("#ocFoto");if(fi)fi.onchange=async()=>{const files=[...fi.files];if(!files.length)return;const fotos=[...(o.fotos||[])];toast("Enviando…");for(const file of files){const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;if(file.size>20*1024*1024){toast(`${file.name} passa de 20 MB`,true);continue;}try{const up=await Store.assets.upload(file,{type});fotos.push({id:up.id,url:up.url,nome:file.name,tipo:type});}catch(x){toast(`Não foi possível enviar ${file.name}`,true);}}await ocSave(id,{fotos});toast("Evidência anexada");re();};
+  $$("[data-delfoto]").forEach(b=>b.onclick=async()=>{const fotos=[...(o.fotos||[])];fotos.splice(+b.dataset.delfoto,1);await ocSave(id,{fotos});re();});
+  if($("#ocQuit"))$("#ocQuit").onclick=()=>multaQuitModal(id);
+  if($("#ocMultaDel"))$("#ocMultaDel").onclick=()=>confirmBox("Remover a multa?","Ela sai da planilha, dos pagamentos e do painel.","Remover",async()=>{const n={...S.ocorrencias[id]};delete n.multa;try{await Store.set("ocorrencias",id,n);toast("Multa removida");re();}catch(e){}});
+  if($("#ocMultaNew"))$("#ocMultaNew").onclick=()=>{$("#ocMultaNew").classList.add("hidden");const def=estou?{12:"p12",24:"p24",48:"p48"}[o.h]:"";
+    $("#ocMultaForm").innerHTML=`<form class="form" id="mfF" style="grid-template-columns:1fr 1fr;margin-top:10px;align-items:start">
+     <label class="f w2" for="mfT">Tipo (TR 6.3.1)<select id="mfT">${MULTAS.map(x=>`<option value="${x.k}" ${x.k===def?"selected":""}>${esc(x.n)} · ${x.livre?"valor livre":pct(x.pct)+(x.dia?" por dia":"")}</option>`).join("")}</select></label>
+     <label class="f" for="mfP">Percentual sobre o contrato (%)<input type="number" id="mfP" step="0.01" min="0" max="30" class="in-num" style="max-width:none"></label>
+     <label class="f" for="mfD">Dias (multa diária, máx. ${MULTA_DIAS_MAX})<input type="number" id="mfD" min="1" max="${MULTA_DIAS_MAX}" step="1" value="1" class="in-num" style="max-width:none"></label>
+     <label class="f" for="mfV">Valor (R$) *<input type="number" id="mfV" step="0.01" min="0.01" class="in-num" style="max-width:none" required></label>
+     <label class="f" for="mfData">Data da notificação *<input type="date" id="mfData" value="${TODAY}" required></label>
+     <label class="f w2" for="mfO">Observação (nº do ofício, justificativa)<input type="text" id="mfO"></label>
+     <span class="err w2" id="mfMsg"></span>
+     <div class="w2 row" style="justify-content:flex-end"><button class="btn" type="button" id="mfC">Cancelar</button><button class="btn p" type="submit">Registrar multa</button></div></form>`;
+    const calc=()=>{const tp=MK[$("#mfT").value]||{};const dEl=$("#mfD");dEl.disabled=!tp.dia;if(!tp.dia)dEl.value=1;const p=+$("#mfP").value||0;const d=tp.dia?Math.min(MULTA_DIAS_MAX,Math.max(1,+dEl.value||1)):1;$("#mfV").value=r2(TETO*p/100*d)||"";};
+    const onType=()=>{const tp=MK[$("#mfT").value]||{};$("#mfP").value=tp.livre?"":(tp.pct*100);$("#mfP").disabled=!!tp.livre;calc();if(tp.livre){$("#mfV").value="";}};
+    $("#mfT").onchange=onType;$("#mfP").oninput=calc;$("#mfD").oninput=calc;onType();
+    $("#mfC").onclick=()=>re();
+    $("#mfF").addEventListener("submit",async e=>{e.preventDefault();const tp=MK[$("#mfT").value]||{};const v=r2($("#mfV").value);const data=$("#mfData").value;const dias=tp.dia?Math.min(MULTA_DIAS_MAX,Math.max(1,+$("#mfD").value||1)):1;
+      if(!(v>0)||!data){$("#mfMsg").textContent="Informe valor e data.";return;}
+      const mt=multaTotals();if(mt.tot+v>MULTA_TETO+0.001){$("#mfMsg").textContent=`Passa do limite de 30% (${brl(MULTA_TETO)}). Acumulado: ${brl(mt.tot)}. Registre mesmo assim só se a SMTC aplicou.`;if(!$("#mfF").dataset.force){$("#mfF").dataset.force="1";return;}}
+      await ocSave(id,{multa:{tipo:$("#mfT").value,pct:tp.livre?0:r2(+$("#mfP").value)/100,dias,valor:v,data,st:"pendente",obs:$("#mfO").value.trim(),em:Date.now()}});
+      toast(`Multa de ${brl(v)} registrada: já soma na planilha, nos pagamentos e no painel`);re();});};
+}
+setInterval(()=>{if(current()==="ocorrencias")rOc();},30000);
+
+/* ================= RELATÓRIOS ================= */
+let rpT="verba";
+$$("#rpType button").forEach(b=>b.onclick=()=>{rpT=b.dataset.t;$$("#rpType button").forEach(x=>x.setAttribute("aria-pressed",x===b));rRep();});
+function repData(){const aa=artAgg(),t=totals();
+  if(rpT==="verba"){const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"").localeCompare(b.data||""));return{t:"Prestação de contas da verba artística",s:`Item 4 do Memorial · ${aa.n} contratações · ${brl(aa.contr)} de ${brl(VERBA)}`,h:["Data","Artista","CPF/CNPJ","Cachê","Pago","Comprovantes"],rows:cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id).filter(p=>p.status==="pago");return[fd(c.data),c.nome,c.doc,brl(a.total),brl(a.pago),ps.length?`${ps.filter(p=>p.comp).length}/${ps.length}`:"—"];}),foot:`Pago: ${brl(aa.pago)} · A pagar: ${brl(aa.aPagar)} · Falta contratar: ${brl(Math.max(0,aa.falta))}`};}
+  if(rpT==="setor")return{t:"Gastos por setor",s:`Homologado ${brl(TETO)} · pago ${brl(t.pago)} (${pct(t.pago/TETO)})`,h:["Setor","Proposta","Previsto","Contratado","Pago","A pagar"],rows:SETORES.map(s=>{const a=setAgg(s.k);return[s.n,brl(a.orc),brl(a.prev),brl(a.contr),brl(a.pago),brl(a.aPagar)];}),foot:`Previsto ${brl(t.prev)} + impostos ${brl(t.imp)} · margem livre ${brl(t.margem)}`};
+  return{t:"Relatório parcial de execução",s:"Medição para nota fiscal",h:["Item","Quantidade","Contratado","Situação"],rows:FUNCS.filter(f=>f.lim!=="sem").map(f=>{const a=itemAgg(f);return[`${f.it} · ${f.n}`,f.lim==="art"?`${a.n} cachês`:(f.lim==="qtd"?`${a.qtd}/${f.q} ${unitWord(f)}`:(a.n?"Contratado":"Pendente")),brl(a.contratado),itemStatus(f,a).map(x=>x[1]).join(", ")];}),foot:`NF 1 (20%): ${brl(TETO*.2)} · NF 2 (40%): ${brl(TETO*.4)} · NF 3 (40%): ${brl(TETO*.4)}`};}
+function rRep(){const r=repData();$("#rpBox").innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid #DDE1E8"><div><span class="rl">Prefeitura de Canela · SMTC · Pregão 60/2026</span><h3>${esc(r.t)}</h3><span style="color:#5A6275;font-size:12.5px">${esc(r.s)}</span></div><span class="rl" style="border:1px dashed #A9B0BF;padding:8px 10px;border-radius:4px">Logo da contratada</span></div><div class="tw"><table><thead><tr>${r.h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r.rows.length?r.rows.map(x=>`<tr>${x.map(y=>`<td>${esc(y)}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${r.h.length}">Nenhum registro ainda.</td></tr>`}</tbody></table></div><div class="ft"><span>${esc(r.foot)}</span><span>Gerado em ${new Date().toLocaleDateString("pt-BR")} · Tecnologia ST Solutions</span></div>`;}
+$("#rpCopy").onclick=async()=>{const r=repData();const txt=[r.t,r.s,"",r.h.join(" | "),...r.rows.map(x=>x.join(" | ")),"",r.foot].join("\n");try{await navigator.clipboard.writeText(txt);toast("Texto copiado");}catch(e){toast("Não foi possível copiar aqui.",true);}};
+
+/* ---------- exportação CSV ---------- */
+const csvCell=v=>{v=String(v==null?"":v);return /[";\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v;};
+const num=v=>(+v||0).toFixed(2).replace(".",",");
+async function saveCsv(name,rows){const txt="﻿"+rows.map(r=>r.map(csvCell).join(";")).join("\n");
+  if(Store.downloads){try{await Store.downloads.save({filename:name,data:txt});toast("Planilha pronta");return;}catch(e){if(e&&e.code==="declined")return;}}
+  try{await navigator.clipboard.writeText(txt);toast("Download indisponível aqui: planilha copiada (cole no Excel ou Sheets)");}catch(e){toast("Não foi possível exportar aqui.",true);}}
+$("#expContr").onclick=()=>saveCsv("contratados_sonho_de_natal.csv",[["Nome","CPF/CNPJ","Tipo","Telefone","Setor","Função","Valor unitário","Quantidade","Valor total","Agendado","Pago","Serviço","Data do serviço","Observações"],...contrList().map(c=>{const f=FN[c.funcao]||{};const a=cAgg(c);return[c.nome,c.doc,c.tipo,c.tel,(SET[f.s]||{}).n,f.n,num(c.diaria),c.qtd,num(a.total),num(a.agendado),num(a.pago),c.servico==="prestado"?"Prestado":"A prestar",fd(c.data),c.obs];})]);
+$("#expPlan").onclick=()=>{const t=totals();const rows=[["Setor","Item","Valor da proposta","Valor Real","Previsto","Contratado","Pago","A pagar"]];SETORES.forEach(x=>FUNCS.filter(f=>f.s===x.k).forEach(f=>{const a=itemAgg(f);rows.push([x.n,`${f.it} · ${f.n}`,num(f.tot),a.real==null?"":num(a.real),num(a.prev),num(a.contratado),num(a.pago),num(a.aPagar)]);}));rows.push(["","Impostos estimados","","",num(t.imp),"","",""]);rows.push(["","Multas e glosas","","",num(t.multas),"",num(t.multasPagas),num(t.multasPend)]);rows.push(["","Margem livre","","",num(t.margem),"","",""]);saveCsv("planilha_custos_sonho_de_natal.csv",rows);};
+$("#expPag").onclick=()=>saveCsv("pagamentos_sonho_de_natal.csv",[["Data prevista","Data do pagamento","Situação","Valor","Contratado","CPF/CNPJ","Setor","Função","Comprovante"],...payList().sort((a,b)=>a.data.localeCompare(b.data)).map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return[fd(p.data),st==="pago"?fd(p.pagoEm):"",st==="pago"?"Realizado":(st==="atrasado"?"Atrasado":"Pendente"),num(p.valor),c.nome,c.doc,(SET[f.s]||{}).n,f.n,p.comp?p.comp.nome:""];})]);
+
+/* ================= EDITAL ================= */
+function rEdital(){$("#edBody").innerHTML=FUNCS.map(f=>`<tr><td class="mono">${f.it}</td><td><b>${f.n}</b>${f.det?`<span class="sub">${f.det}</span>`:""}</td><td><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n}</td><td class="r num">${f.lim==="art"?"100":(f.q||"—")}</td><td>${f.un}</td><td class="r num">${f.d?brl(f.d):"—"}</td><td class="r num">${f.tot?brl(f.tot):"—"}</td><td>${f.lim==="qtd"?`${f.q} ${unitWord(f)}`:f.lim==="count"?`${f.max} contratação(ões)`:f.lim==="art"?`${ART_MIN}–${ART_MAX} cachês · R$ 50.000 exatos`:'<span class="chip w">Sem previsão</span>'}</td></tr>`).join("")+`<tr class="tot"><td></td><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${brl(FUNCS.reduce((a,f)=>a+f.tot,0))}</td><td></td></tr>`;}
+
+/* ================= INÍCIO ================= */
+syncCForm();show();initStore();
+})();
+</script>
+</body>
+</html>
