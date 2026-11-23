@@ -55,12 +55,20 @@ h1,h2,h3{font-family:var(--f-display);letter-spacing:-.02em;text-wrap:balance;ma
 .conn i{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--muted)}
 .conn.on i{background:var(--ok)}.conn.local i{background:var(--warn)}
 .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.artOnly{display:none}form.art .artOnly{display:flex}form.art .artHide{display:none}
+.dl{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.dl .dr{display:grid;grid-template-columns:minmax(0,1fr) 110px 34px;gap:6px;align-items:center}
+.dl .dr input{width:100%}
+.dl .dr button{height:34px;padding:0;border-radius:8px}
+.prog-day td{background:var(--bg1);font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px}
+.prog-day.today td{color:var(--volt)}
+tr.past td{opacity:.72}
 .who{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg1);font-size:12px}
 .who .av{width:26px;height:26px;border-radius:50%;background:var(--volt);color:#06110F;display:grid;place-items:center;font:700 11px var(--f-mono);flex:none}
 .who .em{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .who .em b{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 #login{z-index:90;background:var(--bg)}
-#login[hidden]{display:none}
+[hidden]{display:none!important}
 #login .modal{width:min(420px,calc(100% - 32px))}
 #login .brand{margin-bottom:4px}
 body.ro form.form,body.ro .btn.p,body.ro [data-pay],body.ro [data-up],body.ro [data-v],body.ro .chk,body.ro #ocMultaNew,body.ro #ocFoto,body.ro .in-num,body.ro .in-real{pointer-events:none;opacity:.45}
@@ -292,7 +300,7 @@ label.f .hint{font-size:11px;color:var(--muted)}
       <strong>39º Sonho de Natal</strong>
       <span class="sub">Canela/RS · Pregão Eletrônico 60/2026</span>
       <span class="sub mono">Homologado R$ 269.500,00</span>
-      <span class="sub">Programação e datas: a confirmar</span>
+      <span class="sub" id="sideProg">Programação e datas: a confirmar</span>
     </div>
     <nav class="tabs" id="tabs" aria-label="Módulos do painel"></nav>
     <div class="side-foot">
@@ -360,7 +368,11 @@ label.f .hint{font-size:11px;color:var(--muted)}
         <label class="f" for="cDiaria"><span id="cDiariaLbl">Valor da diária (R$) *</span><input type="number" id="cDiaria" min="0" step="0.01" class="in-num" style="max-width:none" required></label>
         <label class="f" for="cQtd"><span id="cQtdLbl">Diárias contratadas *</span><input type="number" id="cQtd" min="0" step="1" class="in-num" style="max-width:none" required></label>
         <label class="f" for="cTotal">Valor total (calculado)<input type="text" id="cTotal" readonly tabindex="-1"></label>
-        <label class="f" for="cData"><span id="cDataLbl">Data do serviço</span><input type="date" id="cData"></label>
+        <label class="f artHide" for="cData"><span id="cDataLbl">Data do serviço</span><input type="date" id="cData"></label>
+        <label class="f w2 artOnly" for="cAtr">Atração / espetáculo<input type="text" id="cAtr" placeholder="Ex.: Encanto Mágico do Natal"></label>
+        <label class="f artOnly" for="cEstilo">Estilo<input type="text" id="cEstilo" placeholder="Ex.: Teatro de bonecos"></label>
+        <label class="f artOnly" for="cElenco">Elenco (pessoas)<input type="text" id="cElenco" placeholder="Ex.: 3"></label>
+        <div class="f w4 artOnly"><span>Datas e horários das apresentações</span><div class="dl" id="cDatas"></div><div class="row" style="margin-top:6px"><button class="btn sm" type="button" id="cDataAdd">+ Adicionar data</button><span class="hint" id="cDatasHint"></span></div></div>
         <label class="f w4" for="cObs">Observações<input type="text" id="cObs" placeholder="Ex.: grupo de 5 músicos, rider próprio"></label>
         <div class="w4 row" style="justify-content:space-between">
           <span id="cMsg" class="err" role="alert"></span>
@@ -417,12 +429,12 @@ label.f .hint{font-size:11px;color:var(--muted)}
   <!-- ================= PROGRAMAÇÃO ================= -->
   <section class="view" id="v-programacao">
     <div class="topbar">
-      <div><span class="label">Programação</span><h1>Shows e verba artística</h1><p>A grade sai dos artistas cadastrados em Contratados. Precisa haver pelo menos 35 contratações somando exatamente R$ 50.000,00.</p></div>
-      <div class="row"><a class="btn p" href="#contratados" id="prNew">Cadastrar artista</a></div>
+      <div><span class="label">Programação</span><h1>Grade artística</h1><p>Cada linha é uma apresentação; o cachê é por apresentação. O edital pede no mínimo 35 cachês somando R$ 50.000,00. Clique na linha para abrir o contrato; marque cada apresentação como realizada no dia.</p></div>
+      <div class="row"><button class="btn" type="button" id="prImport" hidden>Importar programação oficial</button><a class="btn p" href="#contratados" id="prNew">Cadastrar artista</a></div>
     </div>
-    <div class="grid g4" id="prKpis"></div>
-    <div class="card"><div class="card-h"><h2>Grade artística</h2><span class="label">ordenada pela data do serviço</span></div>
-      <div class="tw"><table><thead><tr><th>Data</th><th>Artista</th><th>Documento</th><th class="r">Cachê</th><th>Serviço</th><th>Pagamento</th><th>Comprovantes</th></tr></thead><tbody id="prBody"></tbody></table></div>
+    <div class="grid g5" id="prKpis"></div>
+    <div class="card"><div class="card-h"><h2>Apresentações por data</h2><div class="row"><div class="seg" id="prFilt" role="group"><button type="button" data-f="todas" aria-pressed="true">Todas</button><button type="button" data-f="prox">Próximas</button><button type="button" data-f="real">Realizadas</button></div><input type="search" id="prQ" placeholder="Buscar atração ou artista" style="max-width:220px"></div></div>
+      <div class="tw"><table><thead><tr><th>Hora</th><th>Atração</th><th>Artista / responsável</th><th>Estilo</th><th class="r">Elenco</th><th class="r">Cachê</th><th>Apresentação</th><th>Pagamento</th></tr></thead><tbody id="prBody"></tbody></table></div>
     </div>
   </section>
 
@@ -737,11 +749,11 @@ function multaTotals(){let tot=0,pend=0,pag=0,np=0;multaList().forEach(m=>{const
 // barra financeira padrão: verde = pago · cinza = previsto a pagar · sem cor = saldo
 const GRAY="#5B6580",GRAY2="#3E4762";
 function finBar(pago,prev,base,h,extra){base=Math.max(base||0,prev,pago,1);const ap=Math.max(0,prev-pago);return `<span class="bar" style="height:${h||8}px" title="Pago ${esc(brl(pago))} · previsto a pagar ${esc(brl(ap))}"><i style="width:${Math.min(100,pago/base*100)}%;background:var(--ok)"></i><i style="width:${Math.min(100,ap/base*100)}%;background:${GRAY}"></i>${extra||""}</span>`;}
-function artAgg(){const cs=contrList().filter(c=>c.funcao==="artista");let contr=0,pago=0;cs.forEach(c=>{contr+=cTotal(c);pago+=cAgg(c).pago;});return{n:cs.length,contr:r2(contr),pago:r2(pago),aPagar:r2(contr-pago),falta:r2(VERBA-contr),prest:cs.filter(c=>c.servico==="prestado").length};}
+function artAgg(){const cs=contrList().filter(c=>c.funcao==="artista");let contr=0,pago=0,cach=0,apres=0,real=0,semDoc=0;cs.forEach(c=>{contr+=cTotal(c);pago+=cAgg(c).pago;cach+=+c.qtd||0;const ds=cDatas(c);apres+=ds.length;real+=ds.filter(x=>x.ok).length;if(digits(c.doc||"").length<11)semDoc++;});return{n:cs.length,cach,apres,real,semDoc,contr:r2(contr),pago:r2(pago),aPagar:r2(contr-pago),falta:r2(VERBA-contr),prest:cs.filter(c=>c.servico==="prestado").length};}
 
 function itemStatus(f,a){const out=[];
   if(f.lim==="sem"){if(a.n)out.push(["w","Fora da proposta"]);else out.push(["","Sem previsão"]);return out;}
-  if(f.lim==="art"){if(a.n<ART_MIN)out.push(["w",`${a.n}/${ART_MIN} contratações`]);if(a.contratado<VERBA)out.push(["w",`Falta ${brl0(VERBA-a.contratado)}`]);if(a.contratado>VERBA)out.push(["b","Acima de R$ 50 mil"]);if(a.n>=ART_MIN&&a.contratado===VERBA)out.push(["g","Completo"]);return out;}
+  if(f.lim==="art"){if(a.qtd<ART_MIN)out.push(["w",`${a.qtd}/${ART_MIN} cachês`]);if(a.contratado<VERBA)out.push(["w",`Falta ${brl0(VERBA-a.contratado)}`]);if(a.contratado>VERBA)out.push(["b","Acima de R$ 50 mil"]);if(a.n>=ART_MIN&&a.contratado===VERBA)out.push(["g","Completo"]);return out;}
   if(!a.n)out.push(["b","Sem contratado"]);
   else if(f.lim==="qtd"&&a.qtd<f.q)out.push(["w",`Faltam ${f.q-a.qtd} ${unitWord(f)}`]);
   if(a.real==null)out.push(["","Sem valor real"]);
@@ -766,7 +778,8 @@ function alerts(){const al=[];const t=totals();
   if(semRealC.length)al.push(["lo","Contratado sem Valor Real lançado",semRealC.map(f=>f.n).join(" · ")+". O previsto usa o valor contratado até você lançar o Valor Real.","planilha"]);
   const aa=artAgg();
   if(aa.contr>VERBA)al.push(["hi","Cachês acima de R$ 50.000",`${brl(aa.contr-VERBA)} acima da verba fixa.`,"programacao"]);
-  else if(aa.falta>0||aa.n<ART_MIN)al.push(["md",`Verba artística: falta contratar ${brl(Math.max(0,aa.falta))}`,`${aa.n} de no mínimo ${ART_MIN} contratações.`,"programacao"]);
+  else if(aa.falta>0||aa.cach<ART_MIN)al.push(["md",`Verba artística: falta contratar ${brl(Math.max(0,aa.falta))}`,`${aa.cach} de no mínimo ${ART_MIN} cachês.`,"programacao"]);
+  if(aa.semDoc)al.push(["md",`${aa.semDoc} artista(s) sem CPF/CNPJ`,"Complete o documento antes de agendar o pagamento: o edital exige recibo e comprovante por artista.","programacao"]);
   const sem=FUNCS.filter(f=>f.lim!=="sem"&&f.lim!=="art"&&!itemAgg(f).n);
   if(sem.length)al.push(["md",`${sem.length} item(ns) da planilha sem contratado`,sem.map(f=>f.n).join(" · "),"planilha"]);
   const inc=FUNCS.filter(f=>{if(f.lim!=="qtd")return false;const a=itemAgg(f);return a.n&&a.qtd<f.q;});
@@ -794,7 +807,8 @@ function renderNav(){const cur=current();const atr=payList().filter(p=>payStatus
 function show(){const c=current();$$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+c));window.scrollTo(0,0);render();}
 window.addEventListener("hashchange",show);
 let _raf=0;function schedule(){if(_raf)return;_raf=requestAnimationFrame(()=>{_raf=0;render();});}
-function render(){renderNav();const c=current();const fn={painel:rPainel,contratados:rContr,planilha:rPlan,pagamentos:rPag,programacao:rProg,riders:rRiders,documentos:rDocs,ocorrencias:rOc,relatorios:rRep,edital:rEdital,usuarios:rUsers}[c];try{fn();}catch(e){console.error(e);}if(openDrawer)openDrawer.refresh();}
+function sideProg(){const el=$("#sideProg");if(!el)return;const ds=[];contrList().filter(c=>c.funcao==="artista").forEach(c=>cDatas(c).forEach(x=>{if(x.d)ds.push(x.d);}));if(!ds.length){el.textContent="Programação e datas: a confirmar";return;}ds.sort();el.textContent=`Programação: ${fd(ds[0])} a ${fd(ds[ds.length-1])} · ${ds.length} apresentações`;}
+function render(){renderNav();sideProg();const c=current();const fn={painel:rPainel,contratados:rContr,planilha:rPlan,pagamentos:rPag,programacao:rProg,riders:rRiders,documentos:rDocs,ocorrencias:rOc,relatorios:rRep,edital:rEdital,usuarios:rUsers}[c];try{fn();}catch(e){console.error(e);}if(openDrawer)openDrawer.refresh();}
 
 /* ================= PAINEL ================= */
 let WIN=7;
@@ -859,11 +873,20 @@ function rPainel(){
 }
 
 /* ================= CONTRATADOS ================= */
+const WD=["dom","seg","ter","qua","qui","sex","sáb"];
+const wd=d=>{if(!d)return"";const x=new Date(d+"T12:00:00");return isNaN(x)?"":WD[x.getDay()];};
+const wdLong=d=>{if(!d)return"";const x=new Date(d+"T12:00:00");return isNaN(x)?"":x.toLocaleDateString("pt-BR",{weekday:"long"});};
+function cDatas(c){if(Array.isArray(c.datas)&&c.datas.length)return c.datas.slice().sort((a,b)=>(a.d+a.h).localeCompare(b.d+b.h));return c.data?[{d:c.data,h:"",ok:c.servico==="prestado"}]:[];}
+function dateRows(host,list){host.innerHTML=(list||[]).map((x,i)=>`<div class="dr"><input type="date" value="${esc(x.d||"")}" data-dd="${i}"><input type="time" value="${esc(x.h||"")}" data-dh="${i}"><button class="btn sm ghost" type="button" data-ddel="${i}" aria-label="Remover data">✕</button></div>`).join("");}
+function readDateRows(host){const out=[];host.querySelectorAll(".dr").forEach(r=>{const d=r.querySelector("[data-dd]").value;const h=r.querySelector("[data-dh]").value;if(d)out.push({d,h,ok:false});});return out.sort((a,b)=>(a.d+a.h).localeCompare(b.d+b.h));}
+function bindDateRows(host,addBtn,onChange,keepOk){const sync=()=>{const list=readDateRows(host);if(keepOk)list.forEach(x=>{const o=keepOk.find(k=>k.d===x.d&&k.h===x.h);if(o)x.ok=!!o.ok;});onChange(list);};
+  host.oninput=sync;host.onclick=e=>{const b=e.target.closest("[data-ddel]");if(!b)return;const cur=readDateRows(host);cur.splice(+b.dataset.ddel,1);dateRows(host,cur);sync();};
+  addBtn.onclick=()=>{const cur=readDateRows(host);const last=cur[cur.length-1];cur.push({d:"",h:last?last.h:"17:00"});dateRows(host,cur);host.querySelector(".dr:last-child [data-dd]").focus();};}
 function funcOptions(sel){return SETORES.map(s=>`<optgroup label="${s.n}">${FUNCS.filter(f=>f.s===s.k).map(f=>`<option value="${f.k}" ${f.k===sel?"selected":""}>${f.n}</option>`).join("")}</optgroup>`).join("");}
 function capInfo(f,exclude){const u=funcUse(f.k,exclude);
   if(f.lim==="qtd")return{txt:`${u.qtd} de ${f.q} ${unitWord(f)} contratadas · disponível ${f.q-u.qtd}`,rest:f.q-u.qtd,u};
   if(f.lim==="count")return{txt:`${u.n} de ${f.max} contratação(ões) · proposta ${brl(f.tot)}`,rest:f.max-u.n,u};
-  if(f.lim==="art")return{txt:`${u.n} contratações (mín. ${ART_MIN}, máx. ${ART_MAX}) · ${brl(u.valor)} de ${brl(VERBA)} · disponível ${brl(VERBA-u.valor)}`,rest:VERBA-u.valor,u};
+  if(f.lim==="art")return{txt:`${u.qtd} cachês em ${u.n} contratação(ões) (mín. ${ART_MIN}, máx. ${ART_MAX}) · ${brl(u.valor)} de ${brl(VERBA)}${u.valor>VERBA?" · ACIMA DA VERBA":" · disponível "+brl(VERBA-u.valor)}`,rest:VERBA-u.valor,u};
   return{txt:"Sem linha na proposta: será sinalizado como fora da proposta",rest:Infinity,u};}
 function validateC(d,excludeId){
   if(!d.nome)return"Informe o nome.";
@@ -874,11 +897,13 @@ function validateC(d,excludeId){
   const ci=capInfo(f,excludeId);
   if(f.lim==="qtd"&&d.qtd>ci.rest)return`Limite da proposta: restam ${Math.max(0,ci.rest)} ${unitWord(f)} em ${f.n}.`;
   if(f.lim==="count"&&ci.rest<=0)return`${f.n} já tem ${f.max} contratação(ões), o limite da proposta.`;
-  if(f.lim==="art"){if(ci.u.n+1>ART_MAX)return`Limite de ${ART_MAX} cachês da proposta atingido.`;if(r2(d.diaria*d.qtd)>r2(VERBA-ci.u.valor)+0.001)return`O cachê passa da verba: restam ${brl(VERBA-ci.u.valor)} dos R$ 50.000.`;}
+  if(f.lim==="art"&&ci.u.qtd+d.qtd>ART_MAX)return`Limite de ${ART_MAX} cachês da proposta atingido (já há ${ci.u.qtd}).`;
   const ps=excludeId?cPays(excludeId):[];const ag=ps.reduce((a,p)=>a+(+p.valor||0),0);
   if(r2(d.diaria*d.qtd)+0.001<ag)return`Já há ${brl(ag)} agendado para este contratado. Reduza as parcelas antes.`;
   return"";}
-function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim()};}
+function validateWarn(d,excludeId){const f=FN[d.funcao];if(!f||f.lim!=="art")return"";const ci=capInfo(f,excludeId);const tot=r2(ci.u.valor+d.diaria*d.qtd);if(tot>VERBA+0.001)return`Com este cachê, os artistas somam ${brl(tot)}, ${brl(tot-VERBA)} acima da verba fixa de R$ 50.000 do edital. Salvar mesmo assim?`;return"";}
+function confirmAsync(t,txt,okLbl){return new Promise(res=>{const m=modalHost();m.innerHTML=`<div class="ovl center" style="z-index:70"><div class="modal" role="alertdialog" aria-modal="true"><h2 style="font-size:18px">${esc(t)}</h2><p class="muted" style="margin:0">${esc(txt)}</p><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="cbN">Cancelar</button><button class="btn p" type="button" id="cbY">${esc(okLbl)}</button></div></div></div>`;$("#cbN").onclick=()=>{closeModal();res(false);};$("#cbY").onclick=()=>{closeModal();res(true);};});}
+function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim(),atracao:$("#cAtr").value.trim(),estilo:$("#cEstilo").value.trim(),elenco:$("#cElenco").value.trim(),datas:readDateRows($("#cDatas"))};}
 function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
   const ci=capInfo(f);$("#cFuncHint").textContent=ci.txt;
   const lbl=f.lim==="art"?"Valor do cachê (R$) *":(f.un==="hora"?"Valor da hora (R$) *":(f.un==="serviço"?"Valor do serviço (R$) *":"Valor da diária (R$) *"));
@@ -886,17 +911,21 @@ function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
   $("#cQtdLbl").textContent=f.lim==="art"?"Apresentações *":(f.un==="hora"?"Horas contratadas *":(f.un==="serviço"?"Quantidade":"Diárias contratadas *"));
   const q=$("#cQtd");if(f.un==="serviço"){q.value=1;q.readOnly=true;}else{q.readOnly=false;if(f.lim==="art"&&!q.value)q.value=1;}
   $("#cDataLbl").textContent=f.lim==="art"?"Data da apresentação":"Data do serviço";
+  $("#cForm").classList.toggle("art",f.lim==="art");
   if(!$("#cDiaria").value&&f.d&&f.lim!=="art")$("#cDiaria").placeholder="Proposta: "+brl(f.d);else if(f.lim==="art")$("#cDiaria").placeholder="Média: R$ 500,00";
   calcCTotal();}
 function calcCTotal(){const v=r2((+$("#cDiaria").value||0)*(+$("#cQtd").value||0));$("#cTotal").value=brl(v);}
 $("#cFunc").innerHTML=funcOptions("artista");
 $("#cFunc").onchange=()=>{$("#cDiaria").value="";$("#cQtd").value="";syncCForm();};
 $("#cDiaria").oninput=calcCTotal;$("#cQtd").oninput=calcCTotal;
+bindDateRows($("#cDatas"),$("#cDataAdd"),list=>{if(FN[$("#cFunc").value]&&FN[$("#cFunc").value].lim==="art"){$("#cQtd").value=list.length||"";$("#cDatasHint").textContent=list.length?`${list.length} apresentação(ões)`:"";calcCTotal();}});
 $("#cDoc").onblur=()=>{$("#cDoc").value=fmtDoc($("#cDoc").value);};
 $("#cForm").addEventListener("submit",async e=>{e.preventDefault();const d=readCForm();const err=validateC(d);$("#cMsg").textContent=err;if(err)return;
+  if(FN[d.funcao].lim==="art"){if(d.datas.length)d.data=d.datas[0].d;}else{delete d.datas;delete d.atracao;delete d.estilo;delete d.elenco;}
+  const w=validateWarn(d);if(w&&!(await confirmAsync("Acima da verba artística",w,"Salvar mesmo assim")))return;
   const id=Store.newId();d.criadoEm=Date.now();
   try{await Store.set("contratados",id,d);}catch(x){return;}
-  $("#cForm").reset();$("#cFunc").value=d.funcao;syncCForm();toast("Contratado salvo. Agende os pagamentos.");openContr(id);});
+  $("#cForm").reset();dateRows($("#cDatas"),[]);$("#cDatasHint").textContent="";$("#cFunc").value=d.funcao;syncCForm();toast("Contratado salvo. Agende os pagamentos.");openContr(id);});
 $("#cSetF").innerHTML=`<option value="">Todos os setores</option>`+SETORES.map(s=>`<option value="${s.k}">${s.n}</option>`).join("");
 $("#cSetF").onchange=()=>rContr();$("#cSearch").oninput=()=>rContr();
 function payBadge(a){if(!a.n)return`<span class="pill warn"><i></i>Não agendado</span>`;if(a.atrasados)return`<span class="pill bad"><i></i>${a.atrasados} atrasado(s)</span>`;if(a.pago>=a.total-0.5&&a.total>0)return`<span class="pill ok"><i></i>Quitado</span>`;if(a.falta>0.5)return`<span class="pill warn"><i></i>Falta agendar ${brl0(a.falta)}</span>`;return`<span class="pill info"><i></i>Em dia</span>`;}
@@ -905,7 +934,7 @@ function rContr(){
   $("#funcBody").innerHTML=FUNCS.map(f=>{const u=funcUse(f.k);let lim,used,disp,p;
     if(f.lim==="qtd"){lim=`${f.q} ${unitWord(f)}`;used=`${u.qtd}`;disp=`${f.q-u.qtd}`;p=u.qtd/f.q;}
     else if(f.lim==="count"){lim=`${f.max} contratação(ões)`;used=`${u.n}`;disp=`${f.max-u.n}`;p=u.n/f.max;}
-    else if(f.lim==="art"){lim=`${brl0(VERBA)} · ${ART_MIN}–${ART_MAX}`;used=`${u.n} · ${brl0(u.valor)}`;disp=brl0(VERBA-u.valor);p=u.valor/VERBA;}
+    else if(f.lim==="art"){lim=`${brl0(VERBA)} · ${ART_MIN}–${ART_MAX} cachês`;used=`${u.qtd} cachês · ${brl0(u.valor)}`;disp=u.valor>VERBA?`<span class="neg">− ${brl0(u.valor-VERBA)}</span>`:brl0(VERBA-u.valor);p=u.valor/VERBA;}
     else{lim="Sem previsão";used=u.n?`${u.n} · ${brl0(u.valor)}`:"0";disp="—";p=0;}
     return `<tr><td><b>${f.n}</b><span class="sub">Item ${f.it} · ${f.un}</span></td><td><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n}</td><td class="r">${lim}</td><td class="r num">${used}</td><td class="r num">${disp}</td><td><span class="bar"><i style="width:${Math.min(100,p*100)}%;background:${p>1?"var(--bad)":SET[f.s].c}"></i></span></td><td class="r num">${(()=>{const a=itemAgg(f);return a.prev?`${brl0(a.prev)}<span class="sub">pago ${brl0(a.pago)}</span><span style="display:block;margin-top:4px">${finBar(a.pago,a.prev,0,6)}</span>`:"—";})()}</td></tr>`;}).join("");
   const q=$("#cSearch").value.trim().toLowerCase(),sf=$("#cSetF").value;
@@ -934,7 +963,7 @@ function openContr(id){
         <div class="kpi"><span class="label">Pago</span><div class="v num" style="font-size:20px">${brl(a.pago)}</div><div class="s">${pct(a.total?a.pago/a.total:0)} do total</div></div>
         <div class="kpi"><span class="label">Falta agendar</span><div class="v num ${a.falta>0.5?"wtxt":""}" style="font-size:20px">${brl(Math.max(0,a.falta))}</div><div class="s">${ps.length} parcela(s)</div></div>
       </div>
-      <div class="row" style="justify-content:space-between"><div class="row"><span class="label">Serviço</span><div class="seg" role="group" aria-label="Situação do serviço"><button type="button" data-sv="a_prestar" aria-pressed="${c.servico!=="prestado"}">A prestar</button><button type="button" data-sv="prestado" class="s-ok" aria-pressed="${c.servico==="prestado"}">Prestado</button></div>${c.data?`<span class="muted">${f.lim==="art"?"Apresentação":"Serviço"}: ${fd(c.data)}</span>`:""}</div><button class="btn sm" type="button" id="dEdit">${editing?"Cancelar edição":"Editar dados"}</button></div>
+      <div class="row" style="justify-content:space-between"><div class="row"><span class="label">Serviço</span><div class="seg" role="group" aria-label="Situação do serviço"><button type="button" data-sv="a_prestar" aria-pressed="${c.servico!=="prestado"}">A prestar</button><button type="button" data-sv="prestado" class="s-ok" aria-pressed="${c.servico==="prestado"}">Prestado</button></div>${f.lim==="art"?(cDatas(c).length?`<span class="muted">${cDatas(c).length} apresentação(ões): ${cDatas(c).map(x=>fd(x.d)+(x.h?" "+x.h:"")).join(" · ")}</span>`:""):(c.data?`<span class="muted">Serviço: ${fd(c.data)}</span>`:"")}</div><button class="btn sm" type="button" id="dEdit">${editing?"Cancelar edição":"Editar dados"}</button></div>
       ${editing?editForm(c):""}
       <div class="card" style="padding:14px 16px">
         <div class="card-h" style="margin-bottom:6px"><h2>Datas de pagamento</h2><span class="label">${brl(a.agendado)} agendado de ${brl(a.total)}</span></div>
@@ -967,15 +996,20 @@ function editForm(c){return `<form class="form card" id="eForm" style="grid-temp
   <label class="f" for="eTipo">Tipo de contratação<select id="eTipo">${["Pessoa física (recibo/RPA)","MEI","Pessoa jurídica","Associação ou cooperativa"].map(t=>`<option ${t===c.tipo?"selected":""}>${t}</option>`).join("")}</select></label>
   <label class="f" for="eTel">Telefone<input type="tel" id="eTel" value="${esc(c.tel)}"></label>
   <label class="f" for="eFunc">Função<select id="eFunc">${funcOptions(c.funcao)}</select></label>
-  <label class="f" for="eData">Data do serviço<input type="date" id="eData" value="${esc(c.data)}"></label>
+  ${FN[c.funcao]&&FN[c.funcao].lim==="art"?`<label class="f" for="eAtr">Atração / espetáculo<input type="text" id="eAtr" value="${esc(c.atracao||"")}"></label><label class="f" for="eEstilo">Estilo<input type="text" id="eEstilo" value="${esc(c.estilo||"")}"></label><label class="f" for="eElenco">Elenco<input type="text" id="eElenco" value="${esc(c.elenco||"")}"></label><div class="f" style="grid-column:1/-1"><span>Datas e horários das apresentações</span><div class="dl" id="eDatas"></div><div class="row" style="margin-top:6px"><button class="btn sm" type="button" id="eDataAdd">+ Adicionar data</button></div></div>`:`<label class="f" for="eData">Data do serviço<input type="date" id="eData" value="${esc(c.data)}"></label>`}
   <label class="f" for="eDiaria">Valor unitário (R$)<input type="number" id="eDiaria" step="0.01" min="0" value="${c.diaria}" class="in-num" style="max-width:none"></label>
   <label class="f" for="eQtd">Quantidade<input type="number" id="eQtd" step="1" min="0" value="${c.qtd}" class="in-num" style="max-width:none"></label>
   <label class="f" for="eObs" style="grid-column:1/-1">Observações<input type="text" id="eObs" value="${esc(c.obs)}"></label>
   <span class="err" id="eMsg" style="grid-column:1/-1"></span>
   <div style="grid-column:1/-1" class="row"><span class="muted" id="eTot"></span><button class="btn p" type="submit" style="margin-left:auto">Salvar alterações</button></div></form>`;}
 function bindEdit(c){const tot=()=>{$("#eTot").textContent="Novo total: "+brl(r2((+$("#eDiaria").value||0)*(+$("#eQtd").value||0)));};$("#eDiaria").oninput=tot;$("#eQtd").oninput=tot;tot();
-  $("#eForm").addEventListener("submit",async e=>{e.preventDefault();const d={...S.contratados[c.id],nome:$("#eNome").value.trim(),doc:fmtDoc($("#eDoc").value),tipo:$("#eTipo").value,tel:$("#eTel").value.trim(),funcao:$("#eFunc").value,data:$("#eData").value,diaria:r2($("#eDiaria").value),qtd:+$("#eQtd").value||0,obs:$("#eObs").value.trim()};
-    if(FN[d.funcao].un==="serviço")d.qtd=1;const err=validateC(d,c.id);$("#eMsg").textContent=err;if(err)return;try{await Store.set("contratados",c.id,d);toast("Dados atualizados");$("#dEdit").click();}catch(x){}});}
+  const isArt=FN[c.funcao]&&FN[c.funcao].lim==="art";let datas=isArt?cDatas(c):null;
+  if(isArt){dateRows($("#eDatas"),datas);bindDateRows($("#eDatas"),$("#eDataAdd"),list=>{datas=list;$("#eQtd").value=list.length||$("#eQtd").value;tot();},cDatas(c));}
+  $("#eForm").addEventListener("submit",async e=>{e.preventDefault();const d={...S.contratados[c.id],nome:$("#eNome").value.trim(),doc:fmtDoc($("#eDoc").value),tipo:$("#eTipo").value,tel:$("#eTel").value.trim(),funcao:$("#eFunc").value,diaria:r2($("#eDiaria").value),qtd:+$("#eQtd").value||0,obs:$("#eObs").value.trim()};
+    if(isArt){d.atracao=$("#eAtr").value.trim();d.estilo=$("#eEstilo").value.trim();d.elenco=$("#eElenco").value.trim();d.datas=datas;d.data=datas.length?datas[0].d:"";}else{d.data=$("#eData").value;}
+    if(FN[d.funcao].un==="serviço")d.qtd=1;const err=validateC(d,c.id);$("#eMsg").textContent=err;if(err)return;
+    const w=validateWarn(d,c.id);if(w&&!(await confirmAsync("Acima da verba artística",w,"Salvar mesmo assim")))return;
+    try{await Store.set("contratados",c.id,d);toast("Dados atualizados");$("#dEdit").click();}catch(x){}});}
 function compLink(p){return p.comp?`<a class="btn sm" href="${esc(p.comp.url||("/_blob/"+p.comp.id))}" target="_blank" rel="noopener">Ver comprovante</a>`:"";}
 function parcRow(p,c){const st=payStatus(p);const pill=st==="pago"?`<span class="pill ok"><i></i>Pago ${fd(p.pagoEm)}</span>`:(st==="atrasado"?'<span class="pill bad"><i></i>Atrasado</span>':'<span class="pill warn"><i></i>Pendente</span>');
   return `<div class="parc"><span class="mono">${fd(p.data)}</span><span><b class="num">${brl(p.valor)}</b> ${pill}${st==="pago"&&!p.comp?' <span class="chip w">sem comprovante</span>':""}</span><span class="row" style="justify-content:flex-end">${st!=="pago"?`<button class="btn sm p" type="button" data-pay="${p.id}">Registrar pagamento</button><button class="btn sm ghost" type="button" data-delp="${p.id}" aria-label="Excluir parcela">Excluir</button>`:`${compLink(p)}${!p.comp&&Store.assets?`<button class="btn sm" type="button" data-att="${p.id}">Anexar comprovante</button>`:""}<button class="btn sm ghost" type="button" data-undo="${p.id}">Desfazer</button>`}</span></div>`;}
@@ -1131,15 +1165,33 @@ function rPag(){
 
 /* ================= PROGRAMAÇÃO ================= */
 $("#prNew").addEventListener("click",()=>{setTimeout(()=>{$("#cFunc").value="artista";syncCForm();$("#cNome").focus();},50);});
-function rProg(){const aa=artAgg();
+let prF="todas";
+function rProg(){const aa=artAgg();const over=aa.contr>VERBA+0.001;
   $("#prKpis").innerHTML=[
-   `<div class="card kpi ${aa.n<ART_MIN?"warnb":""}"><span class="label">Contratações</span><div class="v num">${aa.n} <span class="muted" style="font-size:15px">/ mín. ${ART_MIN}</span></div><div class="s">${aa.prest} já apresentadas</div></div>`,
-   `<div class="card kpi"><span class="label">Contratado</span><div class="v num">${brl0(aa.contr)}</div><div class="s">${pct(aa.contr/VERBA)} da verba</div></div>`,
-   `<div class="card kpi ${aa.falta>0?"warnb":(aa.falta<0?"alert":"")}"><span class="label">Falta contratar</span><div class="v num ${aa.falta>0?"wtxt":""}">${brl0(Math.max(0,aa.falta))}</div><div class="s">${aa.falta<0?"acima da verba":"para fechar R$ 50.000"}</div></div>`,
-   `<div class="card kpi"><span class="label">Pago aos artistas</span><div class="v num">${brl0(aa.pago)}</div><div class="s">A pagar: ${brl0(aa.aPagar)}</div></div>`].join("");
-  const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"9").localeCompare(b.data||"9"));
-  $("#prBody").innerHTML=cs.length?cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id);const comp=ps.filter(p=>p.comp).length;return `<tr class="click" data-id="${esc(c.id)}"><td class="mono">${fd(c.data)}</td><td><b>${esc(c.nome)}</b>${c.obs?`<span class="sub">${esc(c.obs)}</span>`:""}</td><td class="mono">${esc(c.doc)}</td><td class="r num">${brl(a.total)}</td><td>${c.servico==="prestado"?'<span class="chip g">Apresentado</span>':'<span class="chip">Previsto</span>'}</td><td>${payBadge(a)}</td><td>${ps.length?`${comp}/${ps.filter(p=>p.status==="pago").length} pagos com comprovante`:"—"}</td></tr>`;}).join(""):`<tr><td colspan="7"><div class="empty">Nenhum artista cadastrado. Use “Cadastrar artista”.</div></td></tr>`;
-  $$("#prBody tr.click").forEach(tr=>tr.onclick=()=>openContr(tr.dataset.id));}
+   `<div class="card kpi ${aa.cach<ART_MIN?"warnb":""}"><span class="label">Cachês</span><div class="v num">${aa.cach} <span class="muted" style="font-size:15px">/ mín. ${ART_MIN}</span></div><div class="s">${aa.apres} apresentação(ões) · ${aa.n} contrato(s)</div></div>`,
+   `<div class="card kpi ${over?"alert":""}"><span class="label">Contratado</span><div class="v num ${over?"neg":""}">${brl0(aa.contr)}</div><div class="s">${pct(aa.contr/VERBA)} da verba de ${brl0(VERBA)}</div></div>`,
+   `<div class="card kpi ${aa.falta>0?"warnb":(over?"alert":"")}"><span class="label">${over?"Acima da verba":"Falta contratar"}</span><div class="v num ${aa.falta>0?"wtxt":(over?"neg":"")}">${brl0(Math.abs(aa.falta))}</div><div class="s">${over?"além dos R$ 50.000 do edital":"para fechar R$ 50.000"}</div></div>`,
+   `<div class="card kpi"><span class="label">Realizadas</span><div class="v num">${aa.real} <span class="muted" style="font-size:15px">de ${aa.apres}</span></div><div class="s">${aa.prest} contrato(s) com serviço prestado</div></div>`,
+   `<div class="card kpi"><span class="label">Pago aos artistas</span><div class="v num" style="color:var(--ok)">${brl0(aa.pago)}</div><div class="s">A pagar: ${brl0(aa.aPagar)}</div></div>`].join("");
+  const imp=$("#prImport");imp.hidden=!(document.body.classList.contains("admin")&&Store.canWrite&&!contrList().some(c=>c.importado));
+  const q=($("#prQ").value||"").toLowerCase();
+  const rows=[];contrList().filter(c=>c.funcao==="artista").forEach(c=>{const ds=cDatas(c);if(!ds.length)rows.push({c,d:"",h:"",i:-1,ok:false});ds.forEach((x,i)=>rows.push({c,d:x.d,h:x.h,i,ok:!!x.ok}));});
+  rows.sort((a,b)=>((a.d||"9")+(a.h||"")).localeCompare((b.d||"9")+(b.h||"")));
+  const list=rows.filter(r=>{if(q&&!((r.c.atracao||"")+" "+r.c.nome).toLowerCase().includes(q))return false;if(prF==="prox")return !r.ok&&(!r.d||r.d>=TODAY);if(prF==="real")return r.ok;return true;});
+  let html="",last=null;
+  list.forEach(r=>{const key=r.d||"sem";if(key!==last){last=key;html+=`<tr class="prog-day ${r.d===TODAY?"today":""}"><td colspan="8">${r.d?`${wdLong(r.d)} · ${fd(r.d)}${r.d===TODAY?" · hoje":""}`:"Sem data definida"}</td></tr>`;}
+    const c=r.c;const a=cAgg(c);const past=r.d&&r.d<TODAY&&!r.ok;const idx=cDatas(c).findIndex(x=>x.d===r.d&&x.h===r.h);
+    html+=`<tr class="click ${r.ok?"":(past?"past":"")}" data-id="${esc(c.id)}"><td class="mono">${esc(r.h||"—")}</td><td><b>${esc(c.atracao||c.nome)}</b>${c.atracao?`<span class="sub">${esc(c.nome)}</span>`:""}</td><td>${esc(c.nome)}${digits(c.doc||"").length<11?'<span class="sub wtxt">informar CPF/CNPJ</span>':`<span class="sub mono">${esc(c.doc)}</span>`}</td><td class="muted">${esc(c.estilo||"—")}</td><td class="r">${esc(c.elenco||"—")}</td><td class="r num">${brl(c.diaria)}</td><td>${r.i>=0?`<button class="btn sm ${r.ok?"":"ghost"}" type="button" data-real="${esc(c.id)}" data-i="${idx}" style="${r.ok?"background:rgba(43,211,139,.18);color:var(--ok);border-color:rgba(43,211,139,.4)":""}">${r.ok?"✓ Realizada":(past?"Confirmar":"Prevista")}</button>`:'<span class="muted">—</span>'}</td><td>${payBadge(a)}</td></tr>`;});
+  $("#prBody").innerHTML=html||`<tr><td colspan="8"><div class="empty">${q||prF!=="todas"?"Nenhuma apresentação com esse filtro.":"Nenhum artista cadastrado. Use “Cadastrar artista” ou importe a programação oficial."}</div></td></tr>`;
+  $$("#prBody tr.click").forEach(tr=>tr.onclick=()=>openContr(tr.dataset.id));
+  $$("#prBody [data-real]").forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!Store.canWrite)return;const cid=b.dataset.real;const c=S.contratados[cid];if(!c)return;const ds=cDatas(c);const i=+b.dataset.i;if(!ds[i])return;ds[i]={...ds[i],ok:!ds[i].ok};const all=ds.length&&ds.every(x=>x.ok);const patch={...c,datas:ds};if(all)patch.servico="prestado";else if(c.servico==="prestado"&&!all&&!c._prestadoManual)patch.servico="a_prestar";try{await Store.set("contratados",cid,patch);toast(ds[i].ok?`Apresentação de ${fd(ds[i].d)} marcada como realizada`:"Marcação desfeita");}catch(x){}});}
+$$("#prFilt button").forEach(b=>b.onclick=()=>{prF=b.dataset.f;$$("#prFilt button").forEach(x=>x.setAttribute("aria-pressed",x===b));rProg();});
+$("#prQ").oninput=()=>rProg();
+const PROG_SEED=[{"atracao":"Encanto Mágico do Natal","nome":"Marcelo Soccol","diaria":1300,"qtd":3,"datas":[{"d":"2026-11-15","h":"17:00"},{"d":"2026-11-27","h":"17:00"},{"d":"2026-12-05","h":"17:00"}],"estilo":"Show de Mágica","elenco":"1","obs":""},{"atracao":"Alegria No Sonho de Natal","nome":"Waldemir Rabelo (Palhaço Catatau)","diaria":800,"qtd":8,"datas":[{"d":"2026-11-19","h":"17:00"},{"d":"2026-11-19","h":"18:00"},{"d":"2026-11-22","h":"18:00"},{"d":"2026-11-28","h":"18:00"},{"d":"2026-12-10","h":"17:00"},{"d":"2026-12-26","h":"17:30"},{"d":"2027-01-01","h":"18:00"},{"d":"2027-01-07","h":"17:00"}],"estilo":"Palhaço","elenco":"1","obs":""},{"atracao":"Encantaria Conta","nome":"Cecília Stumpf","diaria":1500,"qtd":2,"datas":[{"d":"2026-11-20","h":"17:00"},{"d":"2026-12-18","h":"18:30"}],"estilo":"Teatro Musical Infantil","elenco":"4","obs":""},{"atracao":"Contos e Canções","nome":"Laura Franco","diaria":1500,"qtd":2,"datas":[{"d":"2026-11-21","h":"17:00"},{"d":"2026-11-27","h":"18:00"}],"estilo":"Teatro Musical","elenco":"2","obs":""},{"atracao":"Sempre Foi Assim","nome":"Chiara Cardinale","diaria":1000,"qtd":2,"datas":[{"d":"2026-11-22","h":"17:00"},{"d":"2026-12-13","h":"17:00"}],"estilo":"Teatro","elenco":"3","obs":""},{"atracao":"Som do Vento Duo","nome":"Adriano Dia e Rodrigo Batista","diaria":1500,"qtd":3,"datas":[{"d":"2026-11-26","h":"17:00"},{"d":"2026-12-13","h":"18:00"},{"d":"2026-12-30","h":"18:00"}],"estilo":"Show Música Instrumental","elenco":"2","obs":""},{"atracao":"O Natal de Anelise","nome":"Cesar Cliquet","diaria":1500,"qtd":3,"datas":[{"d":"2026-11-28","h":"17:00"},{"d":"2026-12-12","h":"17:00"},{"d":"2026-12-27","h":"18:30"}],"estilo":"Teatro de Bonecos","elenco":"2","obs":""},{"atracao":"O Natal da Palhachef","nome":"Karla Demarchi","diaria":700,"qtd":2,"datas":[{"d":"2026-11-29","h":"17:00"},{"d":"2026-12-22","h":"18:00"}],"estilo":"Teatro Interativo","elenco":"1","obs":""},{"atracao":"Pocket Loções de Natal","nome":"Cia. Mosaico / Jéssica Fulcher","diaria":1500,"qtd":2,"datas":[{"d":"2026-12-03","h":"17:00"},{"d":"2026-12-06","h":"17:00"}],"estilo":"Show Musical","elenco":"3","obs":""},{"atracao":"Natal Encantado - Sons do Brasil","nome":"APAE","diaria":3500,"qtd":2,"datas":[{"d":"2026-12-04","h":"17:00"},{"d":"2026-12-11","h":"17:00"}],"estilo":"Paradinha Natalina","elenco":"Grupo","obs":""},{"atracao":"Show da Caixinha","nome":"Kombinação","diaria":1800,"qtd":3,"datas":[{"d":"2026-12-06","h":"18:00"},{"d":"2026-12-20","h":"17:30"},{"d":"2026-12-23","h":"17:30"}],"estilo":"Pocket Show Circense","elenco":"2","obs":""},{"atracao":"Sarau do Noel","nome":"Artistas Convidados","diaria":2200,"qtd":5,"datas":[{"d":"2026-12-17","h":"17:00"},{"d":"2027-01-02","h":"18:00"},{"d":"2027-01-03","h":"18:00"},{"d":"2027-01-09","h":"17:00"},{"d":"2027-01-10","h":"18:00"}],"estilo":"Sarau Musical","elenco":"4","obs":""},{"atracao":"Canções de Dezembro","nome":"Jônatas Asafe Rodrigues","diaria":1500,"qtd":2,"datas":[{"d":"2026-12-18","h":"17:30"},{"d":"2026-12-25","h":"17:00"}],"estilo":"Show de Piano e Vozes","elenco":"3","obs":""},{"atracao":"Flocos e o Mistério do Natal","nome":"Igor Foss","diaria":600,"qtd":2,"datas":[{"d":"2026-12-19","h":"16:30"},{"d":"2026-12-24","h":"18:00"}],"estilo":"Clown Mágica e cena","elenco":"1","obs":""},{"atracao":"Natal Cancioneiro","nome":"André Souza","diaria":2000,"qtd":2,"datas":[{"d":"2026-12-19","h":"17:30"},{"d":"2026-12-30","h":"17:00"}],"estilo":"Contos Musicais","elenco":"4","obs":""},{"atracao":"Acro Duo","nome":"Kauã e Gabi","diaria":1500,"qtd":2,"datas":[{"d":"2026-12-20","h":"18:30"},{"d":"2026-12-24","h":"17:00"}],"estilo":"Duo Circense","elenco":"2","obs":""},{"atracao":"Doce Verso","nome":"Poeta Jess","diaria":1000,"qtd":3,"datas":[{"d":"2026-12-21","h":"17:00"},{"d":"2026-12-22","h":"17:00"},{"d":"2026-12-29","h":"17:00"}],"estilo":"Poemas","elenco":"2","obs":"Na planilha, 22/12 constava 'Gaya' como responsável; conferir."},{"atracao":"Circo Bolhas","nome":"Gaya","diaria":700,"qtd":2,"datas":[{"d":"2026-12-21","h":"18:00"},{"d":"2026-12-23","h":"18:30"}],"estilo":"Circo Bolhas","elenco":"1","obs":""},{"atracao":"Uma Mensagem de Natal","nome":"Carla Reis","diaria":1500,"qtd":2,"datas":[{"d":"2026-12-25","h":"18:00"},{"d":"2026-12-29","h":"18:00"}],"estilo":"Teatro","elenco":"3","obs":""},{"atracao":"Papai Noel e o Conto de Natal","nome":"Marcos Marquesani","diaria":700,"qtd":2,"datas":[{"d":"2026-12-26","h":"16:30"},{"d":"2026-12-28","h":"18:00"}],"estilo":"Contação de Histórias","elenco":"1","obs":""},{"atracao":"A menina e o tempo","nome":"Lisiane Berti","diaria":2000,"qtd":3,"datas":[{"d":"2026-12-27","h":"17:30"},{"d":"2026-12-28","h":"17:00"},{"d":"2027-01-02","h":"17:00"}],"estilo":"Estátuas Vivas","elenco":"2","obs":""},{"atracao":"Jingle Reindeer - Tilintar das Renas","nome":"Carol Rosa","diaria":2000,"qtd":2,"datas":[{"d":"2026-12-31","h":"17:00"},{"d":"2027-01-03","h":"17:00"}],"estilo":"Pocket Show Música e Dança","elenco":"5","obs":""},{"atracao":"The Rudolphs","nome":"Charles de Leão","diaria":2500,"qtd":2,"datas":[{"d":"2026-12-31","h":"18:00"},{"d":"2027-01-10","h":"17:00"}],"estilo":"Show Musical","elenco":"5","obs":""},{"atracao":"A Boneca Encantada","nome":"Carla Reis","diaria":1500,"qtd":2,"datas":[{"d":"2027-01-01","h":"17:00"},{"d":"2027-01-08","h":"17:00"}],"estilo":"Teatro","elenco":"3","obs":""},{"atracao":"Santo Reis","nome":"Grupo Convidado","diaria":4000,"qtd":1,"datas":[{"d":"2027-01-06","h":"17:00"}],"estilo":"Terno de Reis","elenco":"8","obs":""},{"atracao":"Make infantil com palhacinha Patinete","nome":"Patty","diaria":2900,"qtd":1,"datas":[{"d":"2026-12-10","h":"15:00"},{"d":"2026-12-11","h":"15:00"},{"d":"2026-12-12","h":"15:00"},{"d":"2026-12-13","h":"15:00"},{"d":"2026-12-14","h":"15:00"},{"d":"2026-12-15","h":"15:00"},{"d":"2026-12-16","h":"15:00"},{"d":"2026-12-17","h":"15:00"},{"d":"2026-12-18","h":"15:00"},{"d":"2026-12-19","h":"15:00"},{"d":"2026-12-20","h":"15:00"},{"d":"2026-12-21","h":"15:00"},{"d":"2026-12-22","h":"15:00"},{"d":"2026-12-23","h":"15:00"},{"d":"2026-12-24","h":"15:00"}],"estilo":"Make Infantil","elenco":"1","obs":"Valor fechado R$ 2.900 por 15 dias (10 a 24/12, 15h)"}];
+$("#prImport").onclick=async()=>{const n=PROG_SEED.length,ap=PROG_SEED.reduce((a,x)=>a+x.datas.length,0),tot=PROG_SEED.reduce((a,x)=>a+x.diaria*x.qtd,0);
+  if(!(await confirmAsync("Importar a programação oficial?",`${n} contratações, ${ap} apresentações, ${brl(tot)} em cachês (a verba do edital é ${brl(VERBA)}). Os CPFs/CNPJs ficam para preencher depois.`,"Importar")))return;
+  let ok=0;for(const x of PROG_SEED){const id=Store.newId();try{await Store.set("contratados",id,{nome:x.nome,doc:"",tipo:"Pessoa física (recibo/RPA)",tel:"",funcao:"artista",servico:"a_prestar",diaria:x.diaria,qtd:x.qtd,data:x.datas[0].d,datas:x.datas.map(d=>({d:d.d,h:d.h,ok:false})),atracao:x.atracao,estilo:x.estilo,elenco:x.elenco,obs:x.obs||"",importado:true,criadoEm:Date.now()});ok++;}catch(e){}}
+  toast(`${ok} contratação(ões) importada(s)`);};
 
 /* ================= RIDERS ================= */
 function rRiders(){const ck=cfg("riders").ck||{};
@@ -1232,7 +1284,7 @@ setInterval(()=>{if(current()==="ocorrencias")rOc();},30000);
 let rpT="verba";
 $$("#rpType button").forEach(b=>b.onclick=()=>{rpT=b.dataset.t;$$("#rpType button").forEach(x=>x.setAttribute("aria-pressed",x===b));rRep();});
 function repData(){const aa=artAgg(),t=totals();
-  if(rpT==="verba"){const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"").localeCompare(b.data||""));return{t:"Prestação de contas da verba artística",s:`Item 4 do Memorial · ${aa.n} contratações · ${brl(aa.contr)} de ${brl(VERBA)}`,h:["Data","Artista","CPF/CNPJ","Cachê","Pago","Comprovantes"],rows:cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id).filter(p=>p.status==="pago");return[fd(c.data),c.nome,c.doc,brl(a.total),brl(a.pago),ps.length?`${ps.filter(p=>p.comp).length}/${ps.length}`:"—"];}),foot:`Pago: ${brl(aa.pago)} · A pagar: ${brl(aa.aPagar)} · Falta contratar: ${brl(Math.max(0,aa.falta))}`};}
+  if(rpT==="verba"){const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"").localeCompare(b.data||""));return{t:"Prestação de contas da verba artística",s:`Item 4 do Memorial · ${aa.n} contratações · ${aa.cach} cachês · ${brl(aa.contr)} de ${brl(VERBA)}`,h:["Datas","Atração","Artista","CPF/CNPJ","Cachês","Total","Pago","Comprovantes"],rows:cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id).filter(p=>p.status==="pago");const ds=cDatas(c);return[ds.map(x=>fd(x.d)).join(", ")||"—",c.atracao||"—",c.nome,c.doc||"—",`${c.qtd} × ${brl(c.diaria)}`,brl(a.total),brl(a.pago),ps.length?`${ps.filter(p=>p.comp).length}/${ps.length}`:"—"];}),foot:`${aa.cach} cachês em ${aa.apres} apresentações · Pago: ${brl(aa.pago)} · A pagar: ${brl(aa.aPagar)}${aa.contr>VERBA?` · ACIMA DA VERBA: ${brl(aa.contr-VERBA)}`:` · Falta contratar: ${brl(Math.max(0,aa.falta))}`}`};}
   if(rpT==="setor")return{t:"Gastos por setor",s:`Homologado ${brl(TETO)} · pago ${brl(t.pago)} (${pct(t.pago/TETO)})`,h:["Setor","Proposta","Previsto","Contratado","Pago","A pagar"],rows:SETORES.map(s=>{const a=setAgg(s.k);return[s.n,brl(a.orc),brl(a.prev),brl(a.contr),brl(a.pago),brl(a.aPagar)];}),foot:`Previsto ${brl(t.prev)} + impostos ${brl(t.imp)} · margem livre ${brl(t.margem)}`};
   return{t:"Relatório parcial de execução",s:"Medição para nota fiscal",h:["Item","Quantidade","Contratado","Situação"],rows:FUNCS.filter(f=>f.lim!=="sem").map(f=>{const a=itemAgg(f);return[`${f.it} · ${f.n}`,f.lim==="art"?`${a.n} cachês`:(f.lim==="qtd"?`${a.qtd}/${f.q} ${unitWord(f)}`:(a.n?"Contratado":"Pendente")),brl(a.contratado),itemStatus(f,a).map(x=>x[1]).join(", ")];}),foot:`NF 1 (20%): ${brl(TETO*.2)} · NF 2 (40%): ${brl(TETO*.4)} · NF 3 (40%): ${brl(TETO*.4)}`};}
 function rRep(){const r=repData();$("#rpBox").innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid #DDE1E8"><div><span class="rl">Prefeitura de Canela · SMTC · Pregão 60/2026</span><h3>${esc(r.t)}</h3><span style="color:#5A6275;font-size:12.5px">${esc(r.s)}</span></div><span class="rl" style="border:1px dashed #A9B0BF;padding:8px 10px;border-radius:4px">Logo da contratada</span></div><div class="tw"><table><thead><tr>${r.h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r.rows.length?r.rows.map(x=>`<tr>${x.map(y=>`<td>${esc(y)}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${r.h.length}">Nenhum registro ainda.</td></tr>`}</tbody></table></div><div class="ft"><span>${esc(r.foot)}</span><span>Gerado em ${new Date().toLocaleDateString("pt-BR")} · Tecnologia ST Solutions</span></div>`;}
