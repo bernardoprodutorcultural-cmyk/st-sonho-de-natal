@@ -644,6 +644,7 @@ const Store={mode:"loading",db:null,assets:null,downloads:null,canWrite:true,
   loadLocal(){try{const raw=localStorage.getItem(LKEY);if(raw){const o=JSON.parse(raw);COLS.forEach(c=>S[c]=o[c]||{});}}catch(e){}},
   setConn(cls,txt){const c=$("#conn");c.className="conn "+cls;c.querySelector("span").textContent=txt;}
 };
+function upMsg(x){const c=(x&&x.code)||"";if(c==="too_large")return"Arquivo grande demais (máx. 20 MB).";if(c==="unsupported_type")return"Tipo de arquivo não aceito (PDF, PNG, JPG ou WEBP).";if(c==="quota_or_state"||c==="storage/quota-exceeded")return"O espaço de anexos está cheio.";if(c==="storage/unauthorized")return"Sem permissão para anexar: só editores e administradores.";if(c==="storage_off"||c==="storage/unknown"||c==="storage/bucket-not-found"||c==="storage/project-not-found"||c==="storage/object-not-found")return"Anexos ainda não ativados: o Storage do Firebase precisa ser criado.";if(c==="storage/retry-limit-exceeded"||c==="storage/canceled")return"Sem conexão. Tente de novo.";return"Não foi possível enviar o arquivo. Tente de novo.";}
 function blobSaver(){return{save:async({filename,data})=>{const bl=new Blob([data],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(bl);const a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);}};}
 const cfgOk=()=>{const c=window.ST_FIREBASE;return !!(c&&c.apiKey&&!/COLE_AQUI/.test(c.apiKey)&&c.projectId&&!/SEU-PROJETO/.test(c.projectId));};
 async function initStore(){
@@ -1008,7 +1009,7 @@ function payModal(pid,onlyAttach){
       if(!["application/pdf","image/png","image/jpeg","image/webp"].includes(type)){$("#pmMsg").textContent="Use PDF, PNG, JPG ou WEBP.";btn.disabled=false;return;}
       if(file.size>20*1024*1024){$("#pmMsg").textContent="O arquivo passa de 20 MB.";btn.disabled=false;return;}
       try{btn.textContent="Enviando…";const up=await Store.assets.upload(file,{type});comp={id:up.id,url:up.url,nome:file.name,tipo:type};}
-      catch(x){const code=x&&x.code;$("#pmMsg").textContent=code==="too_large"?"Arquivo grande demais (máx. 20 MB).":code==="unsupported_type"?"Tipo de arquivo não aceito.":code==="quota_or_state"?"O espaço de anexos está cheio.":"Não foi possível enviar o arquivo. Tente de novo.";btn.disabled=false;btn.textContent="Tentar de novo";return;}}
+      catch(x){$("#pmMsg").textContent=upMsg(x);btn.disabled=false;btn.textContent="Tentar de novo";return;}}
     else if(onlyAttach){$("#pmMsg").textContent="Escolha o arquivo.";btn.disabled=false;return;}
     const n={...p};if(comp)n.comp=comp;if(!onlyAttach){n.status="pago";n.pagoEm=$("#pmD").value||TODAY;}
     try{if(needServ)await Store.set("contratados",p.cid,{...S.contratados[p.cid],servico:"prestado"});await Store.set("pagamentos",pid,n);closeModal();toast(onlyAttach?"Comprovante anexado":`Pagamento de ${brl(p.valor)} registrado`);}catch(x){btn.disabled=false;}
@@ -1087,7 +1088,7 @@ function multaQuitModal(oid){const o=S.ocorrencias[oid];if(!o||!o.multa)return;c
     let anexo=o.multa.anexo||null;const fi=$("#mqFile");
     if(fi&&fi.files&&fi.files[0]){const file=fi.files[0];const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;
       if(file.size>20*1024*1024){$("#mqMsg").textContent="O arquivo passa de 20 MB.";btn.disabled=false;return;}
-      try{btn.textContent="Enviando…";const up=await Store.assets.upload(file,{type});anexo={id:up.id,url:up.url,nome:file.name,tipo:type};}catch(x){$("#mqMsg").textContent="Não foi possível enviar o arquivo.";btn.disabled=false;btn.textContent="Tentar de novo";return;}}
+      try{btn.textContent="Enviando…";const up=await Store.assets.upload(file,{type});anexo={id:up.id,url:up.url,nome:file.name,tipo:type};}catch(x){$("#mqMsg").textContent=upMsg(x);btn.disabled=false;btn.textContent="Tentar de novo";return;}}
     const mu={...o.multa,st:"quitada",quitEm:$("#mqD").value||TODAY,modo};if(anexo)mu.anexo=anexo;
     try{await Store.set("ocorrencias",oid,{...o,multa:mu});closeModal();toast(`Multa de ${brl(mu.valor)} quitada`);}catch(x){btn.disabled=false;}});}
 function rPag(){
@@ -1155,7 +1156,7 @@ function rDocs(){const D=cfg("documentos").items||{};const lic=contrList().filte
   const save=async(i,patch)=>{const c={...cfg("documentos")};c.items={...(c.items||{})};c.items[i]={...(c.items[i]||{}),...patch};try{await Store.set("config","documentos",c);}catch(e){}};
   $$("#dcBody [data-v]").forEach(b=>b.onclick=()=>save(b.dataset.i,{st:(D[b.dataset.i]||{}).st===b.dataset.v?"":b.dataset.v}));
   $$("#dcBody [data-resp]").forEach(s=>s.onchange=()=>save(s.dataset.resp,{cid:s.value}));
-  $$("#dcBody [data-up]").forEach(inp=>inp.onchange=async()=>{const file=inp.files[0];if(!file)return;const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;try{toast("Enviando anexo…");const up=await Store.assets.upload(file,{type});await save(inp.dataset.up,{anexo:{id:up.id,url:up.url,nome:file.name}});toast("Anexo salvo");}catch(e){toast("Não foi possível enviar o arquivo.",true);}});}
+  $$("#dcBody [data-up]").forEach(inp=>inp.onchange=async()=>{const file=inp.files[0];if(!file)return;const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;try{toast("Enviando anexo…");const up=await Store.assets.upload(file,{type});await save(inp.dataset.up,{anexo:{id:up.id,url:up.url,nome:file.name}});toast("Anexo salvo");}catch(e){toast(upMsg(e),true);}});}
 
 /* ================= OCORRÊNCIAS ================= */
 function fmtLeft(ms){const neg=ms<0;ms=Math.abs(ms);const h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3);return (neg?"estourou há ":"")+`${h}h${pad(m)}`;}
@@ -1201,7 +1202,7 @@ function openOc(id){const o=S.ocorrencias[id];if(!o)return;const c=S.contratados
   $$("[data-st]").forEach(b=>b.onclick=async()=>{const k=b.dataset.st;const patch={st:k};if(k==="resolvido"&&!o.okEm)patch.okEm=Date.now();if(k!=="resolvido")patch.okEm=null;patch.ok=k==="resolvido";await ocSave(id,patch);toast(k==="resolvido"?"Chamado resolvido":"Andamento atualizado");re();});
   let provT;$("#ocProv").oninput=()=>{clearTimeout(provT);provT=setTimeout(()=>ocSave(id,{prov:$("#ocProv").value.trim(),provEm:Date.now()}),600);};
   $("#ocProv").onblur=()=>{clearTimeout(provT);const v=$("#ocProv").value.trim();if(v!==(o.prov||""))ocSave(id,{prov:v,provEm:Date.now()});};
-  const fi=$("#ocFoto");if(fi)fi.onchange=async()=>{const files=[...fi.files];if(!files.length)return;const fotos=[...(o.fotos||[])];toast("Enviando…");for(const file of files){const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;if(file.size>20*1024*1024){toast(`${file.name} passa de 20 MB`,true);continue;}try{const up=await Store.assets.upload(file,{type});fotos.push({id:up.id,url:up.url,nome:file.name,tipo:type});}catch(x){toast(`Não foi possível enviar ${file.name}`,true);}}await ocSave(id,{fotos});toast("Evidência anexada");re();};
+  const fi=$("#ocFoto");if(fi)fi.onchange=async()=>{const files=[...fi.files];if(!files.length)return;const fotos=[...(o.fotos||[])];toast("Enviando…");for(const file of files){const ext=(file.name.split(".").pop()||"").toLowerCase();const type={pdf:"application/pdf",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp"}[ext]||file.type;if(file.size>20*1024*1024){toast(`${file.name} passa de 20 MB`,true);continue;}try{const up=await Store.assets.upload(file,{type});fotos.push({id:up.id,url:up.url,nome:file.name,tipo:type});}catch(x){toast(upMsg(x),true);}}await ocSave(id,{fotos});toast("Evidência anexada");re();};
   $$("[data-delfoto]").forEach(b=>b.onclick=async()=>{const fotos=[...(o.fotos||[])];fotos.splice(+b.dataset.delfoto,1);await ocSave(id,{fotos});re();});
   if($("#ocQuit"))$("#ocQuit").onclick=()=>multaQuitModal(id);
   if($("#ocMultaDel"))$("#ocMultaDel").onclick=()=>confirmBox("Remover a multa?","Ela sai da planilha, dos pagamentos e do painel.","Remover",async()=>{const n={...S.ocorrencias[id]};delete n.multa;try{await Store.set("ocorrencias",id,n);toast("Multa removida");re();}catch(e){}});
