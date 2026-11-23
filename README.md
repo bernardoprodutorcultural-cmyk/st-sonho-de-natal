@@ -1,10 +1,14 @@
-# ST Solutions · Sistema de gestão do 39º Sonho de Natal (Canela/RS)
+# Alternativa Cultural · Sistema de gestão de projetos
 
-Site estático (um `index.html`) com banco de dados, login e anexos no Firebase.
+Ferramenta exclusiva da **Alternativa Cultural | Produção de Eventos**. A tela inicial lista os projetos da empresa; o **39º Sonho de Natal (Canela/RS)** é o primeiro projeto configurado, com todos os módulos de execução.
+
+Site estático (um `index.html`) com banco de dados, login e anexos no Firebase. Plataforma: sistema ST Solutions.
 Vários acessos simultâneos, dados em tempo real para toda a equipe.
 
 ## Arquivos
-- `index.html` — o sistema completo (painel, contratados, financeiro, programação, riders, documentos, ocorrências, relatórios, edital, usuários)
+- `index.html` — o sistema completo (projetos, painel, contratados, financeiro, programação, riders, documentos, ocorrências, relatórios, edital, usuários)
+- `assets/brand/` — logos vetoriais da Alternativa Cultural (horizontal, vertical, símbolo; cor, monocromática, negativa e para fundo escuro)
+- `assets/fonts/` — fontes Montserrat e Source Sans 3 (licença OFL), servidas pelo próprio site
 - `backend.js` — ligação com o Firebase (Auth, Firestore, Storage)
 - `firebase-config.js` — **o único arquivo que você edita**: cole aqui a configuração do seu projeto Firebase
 - `firestore.rules` — regras de segurança do banco (quem lê e quem escreve)
@@ -31,7 +35,7 @@ Vários acessos simultâneos, dados em tempo real para toda a equipe.
 
 ### 3. Publicar o site (GitHub Pages)
 1. Crie um repositório **público** no GitHub (ex.: `st-sonho-de-natal`).
-2. Envie estes arquivos para o repositório (`index.html`, `backend.js`, `firebase-config.js`).
+2. Envie estes arquivos para o repositório (`index.html`, `backend.js`, `firebase-config.js` e a pasta `assets/` inteira).
 3. Em **Settings › Pages › Build and deployment**: Source = *Deploy from a branch*, Branch = `main`, pasta `/ (root)`. Salvar.
 4. Em 1–2 minutos o site responde em `https://SEU-USUARIO.github.io/st-sonho-de-natal/`.
 
