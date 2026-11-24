@@ -76,6 +76,7 @@ h1,h2,h3{font-family:var(--f-display);letter-spacing:-.015em;text-wrap:balance;m
 .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:12px}
 .st-credit{display:flex;align-items:center;gap:6px;padding:10px 6px 0;border-top:1px solid rgba(255,255,255,.1);font:500 11.5px/1.3 var(--f-sans);color:#8C9CC8}
 .st-credit b{font:700 11.5px var(--f-display);color:#B5C2E4;letter-spacing:.02em}
+.pix{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}.pix .mono{font-weight:600}.pay .pix{margin-top:6px}
 .artOnly{display:none}form.art .artOnly{display:flex}form.art .artHide{display:none}
 .dl{display:flex;flex-direction:column;gap:6px;margin-top:4px}
 .dl .dr{display:grid;grid-template-columns:minmax(0,1fr) 110px 36px;gap:6px;align-items:center}
@@ -480,6 +481,7 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
         <label class="f" for="cDoc">CPF ou CNPJ *<input type="text" id="cDoc" inputmode="numeric" placeholder="000.000.000-00" required></label>
         <label class="f" for="cTipo">Tipo de contratação *<select id="cTipo"><option>Pessoa física (recibo/RPA)</option><option>MEI</option><option>Pessoa jurídica</option><option>Associação ou cooperativa</option></select></label>
         <label class="f" for="cTel">Telefone<input type="tel" id="cTel" placeholder="(54) 99999-9999"></label>
+        <label class="f" for="cPix">Chave Pix<input type="text" id="cPix" autocomplete="off" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"></label>
         <label class="f w2" for="cFunc">Função *<select id="cFunc"></select><span class="hint" id="cFuncHint"></span></label>
         <label class="f" for="cServ">Situação do serviço<select id="cServ"><option value="a_prestar">A prestar</option><option value="prestado">Prestado</option></select></label>
         <label class="f valOnly" for="cDiaria"><span id="cDiariaLbl">Valor da diária (R$) *</span><input type="number" id="cDiaria" min="0" step="0.01" class="in-num" style="max-width:none" required></label>
@@ -528,7 +530,7 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <section class="view" id="v-pagamentos">
     <div class="topbar">
       <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Financeiro</h1><p>Calendário de pagamentos ligado a cada contrato (CPF ou CNPJ). Ao registrar um pagamento, ele sai de pendentes, entra em realizados e abate o setor no painel.</p></div>
-      <div class="row"><button class="btn" type="button" id="expPag">Baixar pagamentos (.csv)</button><button class="btn p" type="button" id="newPay">Agendar pagamento</button></div>
+      <div class="row"><button class="btn" type="button" id="expPag">Baixar pagamentos (.csv)</button><button class="btn valOnly" type="button" id="autoAll" title="Cria as parcelas que faltam: 10 dias após cada apresentação ou serviço">Agendar D+10 para todos</button><button class="btn p" type="button" id="newPay">Agendar pagamento</button></div>
     </div>
     <nav class="subtabs" aria-label="Seções do financeiro"><a href="#planilha">Planilha de custo</a><a href="#pagamentos" aria-current="page">Pagamentos</a></nav>
     <div class="grid g5" id="pgKpis"></div><div id="pgMultaNote"></div>
@@ -992,6 +994,25 @@ const ROU_TXT="Lei Rouanet";
 const cTotal=c=>isRou(c)?0:r2((+c.diaria||0)*(+c.qtd||0));
 function payStatus(p){if(p.status==="pago")return"pago";return p.data<TODAY?"atrasado":"pendente";}
 function cPays(id){return payList().filter(p=>p.cid===id).sort((a,b)=>a.data.localeCompare(b.data));}
+const PAY_DAYS=10;
+const addDaysIso=(d,n)=>{const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return iso(x);};
+function autoPlan(c){const f=FN[c.funcao];if(!f||isRou(c))return[];const total=cTotal(c);if(!(total>0))return[];
+  if(f.lim==="art"){const ds=cDatas(c);if(!ds.length)return[];
+    if(ds.length===(+c.qtd||0))return ds.map(x=>({data:addDaysIso(x.d,PAY_DAYS),valor:r2(+c.diaria||0),ref:"apr:"+x.d+(x.h?" "+x.h:""),lbl:`apresentação de ${fd(x.d)}${x.h?" "+x.h:""}`}));
+    const last=ds[ds.length-1].d;return[{data:addDaysIso(last,PAY_DAYS),valor:total,ref:"fim:"+last,lbl:`última apresentação em ${fd(last)}`}];}
+  if(c.data)return[{data:addDaysIso(c.data,PAY_DAYS),valor:total,ref:"srv:"+c.data,lbl:`serviço de ${fd(c.data)}`}];return[];}
+async function autoSchedule(cid,quiet){const c0=S.contratados[cid];if(!c0||!Store.canWrite)return{add:0,upd:0,del:0};const c={id:cid,...c0};const plan=autoPlan(c);const ps=cPays(cid);
+  const res={add:0,upd:0,del:0};const used=new Set();
+  for(const p of ps.filter(p=>p.auto&&p.status!=="pago")){const it=plan.find(x=>x.ref===p.ref&&!used.has(x.ref));if(!it){try{await Store.del("pagamentos",p.id);res.del++;}catch(e){}continue;}used.add(it.ref);
+    if(p.data!==it.data||Math.abs((+p.valor||0)-it.valor)>0.005){try{await Store.set("pagamentos",p.id,{...p,data:it.data,valor:it.valor,lbl:it.lbl});res.upd++;}catch(e){}}}
+  ps.filter(p=>p.auto&&p.status==="pago").forEach(p=>used.add(p.ref));
+  let rest=r2(cTotal(c)-cPays(cid).filter(p=>!(p.auto&&p.status!=="pago"&&!used.has(p.ref))).reduce((a,p)=>a+(+p.valor||0),0));
+  for(const it of plan){if(used.has(it.ref))continue;const v=r2(Math.min(it.valor,rest));if(!(v>0))break;try{await Store.set("pagamentos",Store.newId(),{cid,data:it.data,valor:v,status:"pendente",auto:true,ref:it.ref,lbl:it.lbl,criadoEm:Date.now()});res.add++;rest=r2(rest-v);}catch(e){}}
+  if(!quiet&&(res.add||res.upd||res.del))toast(`Agenda D+${PAY_DAYS}: ${res.add} parcela(s) criada(s)${res.upd?`, ${res.upd} ajustada(s)`:""}${res.del?`, ${res.del} removida(s)`:""}`);return res;}
+async function autoScheduleAll(){let n=0,a=0;for(const c of contrList()){const r=await autoSchedule(c.id,true);if(r.add||r.upd||r.del){n++;a+=r.add;}}toast(n?`Agenda D+${PAY_DAYS}: ${a} parcela(s) em ${n} contratado(s)`:"Todos os contratados já estão agendados.");}
+async function copyTxt(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||"Copiado");}catch(e){toast("Não foi possível copiar aqui.",true);}}
+function pixTag(c,full){if(!c)return"";if(c.pix)return`<span class="pix"><span class="label">Pix</span> <span class="mono">${esc(c.pix)}</span> <button class="btn sm ghost" type="button" data-copy="${esc(c.pix)}" aria-label="Copiar chave Pix">Copiar</button></span>`;return isRou(c)?"":`<span class="chip w">sem chave Pix</span>`;}
+function bindCopy(root){(root||document).querySelectorAll("[data-copy]").forEach(b=>b.onclick=e=>{e.stopPropagation();copyTxt(b.dataset.copy,"Chave Pix copiada");});}
 function cAgg(c){const ps=cPays(c.id);const ag=ps.reduce((a,p)=>a+(+p.valor||0),0);const pg=ps.filter(p=>p.status==="pago").reduce((a,p)=>a+(+p.valor||0),0);const at=ps.filter(p=>payStatus(p)==="atrasado").length;return{total:cTotal(c),agendado:r2(ag),pago:r2(pg),falta:r2(cTotal(c)-ag),atrasados:at,n:ps.length,semComp:ps.filter(p=>p.status==="pago"&&!p.comp).length};}
 function funcUse(k,excludeId){const cs=contrList().filter(c=>c.funcao===k&&c.id!==excludeId);return{n:cs.length,qtd:cs.reduce((a,c)=>a+(isRou(c)?0:(+c.qtd||0)),0),valor:r2(cs.reduce((a,c)=>a+cTotal(c),0))};}
 function itemAgg(f){const cs=contrList().filter(c=>c.funcao===f.k);let contratado=0,pago=0,qtd=0;cs.forEach(c=>{contratado+=cTotal(c);if(!isRou(c))qtd+=+c.qtd||0;pago+=cAgg(c).pago;});const realRaw=(cfg("planilha").real||{})[f.k];let real=(realRaw===""||realRaw==null||isNaN(+realRaw))?null:+realRaw;if(real==null&&f.k==="artista")real=VERBA;const prev=r2(Math.max(real||0,contratado));return{n:cs.length,qtd,contratado:r2(contratado),pago:r2(pago),real,prev,aPagar:r2(Math.max(0,prev-pago))};}
@@ -1212,7 +1233,7 @@ function validateC(d,excludeId){
   return"";}
 function validateWarn(d,excludeId){const f=FN[d.funcao];if(!f||f.lim!=="art"||isRou(d))return"";const ci=capInfo(f,excludeId);const tot=r2(ci.u.valor+d.diaria*d.qtd);if(tot>VERBA+0.001)return`Com este cachê, os artistas somam ${brl(tot)}, ${brl(tot-VERBA)} acima da verba fixa de ${brl0(VERBA)} do edital. Salvar mesmo assim?`;return"";}
 function confirmAsync(t,txt,okLbl){return new Promise(res=>{const m=modalHost();m.innerHTML=`<div class="ovl center" style="z-index:70"><div class="modal" role="alertdialog" aria-modal="true"><h2 style="font-size:18px">${esc(t)}</h2><p class="muted" style="margin:0">${esc(txt)}</p><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="cbN">Cancelar</button><button class="btn p" type="button" id="cbY">${esc(okLbl)}</button></div></div></div>`;$("#cbN").onclick=()=>{closeModal();res(false);};$("#cbY").onclick=()=>{closeModal();res(true);};});}
-function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim(),fonte:$("#cFonte").value,atracao:$("#cAtr").value.trim(),estilo:$("#cEstilo").value.trim(),elenco:$("#cElenco").value.trim(),datas:readDateRows($("#cDatas"))};}
+function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),pix:$("#cPix").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim(),fonte:$("#cFonte").value,atracao:$("#cAtr").value.trim(),estilo:$("#cEstilo").value.trim(),elenco:$("#cElenco").value.trim(),datas:readDateRows($("#cDatas"))};}
 function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
   const ci=capInfo(f);$("#cFuncHint").textContent=ci.txt;
   const lbl=f.lim==="verba"?"Valor unitário (R$) *":f.lim==="art"?"Valor do cachê (R$) *":(f.un==="hora"?"Valor da hora (R$) *":(f.un==="serviço"?"Valor do serviço (R$) *":"Valor da diária (R$) *"));
@@ -1235,7 +1256,7 @@ $("#cForm").addEventListener("submit",async e=>{e.preventDefault();const d=readC
   const w=validateWarn(d);if(w&&!(await confirmAsync("Acima da verba artística",w,"Salvar mesmo assim")))return;
   const id=Store.newId();d.criadoEm=Date.now();
   try{await Store.set("contratados",id,d);}catch(x){return;}
-  $("#cForm").reset();dateRows($("#cDatas"),[]);$("#cDatasHint").textContent="";$("#cFunc").value=d.funcao;syncCForm();toast("Contratado salvo. Agende os pagamentos.");openContr(id);});
+  $("#cForm").reset();dateRows($("#cDatas"),[]);$("#cDatasHint").textContent="";$("#cFunc").value=d.funcao;syncCForm();const r=await autoSchedule(id,true);toast(r.add?`Contratado salvo · ${r.add} pagamento(s) agendado(s) para ${PAY_DAYS} dias após cada apresentação`:"Contratado salvo.");openContr(id);});
 $("#cSetF").innerHTML=`<option value="">Todos os setores</option>`+SETORES.map(s=>`<option value="${s.k}">${s.n}</option>`).join("");
 $("#cSetF").onchange=()=>rContr();$("#cSearch").oninput=()=>rContr();
 function payBadge(a){if(NV)return`<span class="muted">—</span>`;if(!a.n)return`<span class="pill warn"><i></i>Não agendado</span>`;if(a.atrasados)return`<span class="pill bad"><i></i>${a.atrasados} atrasado(s)</span>`;if(a.pago>=a.total-0.5&&a.total>0)return`<span class="pill ok"><i></i>Quitado</span>`;if(a.falta>0.5)return`<span class="pill warn"><i></i>Falta agendar ${brl0(a.falta)}</span>`;return`<span class="pill info"><i></i>Em dia</span>`;}
@@ -1268,7 +1289,7 @@ function openContr(id){
     const el=$("#drawer");if(!el)return;
     const keepFocus=document.activeElement&&el.contains(document.activeElement)?document.activeElement.id:null;
     el.innerHTML=`
-      <div class="dh"><div><span class="label"><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n} · ${esc(f.n)}</span><h2 id="dTitle" style="font-size:22px;margin-top:4px">${esc(c.nome)}</h2><span class="sub mono">${esc(c.doc)} · ${esc(c.tipo)}${c.tel?" · "+esc(c.tel):""}</span></div><button class="btn sm ghost" type="button" id="dClose" aria-label="Fechar">Fechar</button></div>
+      <div class="dh"><div><span class="label"><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n} · ${esc(f.n)}</span><h2 id="dTitle" style="font-size:22px;margin-top:4px">${esc(c.nome)}</h2><span class="sub mono">${esc(c.doc)} · ${esc(c.tipo)}${c.tel?" · "+esc(c.tel):""}</span><div style="margin-top:6px">${pixTag(c)}</div></div><button class="btn sm ghost" type="button" id="dClose" aria-label="Fechar">Fechar</button></div>
       <div class="grid g3 valOnly">
         <div class="kpi"><span class="label">Valor total</span><div class="v num" style="font-size:20px">${brl(a.total)}</div><div class="s">${isRou(c)?`${ROU_TXT} · contratação direta da ${ORG} · ${c.qtd} cachê(s) de ${brl(c.diaria)} fora do contrato`:`${brl(c.diaria)} × ${c.qtd} ${unitWord(f)}`}</div></div>
         <div class="kpi"><span class="label">Pago</span><div class="v num" style="font-size:20px">${brl(a.pago)}</div><div class="s">${pct(a.total?a.pago/a.total:0)} do total</div></div>
@@ -1277,7 +1298,7 @@ function openContr(id){
       <div class="row" style="justify-content:space-between"><div class="row"><span class="label">Serviço</span><div class="seg" role="group" aria-label="Situação do serviço"><button type="button" data-sv="a_prestar" aria-pressed="${c.servico!=="prestado"}">A prestar</button><button type="button" data-sv="prestado" class="s-ok" aria-pressed="${c.servico==="prestado"}">Prestado</button></div>${f.lim==="art"?(cDatas(c).length?`<span class="muted">${cDatas(c).length} apresentação(ões): ${cDatas(c).map(x=>fd(x.d)+(x.h?" "+x.h:"")).join(" · ")}</span>`:""):(c.data?`<span class="muted">Serviço: ${fd(c.data)}</span>`:"")}</div><button class="btn sm" type="button" id="dEdit">${editing?"Cancelar edição":"Editar dados"}</button></div>
       ${editing?editForm(c):""}
       <div class="card valOnly" style="padding:14px 16px">
-        <div class="card-h" style="margin-bottom:6px"><h2>Datas de pagamento</h2><span class="label">${brl(a.agendado)} agendado de ${brl(a.total)}</span></div>
+        <div class="card-h" style="margin-bottom:6px"><h2>Datas de pagamento</h2><span class="row"><span class="label">${brl(a.agendado)} agendado de ${brl(a.total)}</span>${autoPlan(c).length&&Store.canWrite?`<button class="btn sm" type="button" id="dAuto" title="${PAY_DAYS} dias após cada apresentação">Agendar D+${PAY_DAYS}</button>`:""}</span></div>
         ${ps.length?ps.map(p=>parcRow(p,c)).join(""):`<div class="empty">Nenhuma parcela agendada.</div>`}
         ${a.falta>0.5?`<form class="form" id="pForm" style="grid-template-columns:1fr 1fr auto;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
           <label class="f" for="pData">Data do pagamento<input type="date" id="pData" required value="${TODAY}"></label>
@@ -1287,7 +1308,7 @@ function openContr(id){
       </div>
       ${c.obs?`<div class="note"><b>Observações:</b> ${esc(c.obs)}</div>`:""}
       <div class="row" style="justify-content:space-between;margin-top:auto"><span class="sub">Cadastrado em ${c.criadoEm?new Date(c.criadoEm).toLocaleDateString("pt-BR"):"—"}</span><button class="btn sm d valOnly" type="button" id="dDel">Excluir contratado</button></div>`;
-    $("#dClose").onclick=closeOvl;
+    $("#dClose").onclick=closeOvl;bindCopy(el);if($("#dAuto"))$("#dAuto").onclick=()=>autoSchedule(id);
     $("#dEdit").onclick=()=>{editing=!editing;draw();};
     $$("#drawer [data-sv]").forEach(b=>b.onclick=async()=>{if(c.servico===b.dataset.sv)return;const n={...c0,servico:b.dataset.sv};try{await Store.set("contratados",id,n);toast(b.dataset.sv==="prestado"?"Serviço marcado como prestado":"Serviço marcado como a prestar");}catch(e){}});
     const pf=$("#pForm");if(pf)pf.addEventListener("submit",async e=>{e.preventDefault();const v=r2($("#pValor").value),dt=$("#pData").value;const rest=r2(cAgg(c).falta);
@@ -1306,6 +1327,7 @@ function editForm(c){return `<form class="form card" id="eForm" style="grid-temp
   <label class="f" for="eDoc">CPF ou CNPJ<input type="text" id="eDoc" value="${esc(c.doc)}"></label>
   <label class="f" for="eTipo">Tipo de contratação<select id="eTipo">${["Pessoa física (recibo/RPA)","MEI","Pessoa jurídica","Associação ou cooperativa"].map(t=>`<option ${t===c.tipo?"selected":""}>${t}</option>`).join("")}</select></label>
   <label class="f" for="eTel">Telefone<input type="tel" id="eTel" value="${esc(c.tel)}"></label>
+  <label class="f" for="ePix">Chave Pix<input type="text" id="ePix" value="${esc(c.pix||"")}" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"></label>
   <label class="f" for="eFunc">Função<select id="eFunc">${funcOptions(c.funcao)}</select></label>
   ${FN[c.funcao]&&FN[c.funcao].lim==="art"?`<label class="f" for="eAtr">Atração / espetáculo<input type="text" id="eAtr" value="${esc(c.atracao||"")}"></label><label class="f" for="eFonte" ${ART&&ART.rouanet?"":"hidden"}>Origem do cachê<select id="eFonte"><option value="contrato" ${cFonte(c)==="contrato"?"selected":""}>Contrato · Alternativa Cultural</option><option value="rouanet" ${cFonte(c)==="rouanet"?"selected":""}>Lei Rouanet · ${ORG} (R$ 0,00)</option></select></label><label class="f" for="eEstilo">Estilo<input type="text" id="eEstilo" value="${esc(c.estilo||"")}"></label><label class="f" for="eElenco">Elenco<input type="text" id="eElenco" value="${esc(c.elenco||"")}"></label><div class="f" style="grid-column:1/-1"><span>Datas e horários das apresentações</span><div class="dl" id="eDatas"></div><div class="row" style="margin-top:6px"><button class="btn sm" type="button" id="eDataAdd">+ Adicionar data</button></div></div>`:`<label class="f" for="eData">Data do serviço<input type="date" id="eData" value="${esc(c.data)}"></label>`}
   <label class="f valOnly" for="eDiaria">Valor unitário (R$)<input type="number" id="eDiaria" step="0.01" min="0" value="${c.diaria}" class="in-num" style="max-width:none"></label>
@@ -1316,14 +1338,14 @@ function editForm(c){return `<form class="form card" id="eForm" style="grid-temp
 function bindEdit(c){const tot=()=>{const rou=$("#eFonte")&&$("#eFonte").value==="rouanet";$("#eTot").textContent=rou?"Total no contrato: R$ 0,00 · "+ROU_TXT:"Novo total: "+brl(r2((+$("#eDiaria").value||0)*(+$("#eQtd").value||0)));};$("#eDiaria").oninput=tot;$("#eQtd").oninput=tot;if($("#eFonte"))$("#eFonte").onchange=tot;tot();
   const isArt=FN[c.funcao]&&FN[c.funcao].lim==="art";let datas=isArt?cDatas(c):null;
   if(isArt){dateRows($("#eDatas"),datas);bindDateRows($("#eDatas"),$("#eDataAdd"),list=>{datas=list;$("#eQtd").value=list.length||$("#eQtd").value;tot();},cDatas(c));}
-  $("#eForm").addEventListener("submit",async e=>{e.preventDefault();const d={...S.contratados[c.id],nome:$("#eNome").value.trim(),doc:fmtDoc($("#eDoc").value),tipo:$("#eTipo").value,tel:$("#eTel").value.trim(),funcao:$("#eFunc").value,diaria:r2($("#eDiaria").value),qtd:+$("#eQtd").value||0,obs:$("#eObs").value.trim()};
+  $("#eForm").addEventListener("submit",async e=>{e.preventDefault();const d={...S.contratados[c.id],nome:$("#eNome").value.trim(),doc:fmtDoc($("#eDoc").value),tipo:$("#eTipo").value,tel:$("#eTel").value.trim(),pix:$("#ePix").value.trim(),funcao:$("#eFunc").value,diaria:r2($("#eDiaria").value),qtd:+$("#eQtd").value||0,obs:$("#eObs").value.trim()};
     if(isArt){d.fonte=$("#eFonte").value;d.atracao=$("#eAtr").value.trim();d.estilo=$("#eEstilo").value.trim();d.elenco=$("#eElenco").value.trim();d.datas=datas;d.data=datas.length?datas[0].d:"";}else{d.data=$("#eData").value;}
     if(FN[d.funcao].un==="serviço")d.qtd=1;const err=validateC(d,c.id);$("#eMsg").textContent=err;if(err)return;
     const w=validateWarn(d,c.id);if(w&&!(await confirmAsync("Acima da verba artística",w,"Salvar mesmo assim")))return;
-    try{await Store.set("contratados",c.id,d);toast("Dados atualizados");$("#dEdit").click();}catch(x){}});}
+    try{await Store.set("contratados",c.id,d);toast("Dados atualizados");$("#dEdit").click();await autoSchedule(c.id);}catch(x){}});}
 function compLink(p){return p.comp?`<a class="btn sm" href="${esc(p.comp.url||("/_blob/"+p.comp.id))}" target="_blank" rel="noopener">Ver comprovante</a>`:"";}
 function parcRow(p,c){const st=payStatus(p);const pill=st==="pago"?`<span class="pill ok"><i></i>Pago ${fd(p.pagoEm)}</span>`:(st==="atrasado"?'<span class="pill bad"><i></i>Atrasado</span>':'<span class="pill warn"><i></i>Pendente</span>');
-  return `<div class="parc"><span class="mono">${fd(p.data)}</span><span><b class="num">${brl(p.valor)}</b> ${pill}${st==="pago"&&!p.comp?' <span class="chip w">sem comprovante</span>':""}</span><span class="row" style="justify-content:flex-end">${st!=="pago"?`<button class="btn sm p" type="button" data-pay="${p.id}">Registrar pagamento</button><button class="btn sm ghost" type="button" data-delp="${p.id}" aria-label="Excluir parcela">Excluir</button>`:`${compLink(p)}${!p.comp&&Store.assets?`<button class="btn sm" type="button" data-att="${p.id}">Anexar comprovante</button>`:""}<button class="btn sm ghost" type="button" data-undo="${p.id}">Desfazer</button>`}</span></div>`;}
+  return `<div class="parc"><span class="mono">${fd(p.data)}${p.lbl?`<span class="sub">D+${PAY_DAYS} · ${esc(p.lbl)}</span>`:""}</span><span><b class="num">${brl(p.valor)}</b> ${pill}${st==="pago"&&!p.comp?' <span class="chip w">sem comprovante</span>':""}</span><span class="row" style="justify-content:flex-end">${st!=="pago"?`<button class="btn sm p" type="button" data-pay="${p.id}">Registrar pagamento</button><button class="btn sm ghost" type="button" data-delp="${p.id}" aria-label="Excluir parcela">Excluir</button>`:`${compLink(p)}${!p.comp&&Store.assets?`<button class="btn sm" type="button" data-att="${p.id}">Anexar comprovante</button>`:""}<button class="btn sm ghost" type="button" data-undo="${p.id}">Desfazer</button>`}</span></div>`;}
 function bindParc(root,c){
   root.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>payModal(b.dataset.pay));
   root.querySelectorAll("[data-att]").forEach(b=>b.onclick=()=>payModal(b.dataset.att,true));
@@ -1337,10 +1359,11 @@ function confirmBox(t,txt,okLbl,fn){const m=modalHost();m.innerHTML=`<div class=
 function payModal(pid,onlyAttach){
   const p=S.pagamentos[pid];if(!p)return;const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};
   const needServ=c.servico!=="prestado"&&!onlyAttach;
-  const m=modalHost();
+  const m=modalHost();setTimeout(()=>bindCopy(m),0);
   m.innerHTML=`<div class="ovl center" style="z-index:70"><form class="modal" id="pmF" role="dialog" aria-modal="true" aria-labelledby="pmT">
     <div><span class="label">${esc(f.n||"")}</span><h2 id="pmT" style="font-size:19px;margin-top:4px">${onlyAttach?"Anexar comprovante":"Registrar pagamento"}</h2><span class="sub">${esc(c.nome||"")} · <span class="mono">${esc(c.doc||"")}</span></span></div>
-    <div class="grid g2"><div class="kpi"><span class="label">Valor</span><div class="v num" style="font-size:20px">${brl(p.valor)}</div></div><div class="kpi"><span class="label">Agendado para</span><div class="v num" style="font-size:20px">${fd(p.data)}</div></div></div>
+    <div class="grid g2"><div class="kpi"><span class="label">Valor</span><div class="v num" style="font-size:20px">${brl(p.valor)}</div>${p.lbl?`<div class="s">${esc(p.lbl)}</div>`:""}</div><div class="kpi"><span class="label">Agendado para</span><div class="v num" style="font-size:20px">${fd(p.data)}</div></div></div>
+    <div class="kpi"><span class="label">Chave Pix do destinatário</span>${c.pix?`<div class="v mono" style="font-size:17px;word-break:break-all">${esc(c.pix)}</div><div class="s"><button class="btn sm" type="button" data-copy="${esc(c.pix)}">Copiar chave</button> · ${esc(c.nome||"")}</div>`:`<div class="s">Nenhuma chave cadastrada. Informe em “Editar dados” na ficha do contratado.</div>`}</div>
     ${needServ?`<div class="note"><b>O serviço ainda está como “a prestar”.</b> Pela regra do sistema, o pagamento é registrado depois do serviço prestado. Ao confirmar, o serviço será marcado como prestado.</div>`:""}
     ${onlyAttach?"":`<label class="f" for="pmD">Data em que foi pago<input type="date" id="pmD" value="${TODAY}" required></label>`}
     ${Store.assets?`<label class="f" for="pmFile">Comprovante (PDF ou imagem, até 20 MB)${onlyAttach?"":" · opcional agora"}<input type="file" id="pmFile" accept="application/pdf,image/png,image/jpeg,image/webp" ${onlyAttach?"required":""}></label>`:`<p class="note" style="margin:0">${Store.mode==="local"?"No modo local não é possível anexar arquivos.":"Só editores podem anexar comprovantes. Peça acesso de editor ao dono."}</p>`}
@@ -1414,7 +1437,7 @@ function newPayModal(){const cs=contrList().filter(c=>cAgg(c).falta>0.5).sort((a
     try{await Store.set("pagamentos",Store.newId(),{cid:id,data:d,valor:v,status:"pendente",criadoEm:Date.now()});closeModal();toast(`Pagamento agendado para ${fd(d)}`);}catch(x){}});}
 function payCard(p){const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);
   return `<div class="pay"><div class="top"><span class="mono">${fd(st==="pago"?p.pagoEm:p.data)}${st==="pago"&&p.pagoEm!==p.data?`<span class="sub">previsto ${fd(p.data)}</span>`:""}</span><span class="val num">${brl(p.valor)}</span></div>
-  <div><span class="who">${esc(c.nome||"Contratado removido")}</span><div class="meta"><span class="mono">${esc(c.doc||"")}</span> · ${f.s?`<span class="sdot" style="background:${SET[f.s].c}"></span>${esc(f.n)}`:""}</div></div>
+  <div><span class="who">${esc(c.nome||"Contratado removido")}</span><div class="meta"><span class="mono">${esc(c.doc||"")}</span> · ${f.s?`<span class="sdot" style="background:${SET[f.s].c}"></span>${esc(f.n)}`:""}${p.lbl?` · ${esc(p.lbl)}`:""}</div>${pixTag(c)}</div>
   <div class="acts">${st!=="pago"?`<button class="btn sm p" type="button" data-pay="${p.id}">Registrar pagamento</button>`:`${compLink(p)}${!p.comp?`<span class="chip w">sem comprovante</span>${Store.assets?`<button class="btn sm" type="button" data-att="${p.id}">Anexar</button>`:""}`:""}<button class="btn sm ghost" type="button" data-undo="${p.id}">Desfazer</button>`}<button class="btn sm ghost" type="button" data-open="${esc(p.cid)}">Contrato</button></div></div>`;}
 function multaCard(m){const tp=MK[m.tipo]||{};const q=m.st==="quitada";
   return `<div class="pay multa"><div class="top"><span class="mono">${fd(q?(m.quitEm||m.data):m.data)}${q&&m.quitEm&&m.quitEm!==m.data?`<span class="sub">aplicada ${fd(m.data)}</span>`:""}</span><span class="val num neg">− ${brl(m.valor)}</span></div>
@@ -1467,7 +1490,7 @@ function rPag(){
   if(mP.length)$("#colP").insertAdjacentHTML("afterbegin",mP.map(multaCard).join(""));
   if(mQ.length)$("#colR").insertAdjacentHTML("afterbegin",mQ.map(multaCard).join(""));
   if(mP.length&&$("#colP .empty"))$("#colP .empty").remove();if(mQ.length&&$("#colR .empty"))$("#colR .empty").remove();
-  $("#kA").textContent=filt(atr).length;$("#kP").textContent=filt(pend).length+mP.length;$("#kR").textContent=filt(pag).length+mQ.length;
+  bindCopy($("#v-pagamentos"));$("#kA").textContent=filt(atr).length;$("#kP").textContent=filt(pend).length+mP.length;$("#kR").textContent=filt(pag).length+mQ.length;
   $$(".kan [data-mquit]").forEach(b=>b.onclick=()=>multaQuitModal(b.dataset.mquit));
   $$(".kan [data-mundo]").forEach(b=>b.onclick=()=>confirmBox("Desfazer quitação?","A multa volta para pendente.","Desfazer",async()=>{const o=S.ocorrencias[b.dataset.mundo];if(!o||!o.multa)return;const m={...o.multa};m.st="pendente";delete m.quitEm;await Store.set("ocorrencias",b.dataset.mundo,{...o,multa:m});toast("Quitação desfeita");}));
   $$(".kan [data-moc]").forEach(b=>b.onclick=()=>{location.hash="ocorrencias";setTimeout(()=>openOc(b.dataset.moc),80);});
@@ -1502,7 +1525,7 @@ const PROG_SEED=[{"atracao":"Encanto Mágico do Natal","nome":"Marcelo Soccol","
 $("#prImport").onclick=async()=>{const C=PROG_SEED.filter(x=>x.fonte!=="rouanet"),R=PROG_SEED.filter(x=>x.fonte==="rouanet");const ap=C.reduce((a,x)=>a+x.datas.length,0),apR=R.reduce((a,x)=>a+x.datas.length,0),tot=C.reduce((a,x)=>a+x.diaria*x.qtd,0);
   if(!(await confirmAsync("Importar a programação oficial?",`${C.length} contratações da Alternativa Cultural (${ap} apresentações, ${brl(tot)} em cachês, verba de ${brl(VERBA)}) e ${R.length} atrações pela ${ROU_TXT}, contratadas diretamente pela SMTC (${apR} apresentações, R$ 0,00 no contrato). Os CPFs/CNPJs ficam para preencher depois.`,"Importar")))return;
   let ok=0;for(const x of PROG_SEED){const id=Store.newId();try{await Store.set("contratados",id,{nome:x.nome,doc:"",tipo:"Pessoa física (recibo/RPA)",tel:"",funcao:"artista",servico:"a_prestar",diaria:x.diaria,qtd:x.qtd,data:x.datas[0].d,datas:x.datas.map(d=>({d:d.d,h:d.h,ok:false})),fonte:x.fonte||"contrato",atracao:x.atracao,estilo:x.estilo,elenco:x.elenco,obs:x.obs||"",importado:true,criadoEm:Date.now()});ok++;}catch(e){}}
-  toast(`${ok} contratação(ões) importada(s)`);};
+  toast(`${ok} contratação(ões) importada(s)`);await autoScheduleAll();};
 
 /* ================= RIDERS ================= */
 function rRiders(){const ck=cfg("riders").ck||{};
@@ -1608,9 +1631,10 @@ const num=v=>(+v||0).toFixed(2).replace(".",",");
 async function saveCsv(name,rows){const txt="﻿"+rows.map(r=>r.map(csvCell).join(";")).join("\n");
   if(Store.downloads){try{await Store.downloads.save({filename:name,data:txt});toast("Planilha pronta");return;}catch(e){if(e&&e.code==="declined")return;}}
   try{await navigator.clipboard.writeText(txt);toast("Download indisponível aqui: planilha copiada (cole no Excel ou Sheets)");}catch(e){toast("Não foi possível exportar aqui.",true);}}
-$("#expContr").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_contratados.csv",[["Nome","CPF/CNPJ","Tipo","Telefone","Setor","Função","Valor unitário","Quantidade","Valor total","Agendado","Pago","Serviço","Data do serviço","Observações"],...contrList().map(c=>{const f=FN[c.funcao]||{};const a=cAgg(c);return[c.nome,c.doc,c.tipo,c.tel,(SET[f.s]||{}).n,f.n,num(c.diaria),c.qtd,num(a.total),num(a.agendado),num(a.pago),c.servico==="prestado"?"Prestado":"A prestar",fd(c.data),c.obs];})]);
+$("#expContr").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_contratados.csv",[["Nome","CPF/CNPJ","Tipo","Telefone","Chave Pix","Setor","Função","Valor unitário","Quantidade","Valor total","Agendado","Pago","Serviço","Data do serviço","Observações"],...contrList().map(c=>{const f=FN[c.funcao]||{};const a=cAgg(c);return[c.nome,c.doc,c.tipo,c.tel,c.pix||"",(SET[f.s]||{}).n,f.n,num(c.diaria),c.qtd,num(a.total),num(a.agendado),num(a.pago),c.servico==="prestado"?"Prestado":"A prestar",fd(c.data),c.obs];})]);
 $("#expPlan").onclick=()=>{const t=totals();const rows=[["Setor","Item","Valor da proposta","Valor Real","Previsto","Contratado","Pago","A pagar"]];SETORES.forEach(x=>FUNCS.filter(f=>f.s===x.k).forEach(f=>{const a=itemAgg(f);rows.push([x.n,`${f.it} · ${f.n}`,num(f.tot),a.real==null?"":num(a.real),num(a.prev),num(a.contratado),num(a.pago),num(a.aPagar)]);}));rows.push(["","Impostos estimados","","",num(t.imp),"","",""]);rows.push(["","Multas e glosas","","",num(t.multas),"",num(t.multasPagas),num(t.multasPend)]);rows.push(["","Margem livre","","",num(t.margem),"","",""]);saveCsv("alternativa-cultural_"+PROJ.arquivo+"_planilha-de-custo.csv",rows);};
-$("#expPag").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_pagamentos.csv",[["Data prevista","Data do pagamento","Situação","Valor","Contratado","CPF/CNPJ","Setor","Função","Comprovante"],...payList().sort((a,b)=>a.data.localeCompare(b.data)).map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return[fd(p.data),st==="pago"?fd(p.pagoEm):"",st==="pago"?"Realizado":(st==="atrasado"?"Atrasado":"Pendente"),num(p.valor),c.nome,c.doc,(SET[f.s]||{}).n,f.n,p.comp?p.comp.nome:""];})]);
+$("#autoAll").onclick=()=>{if(!Store.canWrite){toast("Seu acesso é só de leitura.",true);return;}confirmBox(`Agendar D+${PAY_DAYS} para todos?`,"Cria as parcelas que ainda faltam, 10 dias após cada apresentação (artistas) ou após a data do serviço. Parcelas já pagas e as agendadas à mão não mudam.","Agendar",autoScheduleAll);};
+$("#expPag").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_pagamentos.csv",[["Data prevista","Data do pagamento","Situação","Valor","Contratado","CPF/CNPJ","Chave Pix","Referência","Setor","Função","Comprovante"],...payList().sort((a,b)=>a.data.localeCompare(b.data)).map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return[fd(p.data),st==="pago"?fd(p.pagoEm):"",st==="pago"?"Realizado":(st==="atrasado"?"Atrasado":"Pendente"),num(p.valor),c.nome,c.doc,c.pix||"",p.lbl||"",(SET[f.s]||{}).n,f.n,p.comp?p.comp.nome:""];})]);
 
 /* ================= EDITAL ================= */
 function rEdital(){$("#edBody").innerHTML=FUNCS.map(f=>`<tr><td class="mono">${f.it}</td><td><b>${f.n}</b>${f.det?`<span class="sub">${f.det}</span>`:""}</td><td><span class="sdot" style="background:${(SET[f.s]||{}).c||"var(--gray)"}"></span>${esc((SET[f.s]||{}).n||"—")}</td><td class="r num">${f.lim==="art"?ART_MAX:(f.q||"—")}</td><td>${f.un}</td><td class="r num">${f.d?brl(f.d):"—"}</td><td class="r num">${f.tot?brl(f.tot):"—"}</td><td>${f.lim==="qtd"?`${f.q} ${unitWord(f)}`:f.lim==="count"?`${f.max} contratação(ões)`:f.lim==="art"?`${ART_MIN}–${ART_MAX} cachês · ${brl0(VERBA)} exatos`:f.lim==="verba"?`Verba de ${brl0(f.tot)}`:f.op?'<span class="chip">Custo da operação</span>':'<span class="chip w">Sem previsão</span>'}</td></tr>`).join("")+`<tr class="tot"><td></td><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${brl(FUNCS.reduce((a,f)=>a+f.tot,0))}</td><td></td></tr>`;}
