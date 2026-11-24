@@ -1,4 +1,6 @@
 {
   "_sobre": "Lista dos projetos além do 39º Sonho de Natal (que já vem no sistema). Cada id aponta para projetos/<id>.json. Projeto só aparece para quem tem acesso liberado na aba Usuários.",
-  "projetos": []
+  "projetos": [
+    "figurinos-natal-luz-2026"
+  ]
 }

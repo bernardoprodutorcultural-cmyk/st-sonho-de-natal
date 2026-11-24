@@ -1,0 +1,492 @@
+{
+ "nome": "Figurinos do Grande Desfile de Natal · 41º Natal Luz",
+ "curto": "Figurinos Natal Luz",
+ "status": "execucao",
+ "contratante": "Gramadotur · Autarquia Municipal de Turismo de Gramado/RS",
+ "orgao": "Gramadotur",
+ "orgaoFrase": "a Gramadotur",
+ "contrato": "Pregão Eletrônico 013/2026",
+ "local": "Gramado/RS",
+ "relatorio": "Gramadotur · 41º Natal Luz de Gramado · Pregão 013/2026",
+ "teto": 734454.4,
+ "tetoReferencia": true,
+ "aliquota": 0.125,
+ "vigencia": {
+  "ini": "2026-08-01",
+  "fim": "2027-02-25"
+ },
+ "alertaDocs": "Inventário final até 23/01/2027",
+ "modulos": [
+  "painel",
+  "contratados",
+  "financeiro",
+  "documentos",
+  "ocorrencias",
+  "relatorios",
+  "edital"
+ ],
+ "setores": [
+  {
+   "k": "reforma",
+   "n": "Reforma do acervo"
+  },
+  {
+   "k": "novos",
+   "n": "Figurinos novos"
+  },
+  {
+   "k": "calcados",
+   "n": "Calçados"
+  },
+  {
+   "k": "meias",
+   "n": "Meias"
+  },
+  {
+   "k": "operacao",
+   "n": "Operação da temporada"
+  }
+ ],
+ "funcs": [
+  {
+   "k": "reforma",
+   "n": "Reforma de figurinos do acervo",
+   "s": "reforma",
+   "it": "1–49",
+   "un": "verba",
+   "q": 1,
+   "d": 113141.0,
+   "lim": "verba",
+   "det": "246 figurinos + 6 extras do acervo: manutenção, higienização, troca de galões e tecidos · mão de obra e insumos"
+  },
+  {
+   "k": "novos_confeccao",
+   "n": "Confecção de figurinos novos",
+   "s": "novos",
+   "it": "50–107",
+   "un": "verba",
+   "q": 1,
+   "d": 482087.0,
+   "lim": "verba",
+   "det": "58 itens do memorial · mão de obra, tecidos e aviamentos"
+  },
+  {
+   "k": "novos_prontos",
+   "n": "Peças compradas prontas",
+   "s": "novos",
+   "it": "108–129",
+   "un": "verba",
+   "q": 1,
+   "d": 22416.4,
+   "lim": "verba",
+   "det": "Shorts, camisetas, peruca e barba, coquilhas · 290 camisetas e 5 moletons personalizados do Natal Luz"
+  },
+  {
+   "k": "calcados",
+   "n": "Calçados",
+   "s": "calcados",
+   "it": "130–172",
+   "un": "verba",
+   "q": 1,
+   "d": 89060.0,
+   "lim": "verba",
+   "det": "Botinhas de jazz, sapatilhas e sapatos · reforço em couro nas laterais, na frente e no solado"
+  },
+  {
+   "k": "meias",
+   "n": "Meias e meias-calças",
+   "s": "meias",
+   "it": "173–208",
+   "un": "verba",
+   "q": 1,
+   "d": 27750.0,
+   "lim": "verba",
+   "det": "544 pares · 4 trocas de meia-calça por figurino durante o evento"
+  },
+  {
+   "k": "acompanhamento",
+   "n": "Equipe de acompanhamento",
+   "s": "operacao",
+   "it": "—",
+   "un": "diária",
+   "q": 0,
+   "d": 0,
+   "lim": "sem",
+   "op": true,
+   "det": "Mín. 4 pessoas por sessão · 2 ensaios gerais + 39 apresentações = 164 diárias"
+  },
+  {
+   "k": "coordenacao",
+   "n": "Coordenação, provas e inventário",
+   "s": "operacao",
+   "it": "—",
+   "un": "diária",
+   "q": 0,
+   "d": 0,
+   "lim": "sem",
+   "op": true,
+   "det": "Cronograma por alas, mín. 3 provas presenciais, inventário final com fotos"
+  },
+  {
+   "k": "lavanderia",
+   "n": "Lavanderia",
+   "s": "operacao",
+   "it": "—",
+   "un": "serviço",
+   "q": 0,
+   "d": 0,
+   "lim": "sem",
+   "op": true,
+   "det": "4 lavagens por figurino + 1 final + extras · fora do Expogramado"
+  },
+  {
+   "k": "transporte",
+   "n": "Transporte dos figurinos",
+   "s": "operacao",
+   "it": "—",
+   "un": "serviço",
+   "q": 0,
+   "d": 0,
+   "lim": "sem",
+   "op": true,
+   "det": "Expogramado ↔ camarim e devolução final"
+  },
+  {
+   "k": "embalagens",
+   "n": "Cabides e sacos de lavanderia",
+   "s": "operacao",
+   "it": "—",
+   "un": "serviço",
+   "q": 0,
+   "d": 0,
+   "lim": "sem",
+   "op": true,
+   "det": "Cabide individual e saco transparente padronizado por figurino"
+  },
+  {
+   "k": "atelie",
+   "n": "Ateliê e estrutura de produção",
+   "s": "operacao",
+   "it": "—",
+   "un": "serviço",
+   "q": 0,
+   "d": 0,
+   "lim": "sem",
+   "op": true,
+   "det": "Local próprio · proibido usar máquinas ou equipamentos da Gramadotur"
+  }
+ ],
+ "artistico": null,
+ "subcontratacao": null,
+ "docs": [
+  {
+   "k": "contrato",
+   "n": "Contrato assinado e Ordem de Início",
+   "d": "A Ordem de Início traz o cronograma de execução, base para medir atrasos e aplicar sanções",
+   "pz": "Na assinatura",
+   "r": "Atrasos medidos pela Ordem de Início"
+  },
+  {
+   "k": "garantia",
+   "n": "Garantia contratual de 10%",
+   "d": "Do valor estimado da contratação (art. 96 a 102 da Lei 14.133). Proposta abaixo de 85% do orçado exige garantia adicional (edital 7.5.3)",
+   "pz": "Na assinatura",
+   "r": "0,1% ao dia até 3%; acima de 30 dias, rescisão"
+  },
+  {
+   "k": "rt",
+   "n": "Responsável pela execução indicado",
+   "d": "Representante da contratada na fiscalização (contrato 10.1) e responsável técnico indicado na licitação",
+   "pz": "Na assinatura",
+   "r": "Grau 1: 0,2% ao dia"
+  },
+  {
+   "k": "canal",
+   "n": "Canal de atendimento 24h",
+   "d": "Celular e WhatsApp para emergências (contrato 3.2 e ETP 4.2)",
+   "pz": "Na assinatura",
+   "r": "Descumprimento contratual"
+  },
+  {
+   "k": "licencas",
+   "n": "Certificações, alvarás e licenças",
+   "d": "Para confecção, reforma, lavagem, transporte e acondicionamento (ETP 4.1)",
+   "pz": "Antes de executar",
+   "r": "Descumprimento contratual"
+  },
+  {
+   "k": "cronograma",
+   "n": "Cronograma de compras, produção e entregas por alas",
+   "d": "Aprovado pela Gramadotur, pela direção artística e pelo fiscal (TR 4.3 e 10.2.10)",
+   "pz": "Início da execução",
+   "r": "Base das multas por atraso"
+  },
+  {
+   "k": "provas",
+   "n": "Cronograma de provas aprovado",
+   "d": "Mínimo de 3 provas presenciais de todo o figurino (TR 10.2.8)",
+   "pz": "Antes das provas",
+   "r": "Descumprimento contratual"
+  },
+  {
+   "k": "equipe",
+   "n": "Contratos de trabalho e grade de escalas",
+   "d": "Equipe de produção e de acompanhamento (TR 4.9)",
+   "pz": "Antes da temporada",
+   "r": "Grau 3 por pessoa sem qualificação"
+  },
+  {
+   "k": "locais",
+   "n": "Locais de produção externos informados",
+   "d": "Com o responsável e a comprovação de vínculo (TR 8.2). Subcontratação é vedada (edital 12.5)",
+   "pz": "Antes de produzir fora",
+   "r": "Risco de subcontratação vedada"
+  },
+  {
+   "k": "compras",
+   "n": "Planilha de compras com notas fiscais",
+   "d": "Insumos, calçados, meias e acessórios, com NF de cada compra (TR 2.2, 4.6 e 4.7)",
+   "pz": "Durante todo o contrato",
+   "r": "Prestação de contas recusada"
+  },
+  {
+   "k": "aprovacao",
+   "n": "Aprovação dos figurinos pelo fiscal e pelo figurinista",
+   "d": "Figurino só conta como finalizado depois da aprovação (TR 8.12 e 8.18)",
+   "pz": "Antes dos ensaios gerais",
+   "r": "Etapa não medida para pagamento"
+  },
+  {
+   "k": "inventario",
+   "n": "Inventário final com relatório e fotos",
+   "d": "Com lavagem, manutenção final e conferência da direção artística e do fiscal; devolução no Expogramado (TR 8.10)",
+   "pz": "Até 23/01/2027",
+   "r": "10% se o serviço não for entregue no prazo"
+  },
+  {
+   "k": "nf",
+   "n": "Notas fiscais com empenho e conta bancária",
+   "d": "Só depois de concluída a etapa; entregar ao fiscal com os documentos exigidos (contrato 2.2 a 2.4)",
+   "pz": "A cada parcela",
+   "r": "NF retida"
+  },
+  {
+   "k": "simples",
+   "n": "Declaração do Simples Nacional",
+   "d": "Só se a contratada for optante (IN RFB 1.234/2012, contrato 2.11)",
+   "pz": "Com a nota de empenho, renovada a cada ano",
+   "r": "Retenção de tributos na NF"
+  }
+ ],
+ "multas": {
+  "ref": "contrato, cláusula 6.2",
+  "tetoPct": 0.3,
+  "diasMax": 15,
+  "itens": [
+   {
+    "k": "g1",
+    "n": "Grau 1 · não substituir pessoa inconveniente (8) ou não manter o responsável técnico (10)",
+    "pct": 0.002,
+    "dia": true,
+    "diasMax": 5
+   },
+   {
+    "k": "g2",
+    "n": "Grau 2 · recusar serviço da fiscalização (4) ou descumprir determinação do fiscal (7)",
+    "pct": 0.004,
+    "dia": true,
+    "diasMax": 5
+   },
+   {
+    "k": "g3",
+    "n": "Grau 3 · pessoa sem qualificação (3) ou item descumprido após reincidência (9)",
+    "pct": 0.008,
+    "dia": true,
+    "diasMax": 5
+   },
+   {
+    "k": "g4",
+    "n": "Grau 4 · desídia reiterada (5)",
+    "pct": 0.016,
+    "dia": true,
+    "diasMax": 5
+   },
+   {
+    "k": "g5",
+    "n": "Grau 5 · situação com risco de dano físico ou lesão (1)",
+    "pct": 0.032,
+    "dia": true,
+    "diasMax": 5
+   },
+   {
+    "k": "g6",
+    "n": "Grau 6 · suspender os serviços (2) ou desídia grave (6)",
+    "pct": 0.04,
+    "dia": true,
+    "diasMax": 5
+   },
+   {
+    "k": "garantia",
+    "n": "Atraso na garantia contratual",
+    "pct": 0.001,
+    "dia": true,
+    "diasMax": 30
+   },
+   {
+    "k": "prazo",
+    "n": "Serviço não entregue no prazo do contrato ou da Ordem de Início",
+    "pct": 0.1
+   },
+   {
+    "k": "mora",
+    "n": "Atraso na execução · 0,5% ao dia sobre a parcela em atraso (até 15 dias)",
+    "pct": 0,
+    "livre": true
+   },
+   {
+    "k": "inexec",
+    "n": "Atraso acima de 15 dias ou inexecução parcial · 5% sobre a parcela",
+    "pct": 0,
+    "livre": true
+   },
+   {
+    "k": "glosa",
+    "n": "Glosa ou outra multa aplicada pela Gramadotur",
+    "pct": 0,
+    "livre": true
+   }
+  ]
+ },
+ "ocorrencias": {
+  "prazos": [
+   {
+    "h": 12,
+    "n": "Reparo para a próxima sessão (prazo interno)",
+    "pct": 0
+   },
+   {
+    "h": 24,
+    "n": "Substituição de profissional notificada (TR 4.13)",
+    "pct": 0
+   },
+   {
+    "h": 48,
+    "n": "Ajuste pedido pela fiscalização (prazo interno)",
+    "pct": 0
+   }
+  ],
+  "locais": [
+   "Ateliê da contratada",
+   "Expogramado (acervo e provas)",
+   "Camarim do desfile",
+   "Percurso e dispersão do desfile",
+   "Lavanderia",
+   "Transporte"
+  ]
+ },
+ "rider": null,
+ "nfs": [
+  [
+   "Parcela 1 · 25/08/26",
+   0.15
+  ],
+  [
+   "Parcela 2 · 25/09/26",
+   0.15
+  ],
+  [
+   "Parcela 3 · 25/10/26",
+   0.15
+  ],
+  [
+   "Parcela 4 · 25/11/26",
+   0.15
+  ],
+  [
+   "Parcela 5 · 25/12/26",
+   0.15
+  ],
+  [
+   "Parcela 6 · 25/01/27",
+   0.15
+  ],
+  [
+   "Parcela 7 · 25/02/27",
+   0.1
+  ]
+ ],
+ "regras": [
+  {
+   "t": "Subcontratação vedada",
+   "d": "Edital 12.5: vedada a subcontratação total ou parcial. Produção fora do ateliê da contratada precisa ser informada à Gramadotur, com o responsável e a comprovação de vínculo (TR 8.2).",
+   "chip": "Vedado",
+   "nivel": "hi"
+  },
+  {
+   "t": "Preço global sem linha para a operação",
+   "d": "Acompanhamento (mín. 4 pessoas por sessão em 41 sessões), lavagens, transporte, cabides, sacos e ateliê não têm item próprio: saem da margem dos blocos da proposta.",
+   "chip": "Margem",
+   "nivel": "md"
+  },
+  {
+   "t": "Prestação de contas das compras",
+   "d": "Planilha detalhada de insumos, calçados, meias e acessórios, com a NF de cada compra (TR 2.2, 4.6 e 4.7).",
+   "chip": "Obrigatório",
+   "nivel": "md"
+  },
+  {
+   "t": "Pagamento em 7 parcelas",
+   "d": "6 de 15% (25/08/26 a 25/01/27) e 1 de 10% (25/02/27). A NF só pode ser emitida depois de concluída a etapa, com o nº do empenho e a conta bancária.",
+   "chip": "7 NFs",
+   "nivel": "lo"
+  },
+  {
+   "t": "Lavagens e reposições",
+   "d": "4 lavagens por figurino + 1 final + extras, fora do Expogramado (TR 8.7 e 8.17). Meia-calça: 4 trocas por figurino (TR 8.19). Calçados e roupas revisados todo dia.",
+   "chip": "Limite",
+   "nivel": "lo"
+  },
+  {
+   "t": "Acabamento",
+   "d": "Galões, gregas e passamanarias costurados dos dois lados; proibido o uso de cola quente (TR 8.20 e especificações gerais do memorial).",
+   "chip": "Regra",
+   "nivel": "lo"
+  },
+  {
+   "t": "Contatos da Gramadotur",
+   "d": "Gestora: Camilla Fisch (Gerente de Eventos, mat. 136-02). Fiscal: Ana Patricia Alves Poetini (mat. 182). Fiscal substituto: Tiago Schmitt (mat. 175).",
+   "chip": "Contatos",
+   "nivel": "lo"
+  }
+ ],
+ "pendencias": [
+  {
+   "t": "Valor homologado e proposta vencedora",
+   "d": "O teto e os blocos usam o valor de referência do edital (R$ 734.454,40). Trocar pelo valor homologado e pelos valores da proposta vencedora.",
+   "chip": "Pendente",
+   "nivel": "md"
+  },
+  {
+   "t": "Grau da infração 'suspender os serviços'",
+   "d": "O edital (13.2) diz grau 4; a minuta do contrato (6.2) diz grau 6. Vale o que estiver no contrato assinado.",
+   "chip": "Confirmar",
+   "nivel": "md"
+  },
+  {
+   "t": "Ateliês e costureiras externas",
+   "d": "Confirmar com a fiscalização se a contratação de ateliês PJ para confecção conta como subcontratação, que é vedada.",
+   "chip": "Confirmar",
+   "nivel": "md"
+  },
+  {
+   "t": "Quantidades divergentes",
+   "d": "O ETP fala em 251 peças de reforma, 495 novas, 443 calçados e 566 pares de meias; as planilhas de preço somam 246 reformas e 544 pares de meias.",
+   "chip": "Confirmar",
+   "nivel": "lo"
+  }
+ ],
+ "textos": {
+  "d_ocorrencias": "O prazo começa na notificação da fiscalização pelo canal de atendimento 24h. A substituição de profissional notificado tem 24h (TR 4.13); os demais prazos são internos, porque o edital não os fixa. Se a Gramadotur aplicar multa, registre aqui: ela entra na planilha, nos pagamentos e no painel.",
+  "nota_planilha": "Os blocos seguem o valor de referência do edital (R$ 734.454,40). A operação da temporada (acompanhamento, lavanderia, transporte, embalagens e ateliê) não tem linha própria na proposta: os custos dela saem da margem."
+ }
+}

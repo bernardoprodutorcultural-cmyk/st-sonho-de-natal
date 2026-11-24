@@ -23,15 +23,15 @@ O id usa só letras minúsculas, números e hífen (ex.: `natal-luz-2027`) e nã
 | `status` | `preparacao`, `execucao` ou `encerrado` |
 | `contratante`, `orgao`, `orgaoFrase` | Quem contratou; sigla; e a sigla com artigo para frases ("a SECULT") |
 | `contrato`, `local`, `relatorio` | Modalidade e número; cidade; cabeçalho dos relatórios |
-| `teto`, `aliquota` | Valor homologado e impostos estimados (0,125 = 12,5%) |
+| `teto`, `aliquota` | Valor homologado e impostos estimados (0,125 = 12,5%). `tetoReferencia: true` enquanto o teto for o valor de referência do edital |
 | `vigencia` | `ini` e `fim` (AAAA-MM-DD). Também define os meses do gráfico de pagamentos |
 | `modulos` | Telas ligadas: `painel`, `contratados`, `financeiro`, `programacao`, `riders`, `documentos`, `ocorrencias`, `relatorios`, `edital` |
 | `setores` | Grupos do orçamento (`k`, `n`; cor opcional) |
-| `funcs` | Itens da proposta. `lim`: `qtd` (soma das diárias/horas ≤ `q`), `count` (até `max` contratações), `art` (cachês, usa `artistico`), `sem` (fora da proposta). `sub: true` marca item subcontratável |
+| `funcs` | Itens da proposta. `lim`: `qtd` (soma das diárias/horas ≤ `q`), `count` (até `max` contratações), `verba` (quantos contratados forem precisos, até o valor `q × d`), `art` (cachês, usa `artistico`), `sem` (fora da proposta). `op: true` num item `sem` marca custo da operação sem linha própria, que sai da margem. `sub: true` marca item subcontratável |
 | `artistico` | Verba (`verba`), mínimo e máximo de cachês, `rouanet` (cachês fora do contrato), `item` e `media`. A função artística precisa ter `k: "artista"` |
 | `subcontratacao` | Teto de subcontratação (`pct`) |
 | `docs` | Documentos exigidos: `k`, `n`, `d` (detalhe), `pz` (prazo), `r` (risco) |
-| `multas` | `ref` (item do TR), `tetoPct`, `diasMax` e `itens` (`pct`, `dia` para multa diária, `h` para prazo de chamado, `livre` para glosa) |
+| `multas` | `ref` (item do TR), `tetoPct`, `diasMax` e `itens` (`pct`, `dia` para multa diária, `diasMax` próprio do tipo, `livre` para glosa ou multa sobre parcela) |
 | `ocorrencias` | `prazos` dos chamados (`h`, `n`, `pct` da multa) e `locais` |
 | `rider` | Checklist técnico: `funcs` (itens de rider), `cols` (2 locais), `itens` ([requisito, local 1, local 2]), `info`, `titulo`, `descricao` |
 | `nfs` | Parcelas das notas fiscais: `[["NF 1", 0.2], ...]` |

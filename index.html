@@ -696,7 +696,7 @@ let FUNCS=[
  {k:"acessibilidade",n:"Acessibilidade",s:"estrutura",it:"8",un:"serviço",q:1,d:1500,lim:"count",max:3,det:"Libras (3 datas), 2 mapas táteis, áreas reservadas"}];
 FUNCS.forEach(f=>f.tot=f.q*f.d);
 let FN=Object.fromEntries(FUNCS.map(f=>[f.k,f]));
-const unitWord=f=>f.un.startsWith("diária")?"diárias":(f.un==="hora"?"horas":(f.un==="cachê"?"apresentações":"serviço"));
+const unitWord=f=>f.lim==="verba"?"unidades":f.un.startsWith("diária")?"diárias":(f.un==="hora"?"horas":(f.un==="cachê"?"apresentações":"serviço"));
 const setBudget=k=>FUNCS.filter(f=>f.s===k).reduce((a,f)=>a+f.tot,0);
 
 let DOCS=[
@@ -836,7 +836,7 @@ const TXT_GEN={
 function applyTextos(){
   $$("[data-pt]").forEach(el=>{const k=el.dataset.pt;let t;if(PROJ.legado)t=TXT0[k];else{const o=(PROJ.textos||{})[k];t=o!=null?o:(TXT_GEN[k]?TXT_GEN[k]():"");}el.innerHTML=t||"";el.hidden=!t;});
   $$(".pnome").forEach(e=>e.textContent=PROJ.nome);
-  $("#ctrNome").textContent=PROJ.nome;$("#ctrSub").textContent=[PROJ.local,PROJ.contrato].filter(Boolean).join(" · ");$("#ctrTeto").textContent="Homologado "+brl(TETO);
+  $("#ctrNome").textContent=PROJ.nome;$("#ctrSub").textContent=[PROJ.local,PROJ.contrato].filter(Boolean).join(" · ");$("#ctrTeto").textContent=(PROJ.tetoReferencia?"Referência do edital ":"Homologado ")+brl(TETO);
   $("#ocGrav").innerHTML=PRAZOS.map(p=>`<option value="${+p.h}">${esc(p.n)} · ${+p.h}h</option>`).join("");
   $("#ocLocal").innerHTML=(((PROJ.ocorrencias||{}).locais)||["Área geral"]).map(l=>`<option>${esc(l)}</option>`).join("");
   $("#cFunc").innerHTML=funcOptions(FN.artista?"artista":(FUNCS[0]||{}).k);
@@ -848,7 +848,7 @@ function mesesProjeto(){if(PROJ.meses)return PROJ.meses;const NM=["Janeiro","Fev
   const v=PROJ.vigencia||{};let ini=v.ini,fim=v.fim;if(!ini||!fim){const ds=payList().map(p=>p.data).filter(Boolean).sort();ini=ini||ds[0]||TODAY;fim=fim||ds[ds.length-1]||ini;}
   const out=[];let [y,m]=ini.split("-").map(Number);const [fy,fm]=fim.split("-").map(Number);
   while((y<fy||(y===fy&&m<=fm))&&out.length<12){out.push([`${y}-${pad(m)}`,NM[m-1],`${NM[m-1].slice(0,3).toLowerCase()}/${String(y).slice(2)}`]);m++;if(m>12){m=1;y++;}}
-  return out.slice(-6);}
+  return out.slice(-8);}
 /* ================= ESTADO ================= */
 const cfg=k=>S.config[k]||{};
 const aliq=()=>{const a=cfg("planilha").aliquota;return a==null?(PROJ.aliquota==null?0.125:+PROJ.aliquota):+a;};
@@ -1010,7 +1010,8 @@ function finBar(pago,prev,base,h,extra){base=Math.max(base||0,prev,pago,1);const
 function artAgg(){const cs=contrList().filter(c=>c.funcao==="artista");let contr=0,pago=0,cach=0,apres=0,apresC=0,apresRou=0,real=0,semDoc=0,nRou=0;cs.forEach(c=>{const rou=isRou(c);contr+=cTotal(c);pago+=cAgg(c).pago;const ds=cDatas(c);apres+=ds.length;real+=ds.filter(x=>x.ok).length;if(rou){nRou++;apresRou+=ds.length;}else{cach+=+c.qtd||0;apresC+=ds.length;if(digits(c.doc||"").length<11)semDoc++;}});return{n:cs.length-nRou,nRou,cach,apres,apresC,apresRou,real,semDoc,contr:r2(contr),pago:r2(pago),aPagar:r2(contr-pago),falta:r2(VERBA-contr),prest:cs.filter(c=>c.servico==="prestado").length};}
 
 function itemStatus(f,a){const out=[];
-  if(f.lim==="sem"){if(a.n)out.push(["w","Fora da proposta"]);else out.push(["","Sem previsão"]);return out;}
+  if(f.lim==="sem"){if(f.op)out.push(["",a.n?"Custo da operação":"Sem contratado"]);else if(a.n)out.push(["w","Fora da proposta"]);else out.push(["","Sem previsão"]);return out;}
+  if(f.lim==="verba"&&a.contratado>f.tot+0.5)out.push(["b","Acima da verba"]);
   if(f.lim==="art"){if(a.qtd<ART_MIN)out.push(["w",`${a.qtd}/${ART_MIN} cachês`]);if(a.contratado<VERBA)out.push(["w",`Falta ${brl0(VERBA-a.contratado)}`]);if(a.contratado>VERBA)out.push(["b","Acima de R$ 50 mil"]);if(a.n>=ART_MIN&&a.contratado===VERBA)out.push(["g","Completo"]);return out;}
   if(!a.n)out.push(["b","Sem contratado"]);
   else if(f.lim==="qtd"&&a.qtd<f.q)out.push(["w",`Faltam ${f.q-a.qtd} ${unitWord(f)}`]);
@@ -1044,7 +1045,7 @@ function alerts(){const al=[];const t=totals();
   if(inc.length)al.push(["lo",`${inc.length} item(ns) com diárias ou horas incompletas`,inc.map(f=>{const a=itemAgg(f);return `${f.n}: ${a.qtd}/${f.q}`;}).join(" · "),"planilha"]);
   const semReal=FUNCS.filter(f=>f.lim!=="sem"&&itemAgg(f).real==null);
   if(semReal.length)al.push(["lo",`${semReal.length} item(ns) sem Valor Real lançado`,"Preencha na Planilha de custo.","planilha"]);
-  const fora=FUNCS.filter(f=>f.lim==="sem"&&itemAgg(f).n);
+  const fora=FUNCS.filter(f=>f.lim==="sem"&&!f.op&&itemAgg(f).n);
   if(fora.length)al.push(["md","Contratações fora da proposta",fora.map(f=>`${f.n}: ${brl(itemAgg(f).contratado)}`).join(" · "),"planilha"]);
   const sub=FUNCS.filter(f=>f.sub).reduce((a,f)=>a+itemAgg(f).contratado,0);
   if(SUB_PCT&&sub>TETO*SUB_PCT)al.push(["hi",`Subcontratação acima de ${pct(SUB_PCT)}`,`${brl(sub)} em serviços subcontratáveis.`,"planilha"]);
@@ -1075,7 +1076,7 @@ function rProjetos(){const ids=FICHAS_ORDEM.filter(pid=>acc(pid));const admin=do
     return `<a class="proj" href="#${first}" data-proj="${esc(pid)}" aria-label="Abrir o painel do ${esc(P.nome)}">
     <div class="proj-cover"><img class="pc-mark" src="assets/brand/alternativa-cultural-simbolo-fundo-escuro.svg" alt="" aria-hidden="true"><span class="pc-tag">${st}</span><h2>${esc(P.nome)}</h2></div>
     <div class="proj-body">
-      <dl class="proj-meta"><div><dt>Contratante</dt><dd>${esc(P.contratante||"—")}</dd></div><div><dt>Contrato</dt><dd>${esc(P.contrato||"—")}</dd></div><div><dt>Valor homologado</dt><dd class="num">${brl(TETO)}</dd></div><div><dt>${ART?"Programação":"Vigência"}</dt><dd>${esc(per)}</dd></div></dl>
+      <dl class="proj-meta"><div><dt>Contratante</dt><dd>${esc(P.contratante||"—")}</dd></div><div><dt>Contrato</dt><dd>${esc(P.contrato||"—")}</dd></div><div><dt>${P.tetoReferencia?"Valor de referência":"Valor homologado"}</dt><dd class="num">${brl(TETO)}</dd></div><div><dt>${ART?"Programação":"Vigência"}</dt><dd>${esc(per)}</dd></div></dl>
       ${prog}
       <div class="row" style="gap:6px"><span class="chip">${nC} contratado(s)</span>${a.valores?`<span class="chip">${pend} pagamento(s) em aberto</span>`:""}${ocA.length?`<span class="chip ${ocE?"b":""}">${ocA.length} chamado(s) aberto(s)</span>`:""}${a.valores&&t.multas?`<span class="chip b">Multas ${brl0(t.multas)}</span>`:""}</div>
       <span class="proj-go">Abrir painel do projeto<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1122,7 +1123,7 @@ function rPainel(){
   const nextV=nextP.reduce((a,p)=>a+(+p.valor||0),0);
   const pv=t.prev;const prevAberto=t.aPagar;const margem=t.margem;
   $("#pnlKpis").innerHTML=[
-   `<div class="card kpi"><span class="label">Homologado</span><div class="v num">${brl0(TETO)}</div><div class="s">Margem livre: <span class="${margem<0?"neg":""}">${brl0(margem)}</span></div></div>`,
+   `<div class="card kpi"><span class="label">${PROJ.tetoReferencia?"Referência do edital":"Homologado"}</span><div class="v num">${brl0(TETO)}</div><div class="s">Margem livre: <span class="${margem<0?"neg":""}">${brl0(margem)}</span></div></div>`,
    `<div class="card kpi ${t.multas?"alert":""}"><span class="label">Previsto</span><div class="v num">${brl0(pv+t.imp+t.multas)}</div><div class="s">Real ${brl0(pv)} + impostos ${brl0(t.imp)}${t.multas?` + <span class="neg">multas ${brl0(t.multas)}</span>`:""}</div></div>`,
    `<div class="card kpi"><span class="label">Pago</span><div class="v num" style="color:var(--ok)">${brl0(t.pago)}</div><div class="s">${pct(pv+t.imp?t.pago/(pv+t.imp):0)} do previsto</div></div>`,
    `<div class="card kpi"><span class="label">Contratado</span><div class="v num">${brl0(t.contr)}</div><div class="s">A pagar: ${brl0(t.contr-t.pago)}</div></div>`,
@@ -1134,7 +1135,7 @@ function rPainel(){
   $("#pnlTetoLbl").innerHTML=margem<0?`<span class="neg">${brl0(-margem)} acima do teto</span>`:`margem: ${brl0(margem)}`;
   $("#pnlTetoLeg").innerHTML=`<span><b style="background:var(--ok)"></b>Pago · ${brl0(t.pago)}</span><span><b style="background:${GRAY}"></b>Previsto a pagar · ${brl0(prevAberto)}</span><span><b style="background:${GRAY2}"></b>Impostos · ${brl0(t.imp)}</span>${t.multas?`<span><b style="background:var(--bad)"></b>Multas · ${brl0(t.multas)}</span>`:""}<span><b style="background:var(--bg2);border:1px solid var(--line2)"></b>Margem · ${brl0(Math.max(0,margem))}</span>`;
   // setores
-  $("#pnlSet").innerHTML=SETORES.map(s=>{const a=setAgg(s.k);const over=a.prev>a.orc+0.5;return `<div class="sect"><span><span class="sdot" style="background:${s.c}"></span>${s.n}<span class="sub">Previsto ${brl0(a.prev)} · proposta ${brl0(a.orc)}${over?' · <span class="neg">acima da proposta</span>':""}</span></span>${finBar(a.pago,a.prev,a.orc,10)}<span class="v">${a.prev?brl0(a.prev):"—"}<span class="sub" style="text-align:right">pago ${brl0(a.pago)}</span></span></div>`;}).join("");
+  $("#pnlSet").innerHTML=SETORES.map(s=>{const a=setAgg(s.k);const opS=FUNCS.filter(f=>f.s===s.k).every(f=>f.op);const over=!opS&&a.prev>a.orc+0.5;return `<div class="sect"><span><span class="sdot" style="background:${s.c}"></span>${s.n}<span class="sub">Previsto ${brl0(a.prev)} · ${opS?"sem linha própria, sai da margem":"proposta "+brl0(a.orc)}${over?' · <span class="neg">acima da proposta</span>':""}</span></span>${finBar(a.pago,a.prev,a.orc,10)}<span class="v">${a.prev?brl0(a.prev):"—"}<span class="sub" style="text-align:right">pago ${brl0(a.pago)}</span></span></div>`;}).join("");
   // arco: previsto (Valor Real) por setor + impostos, desenhado como o arco do símbolo da marca; o restante fica em trilho neutro
   {const fat=SETORES.map(x=>({n:x.n,c:x.c,v:setAgg(x.k).prev}));
    fat.push({n:`Impostos (${pct(aliq())})`,c:"#8F99B3",v:t.imp});if(t.multas)fat.push({n:"Multas e glosas",c:"var(--bad)",v:t.multas});
@@ -1163,10 +1164,10 @@ function rPainel(){
    const ax=`<div class="ax">${[0,1,2,3,4].map(i=>`<span style="bottom:${i/4*usable}px">${yk(step*i)}</span>`).join("")}</div>`;
    const cols=M.map((m,i)=>{const h=v=>v/top*usable;const segs=[[m.pago,"var(--ok)","Pago"],[m.pend,GRAY,"Agendado"],[m.atr,"var(--bad)","Atrasado"]].filter(x=>x[0]>0);
      return `<div class="col" role="button" tabindex="0" data-m="${m.k}" aria-label="${m.n}: pago ${esc(brl(m.pago))}, agendado ${esc(brl(m.pend))}, atrasado ${esc(brl(m.atr))}" title="${m.n}: pago ${esc(brl(m.pago))} · agendado ${esc(brl(m.pend))}${m.atr?` · atrasado ${esc(brl(m.atr))}`:""}"><span class="top" style="color:${m.pago?"var(--ok)":"var(--muted)"}">${brl0(m.pago)}</span><span class="stk">${segs.map(x=>`<i style="height:${Math.max(2,h(x[0]))}px;background:${x[1]}"></i>`).join("")||`<i style="height:2px;background:var(--line2)"></i>`}</span></div>`;}).join("");
-   const fts=M.map(m=>`<div class="ft"><b>${m.n}</b>${m.pend+m.atr?`<span title="Agendado no mês">+ ${brl0(m.pend+m.atr)} a pagar</span>`:""}</div>`).join("");
+   const fts=M.map(m=>`<div class="ft"><b>${M.length>4?m.c:m.n}</b>${m.pend+m.atr?`<span title="Agendado no mês">+ ${brl0(m.pend+m.atr)} a pagar</span>`:""}</div>`).join("");
    const tot=M.reduce((a,m)=>a+m.pago,0);
    $("#pnlMesLbl").textContent=`pago ${brl0(tot)}`;
-   $("#pnlMes").innerHTML=`<div class="mes">${ax}<div class="plot">${gl}${cols}</div><div class="fts">${fts}</div></div><div class="legend"><span><b style="background:var(--ok)"></b>Pago no mês</span><span><b style="background:${GRAY}"></b>Agendado</span><span><b style="background:var(--bad)"></b>Atrasado</span></div>${fora.length?`<p class="muted" style="font-size:12px;margin:8px 0 0">${fora.length} pagamento(s) fora desses meses: ${brl(fora.reduce((a,p)=>a+(+p.valor||0),0))}.</p>`:""}`;
+   $("#pnlMes").innerHTML=`<div class="mes">${ax}<div class="plot" style="grid-template-columns:repeat(${M.length},minmax(0,1fr))">${gl}${cols}</div><div class="fts" style="grid-template-columns:repeat(${M.length},minmax(0,1fr))">${fts}</div></div><div class="legend"><span><b style="background:var(--ok)"></b>Pago no mês</span><span><b style="background:${GRAY}"></b>Agendado</span><span><b style="background:var(--bad)"></b>Atrasado</span></div>${fora.length?`<p class="muted" style="font-size:12px;margin:8px 0 0">${fora.length} pagamento(s) fora desses meses: ${brl(fora.reduce((a,p)=>a+(+p.valor||0),0))}.</p>`:""}`;
    $$("#pnlMes .col").forEach(c=>{const go=()=>{const [y,mm]=c.dataset.m.split("-").map(Number);calM={y,m:mm-1};calSel=null;location.hash="pagamentos";};c.onclick=go;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}};});}
   // próximos
   const atr=payList().filter(p=>payStatus(p)==="atrasado").sort((a,b)=>a.data.localeCompare(b.data));
@@ -1192,6 +1193,8 @@ function capInfo(f,exclude){const u=funcUse(f.k,exclude);
   if(f.lim==="qtd")return{txt:`${u.qtd} de ${f.q} ${unitWord(f)} contratadas · disponível ${f.q-u.qtd}`,rest:f.q-u.qtd,u};
   if(f.lim==="count")return{txt:`${u.n} de ${f.max} contratação(ões) · proposta ${brl(f.tot)}`,rest:f.max-u.n,u};
   if(f.lim==="art")return{txt:`${u.qtd} cachês em ${u.n} contratação(ões) (mín. ${ART_MIN}, máx. ${ART_MAX}) · ${brl(u.valor)} de ${brl(VERBA)}${u.valor>VERBA?" · ACIMA DA VERBA":" · disponível "+brl(VERBA-u.valor)}`,rest:VERBA-u.valor,u};
+  if(f.lim==="verba")return{txt:`${u.n} contratação(ões) · ${brl(u.valor)} de ${brl(f.tot)} · disponível ${brl(Math.max(0,f.tot-u.valor))}`,rest:f.tot-u.valor,u};
+  if(f.op)return{txt:"Custo da operação sem linha própria na proposta: sai da margem do contrato",rest:Infinity,u};
   return{txt:"Sem linha na proposta: será sinalizado como fora da proposta",rest:Infinity,u};}
 function validateC(d,excludeId){
   if(!d.nome)return"Informe o nome.";
@@ -1202,6 +1205,7 @@ function validateC(d,excludeId){
   const ci=capInfo(f,excludeId);
   if(f.lim==="qtd"&&d.qtd>ci.rest)return`Limite da proposta: restam ${Math.max(0,ci.rest)} ${unitWord(f)} em ${f.n}.`;
   if(f.lim==="count"&&ci.rest<=0)return`${f.n} já tem ${f.max} contratação(ões), o limite da proposta.`;
+  if(f.lim==="verba"&&!NV&&r2(d.diaria*d.qtd)>r2(ci.rest)+0.001)return`Passa da verba de ${f.n}: restam ${brl(Math.max(0,ci.rest))}.`;
   if(f.lim==="art"&&ci.u.qtd+d.qtd>ART_MAX)return`Limite de ${ART_MAX} cachês da proposta atingido (já há ${ci.u.qtd}).`;
   const ps=excludeId?cPays(excludeId):[];const ag=ps.reduce((a,p)=>a+(+p.valor||0),0);
   if(r2(d.diaria*d.qtd)+0.001<ag)return`Já há ${brl(ag)} agendado para este contratado. Reduza as parcelas antes.`;
@@ -1211,10 +1215,10 @@ function confirmAsync(t,txt,okLbl){return new Promise(res=>{const m=modalHost();
 function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim(),fonte:$("#cFonte").value,atracao:$("#cAtr").value.trim(),estilo:$("#cEstilo").value.trim(),elenco:$("#cElenco").value.trim(),datas:readDateRows($("#cDatas"))};}
 function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
   const ci=capInfo(f);$("#cFuncHint").textContent=ci.txt;
-  const lbl=f.lim==="art"?"Valor do cachê (R$) *":(f.un==="hora"?"Valor da hora (R$) *":(f.un==="serviço"?"Valor do serviço (R$) *":"Valor da diária (R$) *"));
+  const lbl=f.lim==="verba"?"Valor unitário (R$) *":f.lim==="art"?"Valor do cachê (R$) *":(f.un==="hora"?"Valor da hora (R$) *":(f.un==="serviço"?"Valor do serviço (R$) *":"Valor da diária (R$) *"));
   $("#cDiariaLbl").textContent=lbl;
-  $("#cQtdLbl").textContent=f.lim==="art"?"Apresentações *":(f.un==="hora"?"Horas contratadas *":(f.un==="serviço"?"Quantidade":"Diárias contratadas *"));
-  const q=$("#cQtd");if(f.un==="serviço"){q.value=1;q.readOnly=true;}else{q.readOnly=false;if(f.lim==="art"&&!q.value)q.value=1;}
+  $("#cQtdLbl").textContent=f.lim==="verba"?"Quantidade *":f.lim==="art"?"Apresentações *":(f.un==="hora"?"Horas contratadas *":(f.un==="serviço"?"Quantidade":"Diárias contratadas *"));
+  const q=$("#cQtd");if(f.un==="serviço"&&f.lim!=="verba"){q.value=1;q.readOnly=true;}else{q.readOnly=false;if(f.lim==="art"&&!q.value)q.value=1;}
   $("#cDataLbl").textContent=f.lim==="art"?"Data da apresentação":"Data do serviço";
   $("#cForm").classList.toggle("art",f.lim==="art");
   if(!$("#cDiaria").value&&f.d&&f.lim!=="art")$("#cDiaria").placeholder="Proposta: "+brl(f.d);else if(f.lim==="art")$("#cDiaria").placeholder=ART&&ART.media?"Média: "+brl(ART.media):"";
@@ -1241,7 +1245,8 @@ function rContr(){
     if(f.lim==="qtd"){lim=`${f.q} ${unitWord(f)}`;used=`${u.qtd}`;disp=`${f.q-u.qtd}`;p=u.qtd/f.q;}
     else if(f.lim==="count"){lim=`${f.max} contratação(ões)`;used=`${u.n}`;disp=`${f.max-u.n}`;p=u.n/f.max;}
     else if(f.lim==="art"){lim=`${brl0(VERBA)} · ${ART_MIN}–${ART_MAX} cachês`;used=`${u.qtd} cachês · ${brl0(u.valor)}`;disp=u.valor>VERBA?`<span class="neg">− ${brl0(u.valor-VERBA)}</span>`:brl0(VERBA-u.valor);p=u.valor/VERBA;}
-    else{lim="Sem previsão";used=u.n?`${u.n} · ${brl0(u.valor)}`:"0";disp="—";p=0;}
+    else if(f.lim==="verba"){lim=`Verba ${brl0(f.tot)}`;used=`${u.n} · ${brl0(u.valor)}`;disp=u.valor>f.tot?`<span class="neg">− ${brl0(u.valor-f.tot)}</span>`:brl0(f.tot-u.valor);p=f.tot?u.valor/f.tot:0;}
+    else{lim=f.op?"Custo da operação":"Sem previsão";used=u.n?`${u.n} · ${brl0(u.valor)}`:"0";disp="—";p=0;}
     return `<tr><td><b>${f.n}</b><span class="sub">Item ${f.it} · ${f.un}</span></td><td><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n}</td><td class="r">${lim}</td><td class="r num">${used}</td><td class="r num">${disp}</td><td><span class="bar"><i style="width:${Math.min(100,p*100)}%;background:${p>1?"var(--bad)":SET[f.s].c}"></i></span></td><td class="r num">${(()=>{const a=itemAgg(f);return a.prev?`${brl0(a.prev)}<span class="sub">pago ${brl0(a.pago)}</span><span style="display:block;margin-top:4px">${finBar(a.pago,a.prev,0,6)}</span>`:"—";})()}</td></tr>`;}).join("");
   const q=$("#cSearch").value.trim().toLowerCase(),sf=$("#cSetF").value;
   const cs=contrList().filter(c=>(!sf||(FN[c.funcao]||{}).s===sf)&&(!q||(c.nome||"").toLowerCase().includes(q)||digits(c.doc).includes(digits(q)||"§"))).sort((a,b)=>(a.nome||"").localeCompare(b.nome||""));
@@ -1436,7 +1441,7 @@ function rPag(){
   const pend=ps.filter(p=>payStatus(p)==="pendente"),atr=ps.filter(p=>payStatus(p)==="atrasado"),pag=ps.filter(p=>payStatus(p)==="pago");
   const sum=a=>a.reduce((x,p)=>x+(+p.valor||0),0);
   $("#pgKpis").innerHTML=[
-   `<div class="card kpi"><span class="label">Homologado</span><div class="v num">${brl0(TETO)}</div><div class="s">Pago ${pct(t.pago/TETO)} · margem ${brl0(t.margem)}</div><div style="margin-top:8px">${finBar(t.pago,t.prev,TETO,8,`<i style="width:${Math.min(100,t.imp/TETO*100)}%;background:${GRAY2}"></i><i style="width:${Math.min(100,t.multas/TETO*100)}%;background:var(--bad)"></i>`)}</div></div>`,
+   `<div class="card kpi"><span class="label">${PROJ.tetoReferencia?"Referência do edital":"Homologado"}</span><div class="v num">${brl0(TETO)}</div><div class="s">Pago ${pct(t.pago/TETO)} · margem ${brl0(t.margem)}</div><div style="margin-top:8px">${finBar(t.pago,t.prev,TETO,8,`<i style="width:${Math.min(100,t.imp/TETO*100)}%;background:${GRAY2}"></i><i style="width:${Math.min(100,t.multas/TETO*100)}%;background:var(--bad)"></i>`)}</div></div>`,
    `<div class="card kpi"><span class="label">Realizados</span><div class="v num">${brl0(sum(pag))}</div><div class="s">${pag.length} pagamento(s) · ${pag.filter(p=>!p.comp).length} sem comprovante</div></div>`,
    `<div class="card kpi ${pend.length?"warnb":""}"><span class="label">Pendentes</span><div class="v num">${brl0(sum(pend))}</div><div class="s">${pend.length} pagamento(s)</div></div>`,
    `<div class="card kpi ${atr.length?"alert":""}"><span class="label">Atrasados</span><div class="v num">${brl0(sum(atr))}</div><div class="s">${atr.length} pagamento(s)</div></div>`,
@@ -1568,17 +1573,18 @@ function openOc(id){const o=S.ocorrencias[id];if(!o)return;const c=S.contratados
     $("#ocMultaForm").innerHTML=`<form class="form" id="mfF" style="grid-template-columns:1fr 1fr;margin-top:10px;align-items:start">
      <label class="f w2" for="mfT">Tipo${MUL_REF?` (${esc(MUL_REF)})`:""}<select id="mfT">${MULTAS.map(x=>`<option value="${x.k}" ${x.k===def?"selected":""}>${esc(x.n)} · ${x.livre?"valor livre":pct(x.pct)+(x.dia?" por dia":"")}</option>`).join("")}</select></label>
      <label class="f" for="mfP">Percentual sobre o contrato (%)<input type="number" id="mfP" step="0.01" min="0" max="30" class="in-num" style="max-width:none"></label>
-     <label class="f" for="mfD">Dias (multa diária, máx. ${MULTA_DIAS_MAX})<input type="number" id="mfD" min="1" max="${MULTA_DIAS_MAX}" step="1" value="1" class="in-num" style="max-width:none"></label>
+     <label class="f" for="mfD">Dias (multa diária, máx. <span id="mfDl">${MULTA_DIAS_MAX}</span>)<input type="number" id="mfD" min="1" max="${MULTA_DIAS_MAX}" step="1" value="1" class="in-num" style="max-width:none"></label>
      <label class="f" for="mfV">Valor (R$) *<input type="number" id="mfV" step="0.01" min="0.01" class="in-num" style="max-width:none" required></label>
      <label class="f" for="mfData">Data da notificação *<input type="date" id="mfData" value="${TODAY}" required></label>
      <label class="f w2" for="mfO">Observação (nº do ofício, justificativa)<input type="text" id="mfO"></label>
      <span class="err w2" id="mfMsg"></span>
      <div class="w2 row" style="justify-content:flex-end"><button class="btn" type="button" id="mfC">Cancelar</button><button class="btn p" type="submit">Registrar multa</button></div></form>`;
-    const calc=()=>{const tp=MK[$("#mfT").value]||{};const dEl=$("#mfD");dEl.disabled=!tp.dia;if(!tp.dia)dEl.value=1;const p=+$("#mfP").value||0;const d=tp.dia?Math.min(MULTA_DIAS_MAX,Math.max(1,+dEl.value||1)):1;$("#mfV").value=r2(TETO*p/100*d)||"";};
+    const dMax=tp=>+tp.diasMax||MULTA_DIAS_MAX;
+    const calc=()=>{const tp=MK[$("#mfT").value]||{};const dEl=$("#mfD");dEl.max=dMax(tp);$("#mfDl").textContent=dMax(tp);if(+dEl.value>dMax(tp))dEl.value=dMax(tp);dEl.disabled=!tp.dia;if(!tp.dia)dEl.value=1;const p=+$("#mfP").value||0;const d=tp.dia?Math.min(dMax(tp),Math.max(1,+dEl.value||1)):1;$("#mfV").value=r2(TETO*p/100*d)||"";};
     const onType=()=>{const tp=MK[$("#mfT").value]||{};$("#mfP").value=tp.livre?"":(tp.pct*100);$("#mfP").disabled=!!tp.livre;calc();if(tp.livre){$("#mfV").value="";}};
     $("#mfT").onchange=onType;$("#mfP").oninput=calc;$("#mfD").oninput=calc;onType();
     $("#mfC").onclick=()=>re();
-    $("#mfF").addEventListener("submit",async e=>{e.preventDefault();const tp=MK[$("#mfT").value]||{};const v=r2($("#mfV").value);const data=$("#mfData").value;const dias=tp.dia?Math.min(MULTA_DIAS_MAX,Math.max(1,+$("#mfD").value||1)):1;
+    $("#mfF").addEventListener("submit",async e=>{e.preventDefault();const tp=MK[$("#mfT").value]||{};const v=r2($("#mfV").value);const data=$("#mfData").value;const dias=tp.dia?Math.min(dMax(tp),Math.max(1,+$("#mfD").value||1)):1;
       if(!(v>0)||!data){$("#mfMsg").textContent="Informe valor e data.";return;}
       const mt=multaTotals();if(mt.tot+v>MULTA_TETO+0.001){$("#mfMsg").textContent=`Passa do limite de ${pct(MULTA_PCT)} (${brl(MULTA_TETO)}). Acumulado: ${brl(mt.tot)}. Registre mesmo assim só se ${ORG_F} aplicou.`;if(!$("#mfF").dataset.force){$("#mfF").dataset.force="1";return;}}
       await ocSave(id,{multa:{tipo:$("#mfT").value,pct:tp.livre?0:r2(+$("#mfP").value)/100,dias,valor:v,data,st:"pendente",obs:$("#mfO").value.trim(),em:Date.now()}});
@@ -1592,7 +1598,7 @@ $$("#rpType button").forEach(b=>b.onclick=()=>{rpT=b.dataset.t;$$("#rpType butto
 function repData(){const aa=artAgg(),t=totals();
   if(rpT==="verba"){const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"").localeCompare(b.data||""));return{t:"Prestação de contas da verba artística",s:`${ART&&ART.item?ART.item+" · ":""}${aa.n} contratações · ${aa.cach} cachês · ${brl(aa.contr)} de ${brl(VERBA)}${aa.nRou?` · ${aa.nRou} atração(ões) pela ${ROU_TXT} (R$ 0,00 no contrato)`:""}`,h:["Datas","Atração","Artista","CPF/CNPJ","Cachês","Total","Pago","Comprovantes"],rows:cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id).filter(p=>p.status==="pago");const ds=cDatas(c);const rou=isRou(c);return[ds.map(x=>fd(x.d)).join(", ")||"—",c.atracao||"—",c.nome,rou?"—":(c.doc||"—"),rou?ROU_TXT:`${c.qtd} × ${brl(c.diaria)}`,brl(a.total),rou?"—":brl(a.pago),rou?ROU_TXT+" · "+ORG:(ps.length?`${ps.filter(p=>p.comp).length}/${ps.length}`:"—")];}),foot:`${aa.cach} cachês em ${aa.apresC} apresentações${aa.nRou?` (+${aa.apresRou} pela ${ROU_TXT})`:""} · Pago: ${brl(aa.pago)} · A pagar: ${brl(aa.aPagar)}${aa.contr>VERBA?` · ACIMA DA VERBA: ${brl(aa.contr-VERBA)}`:` · Falta contratar: ${brl(Math.max(0,aa.falta))}`}`};}
   if(rpT==="setor")return{t:"Gastos por setor",s:`Homologado ${brl(TETO)} · pago ${brl(t.pago)} (${pct(t.pago/TETO)})`,h:["Setor","Proposta","Previsto","Contratado","Pago","A pagar"],rows:SETORES.map(s=>{const a=setAgg(s.k);return[s.n,brl(a.orc),brl(a.prev),brl(a.contr),brl(a.pago),brl(a.aPagar)];}),foot:`Previsto ${brl(t.prev)} + impostos ${brl(t.imp)} · margem livre ${brl(t.margem)}`};
-  return{t:"Relatório parcial de execução",s:"Medição para nota fiscal",h:["Item","Quantidade","Contratado","Situação"],rows:FUNCS.filter(f=>f.lim!=="sem").map(f=>{const a=itemAgg(f);return[`${f.it} · ${f.n}`,f.lim==="art"?`${a.qtd} cachês`:(f.lim==="qtd"?`${a.qtd}/${f.q} ${unitWord(f)}`:(a.n?"Contratado":"Pendente")),brl(a.contratado),itemStatus(f,a).map(x=>x[1]).join(", ")];}),foot:(PROJ.nfs||[]).map(([n,p])=>`${n} (${pct(p)}): ${brl(TETO*p)}`).join(" · ")||`Homologado ${brl(TETO)}`};}
+  return{t:"Relatório parcial de execução",s:"Medição para nota fiscal",h:["Item","Quantidade","Contratado","Situação"],rows:FUNCS.filter(f=>f.lim!=="sem").map(f=>{const a=itemAgg(f);return[`${f.it} · ${f.n}`,f.lim==="art"?`${a.qtd} cachês`:(f.lim==="qtd"?`${a.qtd}/${f.q} ${unitWord(f)}`:f.lim==="verba"?`${a.n} contratação(ões)`:(a.n?"Contratado":"Pendente")),brl(a.contratado),itemStatus(f,a).map(x=>x[1]).join(", ")];}),foot:(PROJ.nfs||[]).map(([n,p])=>`${n} (${pct(p)}): ${brl(TETO*p)}`).join(" · ")||`Homologado ${brl(TETO)}`};}
 function rRep(){const r=repData();$("#rpBox").innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)"><div><span class="rl">${esc(PROJ.relatorio||[PROJ.contratante,PROJ.contrato].filter(Boolean).join(" · "))}</span><h3>${esc(r.t)}</h3><span style="color:var(--muted);font-size:13px">${esc(r.s)}</span></div><img class="rep-logo" src="assets/brand/alternativa-cultural-horizontal-cor.svg" alt="Alternativa Cultural · Produção de Eventos" width="240" height="54"></div><div class="tw"><table><thead><tr>${r.h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r.rows.length?r.rows.map(x=>`<tr>${x.map(y=>`<td>${esc(y)}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${r.h.length}">Nenhum registro ainda.</td></tr>`}</tbody></table></div><div class="ft"><span>${esc(r.foot)}</span><span>Gerado em ${new Date().toLocaleDateString("pt-BR")} · Alternativa Cultural · Sistema ST Solutions</span></div>`;}
 $("#rpCopy").onclick=async()=>{const r=repData();const txt=[r.t,r.s,"",r.h.join(" | "),...r.rows.map(x=>x.join(" | ")),"",r.foot].join("\n");try{await navigator.clipboard.writeText(txt);toast("Texto copiado");}catch(e){toast("Não foi possível copiar aqui.",true);}};
 
@@ -1607,7 +1613,7 @@ $("#expPlan").onclick=()=>{const t=totals();const rows=[["Setor","Item","Valor d
 $("#expPag").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_pagamentos.csv",[["Data prevista","Data do pagamento","Situação","Valor","Contratado","CPF/CNPJ","Setor","Função","Comprovante"],...payList().sort((a,b)=>a.data.localeCompare(b.data)).map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return[fd(p.data),st==="pago"?fd(p.pagoEm):"",st==="pago"?"Realizado":(st==="atrasado"?"Atrasado":"Pendente"),num(p.valor),c.nome,c.doc,(SET[f.s]||{}).n,f.n,p.comp?p.comp.nome:""];})]);
 
 /* ================= EDITAL ================= */
-function rEdital(){$("#edBody").innerHTML=FUNCS.map(f=>`<tr><td class="mono">${f.it}</td><td><b>${f.n}</b>${f.det?`<span class="sub">${f.det}</span>`:""}</td><td><span class="sdot" style="background:${(SET[f.s]||{}).c||"var(--gray)"}"></span>${esc((SET[f.s]||{}).n||"—")}</td><td class="r num">${f.lim==="art"?ART_MAX:(f.q||"—")}</td><td>${f.un}</td><td class="r num">${f.d?brl(f.d):"—"}</td><td class="r num">${f.tot?brl(f.tot):"—"}</td><td>${f.lim==="qtd"?`${f.q} ${unitWord(f)}`:f.lim==="count"?`${f.max} contratação(ões)`:f.lim==="art"?`${ART_MIN}–${ART_MAX} cachês · ${brl0(VERBA)} exatos`:'<span class="chip w">Sem previsão</span>'}</td></tr>`).join("")+`<tr class="tot"><td></td><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${brl(FUNCS.reduce((a,f)=>a+f.tot,0))}</td><td></td></tr>`;}
+function rEdital(){$("#edBody").innerHTML=FUNCS.map(f=>`<tr><td class="mono">${f.it}</td><td><b>${f.n}</b>${f.det?`<span class="sub">${f.det}</span>`:""}</td><td><span class="sdot" style="background:${(SET[f.s]||{}).c||"var(--gray)"}"></span>${esc((SET[f.s]||{}).n||"—")}</td><td class="r num">${f.lim==="art"?ART_MAX:(f.q||"—")}</td><td>${f.un}</td><td class="r num">${f.d?brl(f.d):"—"}</td><td class="r num">${f.tot?brl(f.tot):"—"}</td><td>${f.lim==="qtd"?`${f.q} ${unitWord(f)}`:f.lim==="count"?`${f.max} contratação(ões)`:f.lim==="art"?`${ART_MIN}–${ART_MAX} cachês · ${brl0(VERBA)} exatos`:f.lim==="verba"?`Verba de ${brl0(f.tot)}`:f.op?'<span class="chip">Custo da operação</span>':'<span class="chip w">Sem previsão</span>'}</td></tr>`).join("")+`<tr class="tot"><td></td><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${brl(FUNCS.reduce((a,f)=>a+f.tot,0))}</td><td></td></tr>`;}
 
 /* ================= INÍCIO ================= */
 $$("[data-pt]").forEach(el=>{TXT0[el.dataset.pt]=el.innerHTML;});
