@@ -1,6 +1,9 @@
 # Alternativa Cultural · Sistema de gestão de projetos
 
-Ferramenta exclusiva da **Alternativa Cultural | Produção de Eventos**. A tela inicial lista os projetos da empresa; o **39º Sonho de Natal (Canela/RS)** é o primeiro projeto configurado, com todos os módulos de execução.
+Ferramenta exclusiva da **Alternativa Cultural | Produção de Eventos**: o controle interno de uma empresa que executa contratos de licitação.
+A tela inicial é o painel geral da empresa, com um card por projeto. Cada projeto abre um painel próprio, montado a partir da **ficha do edital** dele
+(teto, itens da proposta, regras, prazos, documentos exigidos e módulos), com planilhas separadas e acessos por área.
+O **39º Sonho de Natal (Canela/RS)** é o projeto de origem. Os projetos novos entram pela pasta `projetos/` (ver `projetos/LEIA-ME.md`).
 
 Site estático (um `index.html`) com banco de dados, login e anexos no Firebase. Plataforma: sistema ST Solutions.
 Vários acessos simultâneos, dados em tempo real para toda a equipe.
@@ -11,7 +14,8 @@ Vários acessos simultâneos, dados em tempo real para toda a equipe.
 - `assets/fonts/` — fontes Montserrat e Source Sans 3 (licença OFL), servidas pelo próprio site
 - `backend.js` — ligação com o Firebase (Auth, Firestore, Storage)
 - `firebase-config.js` — **o único arquivo que você edita**: cole aqui a configuração do seu projeto Firebase
-- `firestore.rules` — regras de segurança do banco (quem lê e quem escreve)
+- `projetos/` — fichas de edital dos projetos novos (`registro.json`, `<id>.json`, modelo e instruções)
+- `firestore.rules` — regras de segurança do banco (quem lê e quem escreve, por projeto e por área)
 - `storage.rules` — regras de segurança dos anexos
 
 ## Implantação (uma vez, cerca de 15 minutos)
@@ -39,13 +43,19 @@ Vários acessos simultâneos, dados em tempo real para toda a equipe.
 3. Em **Settings › Pages › Build and deployment**: Source = *Deploy from a branch*, Branch = `main`, pasta `/ (root)`. Salvar.
 4. Em 1–2 minutos o site responde em `https://SEU-USUARIO.github.io/st-sonho-de-natal/`.
 
-## Papéis
-- **admin**: tudo, inclusive a aba Usuários.
-- **editor**: cadastra, paga, anexa, registra chamados e multas.
-- **leitura**: só consulta.
+## Acessos
+- **Administrador**: todos os projetos, inclusive a aba Usuários.
+- **Equipe**: acesso liberado projeto a projeto, na aba Usuários:
+  - **Edita** ou **Só consulta**;
+  - as **áreas** que vê (Painel, Contratados, Financeiro, Programação, Riders, Documentos, Ocorrências, Relatórios) ou todas;
+  - **Vê valores financeiros** ou não. Sem valores, pagamentos e planilha de custo não são carregados e os valores aparecem como R$ •••. Painel, Financeiro e Relatórios exigem valores.
+- Os papéis antigos `editor` e `leitura` continuam valendo só para o 39º Sonho de Natal, com todas as áreas. Ao editar a pessoa na aba Usuários, ela passa para o formato novo.
+
+As regras do Firestore e do Storage aplicam essas permissões no servidor: cada projeto fica isolado no próprio caminho do banco.
+Depois de qualquer mudança em `firestore.rules` ou `storage.rules`, cole o arquivo de novo no console do Firebase e clique em **Publicar**.
 
 Só entra quem tiver o e-mail cadastrado em `usuarios`. Remover o documento corta o acesso.
 
 ## Custos
 Franquia gratuita do Firebase: 50 mil leituras/dia, 20 mil gravações/dia, 1 GB no Firestore, 5 GB no Storage.
-Uma equipe de 5 a 10 pessoas neste contrato fica muito abaixo disso.
+Uma equipe de 5 a 10 pessoas por contrato, com alguns contratos ao mesmo tempo, fica muito abaixo disso.

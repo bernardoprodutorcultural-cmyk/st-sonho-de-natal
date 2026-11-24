@@ -1,13 +1,33 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Anexos (comprovantes, fotos, documentos): até 20 MB, só PDF e imagens, só para editores e administradores
+    // Anexos (comprovantes, fotos, documentos): até 20 MB, só PDF e imagens.
+    function perfil() { return firestore.get(/databases/(default)/documents/usuarios/$(request.auth.token.email.lower())).data; }
+    function arquivoOk() {
+      return request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches('application/pdf|image/png|image/jpeg|image/webp');
+    }
+    function acesso(pid) { return perfil().get('projetos', {}).get(pid, {}); }
+    function edita(pid) {
+      return perfil().papel == 'admin'
+        || (pid == 'sonho-natal-2026' && perfil().papel == 'editor')
+        || acesso(pid).get('papel', '') == 'editor';
+    }
+    function membro(pid) {
+      return perfil().papel == 'admin'
+        || (pid == 'sonho-natal-2026' && perfil().papel in ['editor', 'leitura'])
+        || acesso(pid).get('papel', '') in ['editor', 'leitura'];
+    }
+
+    // 39º Sonho de Natal (caminho de sempre)
     match /anexos/{arquivo=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && request.resource.size < 20 * 1024 * 1024
-        && request.resource.contentType.matches('application/pdf|image/png|image/jpeg|image/webp')
-        && firestore.get(/databases/(default)/documents/usuarios/$(request.auth.token.email.lower())).data.papel in ['admin', 'editor'];
+      allow read: if request.auth != null && membro('sonho-natal-2026');
+      allow write: if request.auth != null && arquivoOk() && edita('sonho-natal-2026');
+    }
+    // Demais projetos
+    match /projetos/{pid}/anexos/{arquivo=**} {
+      allow read: if request.auth != null && membro(pid);
+      allow write: if request.auth != null && arquivoOk() && edita(pid);
     }
   }
 }

@@ -329,6 +329,17 @@ label.f .hint{font-weight:400;font-size:12px;color:var(--muted)}
 .proj.add:hover{transform:none;box-shadow:none;border-color:var(--gray)}
 .proj.add h2{font-size:1.06rem}
 .proj.add p{margin:0;max-width:44ch}
+body.nv .valOnly{display:none!important}
+body.nofin #pForm,body.nofin [data-pay]{display:none!important}
+.usp{border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px 14px;margin:0 0 10px;min-width:0}
+.usp legend{padding:0 6px;font:700 14px/1.3 var(--f-display);color:var(--ink)}
+.usp legend .sub{display:inline;font:500 12px var(--f-sans);color:var(--muted);margin-left:6px}
+.usp .row{gap:14px;flex-wrap:wrap;align-items:center}
+.usp select{width:auto;min-width:150px}
+.chkl{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;color:var(--ink2);cursor:pointer}
+.usp .areas{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.usp.off .areas,.usp.off .chkl{opacity:.45;pointer-events:none}
+.acc-chips{display:flex;flex-wrap:wrap;gap:6px}
 .co-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
 .co-hero p{margin:8px 0 0;color:var(--ink2);max-width:62ch}
 .co-stats{display:flex;gap:28px;flex-wrap:wrap}
@@ -391,11 +402,11 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <aside class="side">
     <a class="brand" href="#projetos" aria-label="Alternativa Cultural · início"><img src="assets/brand/alternativa-cultural-horizontal-cor-fundo-escuro.svg" alt="Alternativa Cultural · Produção de Eventos" width="224" height="50"></a>
     <nav class="tabs" id="tabsCo" aria-label="Empresa"></nav>
-    <a class="ctr" href="#painel">
-      <span class="label">Projeto em execução</span>
-      <strong>39º Sonho de Natal</strong>
-      <span class="sub">Canela/RS · Pregão Eletrônico 60/2026</span>
-      <span class="sub">Homologado R$ 269.500,00</span>
+    <a class="ctr" href="#painel" id="ctrCard">
+      <span class="label">Projeto aberto</span>
+      <strong id="ctrNome">39º Sonho de Natal</strong>
+      <span class="sub" id="ctrSub">Canela/RS · Pregão Eletrônico 60/2026</span>
+      <span class="sub" id="ctrTeto">Homologado R$ 269.500,00</span>
       <span class="sub" id="sideProg">Programação e datas: a confirmar</span>
     </a>
     <nav class="tabs" id="tabs" aria-label="Módulos do projeto"></nav>
@@ -411,15 +422,16 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= PROJETOS (empresa) ================= -->
   <section class="view" id="v-projetos">
     <div class="topbar">
-      <div><h1>Projetos</h1><p>Painéis de execução dos projetos da Alternativa Cultural. Cada projeto tem o seu teto, os itens do contrato, a equipe contratada, os pagamentos e os documentos.</p></div>
+      <div><h1>Projetos</h1><p>Painel geral da Alternativa Cultural. Cada projeto segue o próprio edital: tem o seu teto, os itens do contrato, a equipe, os pagamentos, os documentos e os acessos.</p></div>
     </div>
+    <div class="grid g5" id="projKpis"></div>
     <div class="proj-grid" id="projGrid"></div>
   </section>
 
   <!-- ================= PAINEL ================= -->
   <section class="view" id="v-painel">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Visão geral do contrato</h1><p>Teto do contrato, quanto já foi pago, o que vence nos próximos dias e o que ainda falta contratar. Atualiza na hora a cada cadastro ou pagamento.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Visão geral do contrato</h1><p>Teto do contrato, quanto já foi pago, o que vence nos próximos dias e o que ainda falta contratar. Atualiza na hora a cada cadastro ou pagamento.</p></div>
       <div class="row"><span class="label">Próximos</span><div class="seg" id="pnlWin" role="group" aria-label="Janela de dias"><button type="button" data-n="7" aria-pressed="true">7 dias</button><button type="button" data-n="15" aria-pressed="false">15 dias</button><button type="button" data-n="30" aria-pressed="false">30 dias</button></div></div>
     </div>
     <div class="grid g6" id="pnlKpis"></div>
@@ -458,7 +470,7 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= CONTRATADOS ================= -->
   <section class="view" id="v-contratados">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Artistas e prestadores</h1><p>Cada contratado ocupa uma função fixa da proposta, com limite de diárias, horas ou cachês. O valor total é calculado sozinho; depois do cadastro, agende as datas de pagamento até completar o valor.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Artistas e prestadores</h1><p>Cada contratado ocupa uma função fixa da proposta, com limite de diárias, horas ou cachês. O valor total é calculado sozinho; depois do cadastro, agende as datas de pagamento até completar o valor.</p></div>
       <div class="row"><button class="btn" type="button" id="expContr">Baixar planilha (.csv)</button></div>
     </div>
     <div class="card">
@@ -470,12 +482,12 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
         <label class="f" for="cTel">Telefone<input type="tel" id="cTel" placeholder="(54) 99999-9999"></label>
         <label class="f w2" for="cFunc">Função *<select id="cFunc"></select><span class="hint" id="cFuncHint"></span></label>
         <label class="f" for="cServ">Situação do serviço<select id="cServ"><option value="a_prestar">A prestar</option><option value="prestado">Prestado</option></select></label>
-        <label class="f" for="cDiaria"><span id="cDiariaLbl">Valor da diária (R$) *</span><input type="number" id="cDiaria" min="0" step="0.01" class="in-num" style="max-width:none" required></label>
+        <label class="f valOnly" for="cDiaria"><span id="cDiariaLbl">Valor da diária (R$) *</span><input type="number" id="cDiaria" min="0" step="0.01" class="in-num" style="max-width:none" required></label>
         <label class="f" for="cQtd"><span id="cQtdLbl">Diárias contratadas *</span><input type="number" id="cQtd" min="0" step="1" class="in-num" style="max-width:none" required></label>
-        <label class="f" for="cTotal">Valor total (calculado)<input type="text" id="cTotal" readonly tabindex="-1"></label>
+        <label class="f valOnly" for="cTotal">Valor total (calculado)<input type="text" id="cTotal" readonly tabindex="-1"></label>
         <label class="f artHide" for="cData"><span id="cDataLbl">Data do serviço</span><input type="date" id="cData"></label>
         <label class="f w2 artOnly" for="cAtr">Atração / espetáculo<input type="text" id="cAtr" placeholder="Ex.: Encanto Mágico do Natal"></label>
-        <label class="f w2 artOnly" for="cFonte">Origem do cachê<select id="cFonte"><option value="contrato">Contrato · Alternativa Cultural (verba de R$ 50.000)</option><option value="rouanet">Lei Rouanet · contratação direta da SMTC (R$ 0,00 no contrato)</option></select><span class="hint">Na Lei Rouanet o cachê não entra na verba, nos pagamentos nem no painel; a apresentação fica só na grade.</span></label>
+        <label class="f w2 artOnly" for="cFonte" id="cFonteF">Origem do cachê<select id="cFonte"><option value="contrato">Contrato · Alternativa Cultural (verba de R$ 50.000)</option><option value="rouanet">Lei Rouanet · contratação direta da SMTC (R$ 0,00 no contrato)</option></select><span class="hint">Na Lei Rouanet o cachê não entra na verba, nos pagamentos nem no painel; a apresentação fica só na grade.</span></label>
         <label class="f artOnly" for="cEstilo">Estilo<input type="text" id="cEstilo" placeholder="Ex.: Teatro de bonecos"></label>
         <label class="f artOnly" for="cElenco">Elenco (pessoas)<input type="text" id="cElenco" placeholder="Ex.: 3"></label>
         <div class="f w4 artOnly"><span>Datas e horários das apresentações</span><div class="dl" id="cDatas"></div><div class="row" style="margin-top:6px"><button class="btn sm" type="button" id="cDataAdd">+ Adicionar data</button><span class="hint" id="cDatasHint"></span></div></div>
@@ -501,21 +513,21 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= FINANCEIRO: PLANILHA ================= -->
   <section class="view" id="v-planilha">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Financeiro</h1><p>Guia: proposta readequada. Lance o <b>Valor Real</b> total de cada item; o sistema calcula a diária real. <b>Contratado</b> e <b>Valor Pago</b> vêm sozinhos das abas Contratados e Pagamentos.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Financeiro</h1><p>Guia: proposta readequada. Lance o <b>Valor Real</b> total de cada item; o sistema calcula a diária real. <b>Contratado</b> e <b>Valor Pago</b> vêm sozinhos das abas Contratados e Pagamentos.</p></div>
       <div class="row"><label class="f" for="aliq" style="flex-direction:row;align-items:center;gap:8px">Impostos estimados (%)<input type="number" id="aliq" min="0" max="40" step="0.1" class="in-num" style="width:90px"></label><button class="btn sm" type="button" id="expPlan">Exportar planilha</button></div>
     </div>
     <nav class="subtabs" aria-label="Seções do financeiro"><a href="#planilha" aria-current="page">Planilha de custo</a><a href="#pagamentos">Pagamentos</a></nav>
     <div class="grid g4" id="plKpis"></div>
     <div class="card">
       <div class="tw"><table><thead><tr><th>Item</th><th class="r">Qtd</th><th class="r">Diária<br>proposta</th><th class="r">Valor da<br>proposta</th><th class="r" style="min-width:150px">Valor Real<br>(total)</th><th class="r">Diária<br>real</th><th class="r">Contratado</th><th class="r">Valor<br>pago</th><th>Situação</th></tr></thead><tbody id="plBody"></tbody></table></div>
-      <div class="note" style="margin-top:12px">Item 6.1 da proposta: 1 × R$ 2.000,00 lançado como R$ 2.500,00. A planilha usa R$ 2.500,00, que é o valor que compõe os R$ 269.500,00 homologados.</div>
+      <div class="note" style="margin-top:12px" data-pt="nota_planilha">Item 6.1 da proposta: 1 × R$ 2.000,00 lançado como R$ 2.500,00. A planilha usa R$ 2.500,00, que é o valor que compõe os R$ 269.500,00 homologados.</div>
     </div>
   </section>
 
   <!-- ================= FINANCEIRO: PAGAMENTOS ================= -->
   <section class="view" id="v-pagamentos">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Financeiro</h1><p>Calendário de pagamentos ligado a cada contrato (CPF ou CNPJ). Ao registrar um pagamento, ele sai de pendentes, entra em realizados e abate o setor no painel.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Financeiro</h1><p>Calendário de pagamentos ligado a cada contrato (CPF ou CNPJ). Ao registrar um pagamento, ele sai de pendentes, entra em realizados e abate o setor no painel.</p></div>
       <div class="row"><button class="btn" type="button" id="expPag">Baixar pagamentos (.csv)</button><button class="btn p" type="button" id="newPay">Agendar pagamento</button></div>
     </div>
     <nav class="subtabs" aria-label="Seções do financeiro"><a href="#planilha">Planilha de custo</a><a href="#pagamentos" aria-current="page">Pagamentos</a></nav>
@@ -535,7 +547,7 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= PROGRAMAÇÃO ================= -->
   <section class="view" id="v-programacao">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Grade artística</h1><p>Cada linha é uma apresentação; o cachê é por apresentação. O edital pede no mínimo 35 cachês somando R$ 50.000,00. Clique na linha para abrir o contrato; marque cada apresentação como realizada no dia.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Grade artística</h1><p data-pt="d_programacao">Cada linha é uma apresentação; o cachê é por apresentação. O edital pede no mínimo 35 cachês somando R$ 50.000,00. Clique na linha para abrir o contrato; marque cada apresentação como realizada no dia.</p></div>
       <div class="row"><button class="btn" type="button" id="prImport" hidden>Importar programação oficial</button><a class="btn p" href="#contratados" id="prNew">Cadastrar artista</a></div>
     </div>
     <div class="grid g5" id="prKpis"></div>
@@ -548,7 +560,7 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= RIDERS ================= -->
   <section class="view" id="v-riders">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Coreto e Praça da Matriz</h1><p>Diárias contratadas e checklist conferido com o Memorial Descritivo (itens 1 e 3) e o Termo de Referência. Os riders itinerantes (itens 9 e 10) foram suprimidos. Tudo precisa estar montado, ligado e testado antes da 1ª NF (20%).</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1 data-pt="t_riders">Coreto e Praça da Matriz</h1><p data-pt="d_riders">Diárias contratadas e checklist conferido com o Memorial Descritivo (itens 1 e 3) e o Termo de Referência. Os riders itinerantes (itens 9 e 10) foram suprimidos. Tudo precisa estar montado, ligado e testado antes da 1ª NF (20%).</p></div>
     </div>
     <div class="grid g2" id="rdKpis"></div>
     <div class="card"><div class="card-h"><h2>Checklist de conferência</h2><span class="label" id="rdCount"></span></div><div class="cmp" id="rdCmp"></div></div>
@@ -557,8 +569,8 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= DOCUMENTOS ================= -->
   <section class="view" id="v-documentos">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Licenças e prazos documentais</h1><p>Situação, responsável e anexo de cada documento exigido pelo Edital, pelo TR e pelo Memorial, na ordem em que vencem.</p></div>
-      <span class="pill bad"><i></i>Faltar licença: multa de 15%</span>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Licenças e prazos documentais</h1><p>Situação, responsável e anexo de cada documento exigido pelo Edital, pelo TR e pelo Memorial, na ordem em que vencem.</p></div>
+      <span class="pill bad" data-pt="pill_documentos"><i></i>Faltar licença: multa de 15%</span>
     </div>
     <div class="card"><div class="tw"><table><thead><tr><th>Documento</th><th>Prazo</th><th>Risco se faltar</th><th>Responsável</th><th>Situação</th><th>Anexo</th></tr></thead><tbody id="dcBody"></tbody></table></div></div>
   </section>
@@ -566,8 +578,8 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= OCORRÊNCIAS ================= -->
   <section class="view" id="v-ocorrencias">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Chamados, prazos e multas</h1><p>O prazo começa na hora da mensagem no grupo oficial de WhatsApp: 12h para risco grave, 24h para integridade e 48h para manutenção regular. Se a SMTC aplicar multa, registre aqui: ela entra na planilha, nos pagamentos e no painel.</p></div>
-      <span class="pill bad"><i></i>Limite de multas: 30% do contrato</span>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Chamados, prazos e multas</h1><p data-pt="d_ocorrencias">O prazo começa na hora da mensagem no grupo oficial de WhatsApp: 12h para risco grave, 24h para integridade e 48h para manutenção regular. Se a SMTC aplicar multa, registre aqui: ela entra na planilha, nos pagamentos e no painel.</p></div>
+      <span class="pill bad" data-pt="pill_ocorrencias"><i></i>Limite de multas: 30% do contrato</span>
     </div>
     <div class="grid g4" id="ocKpis"></div>
     <div class="card"><div class="card-h"><h2>Registrar chamado</h2><span class="label">campos com * são obrigatórios</span></div>
@@ -588,7 +600,7 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
   <!-- ================= RELATÓRIOS ================= -->
   <section class="view" id="v-relatorios">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Relatórios para o fiscal e a direção</h1><p>Montados a partir dos contratados, pagamentos e comprovantes. Copie o texto ou baixe a planilha.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Relatórios para o fiscal e a direção</h1><p>Montados a partir dos contratados, pagamentos e comprovantes. Copie o texto ou baixe a planilha.</p></div>
       <div class="seg" id="rpType" role="group" aria-label="Tipo de relatório"><button type="button" data-t="verba" aria-pressed="true">Verba artística</button><button type="button" data-t="setor" aria-pressed="false">Gastos por setor</button><button type="button" data-t="nf" aria-pressed="false">Medição da NF</button></div>
     </div>
     <div class="rep" id="rpBox"></div>
@@ -597,9 +609,9 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
 
   <!-- ================= EDITAL ================= -->
   <section class="view" id="v-edital">
-    <div class="topbar"><div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel">39º Sonho de Natal</a></nav><h1>Itens, regras e pontos a formalizar</h1><p>Referência fixa do TR, do Memorial Descritivo e da proposta readequada.</p></div></div>
+    <div class="topbar"><div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Projetos</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><a href="#painel" class="pnome">39º Sonho de Natal</a></nav><h1>Itens, regras e pontos a formalizar</h1><p>Referência fixa do TR, do Memorial Descritivo e da proposta readequada.</p></div></div>
     <div class="card"><div class="tw"><table><thead><tr><th>Item</th><th>Serviço</th><th>Setor</th><th class="r">Qtd</th><th>Unid.</th><th class="r">Unitário</th><th class="r">Total</th><th>Limite no sistema</th></tr></thead><tbody id="edBody"></tbody></table></div></div>
-    <div class="grid g2">
+    <div class="grid g2" data-pt="edital_regras">
       <div class="card"><div class="card-h"><h2>Regras de valor</h2></div><div class="alerts">
         <div class="al"><span class="d md"></span><div><b>Único item fixo: cachês dos artistas</b><p>R$ 50.000,00 em no mínimo 35 contratações. Saldo não repassado é glosado.</p></div><span class="chip w">Fixo</span></div>
         <div class="al"><span class="d lo"></span><div><b>Quantidades do Memorial</b><p>Diárias, horas e serviços além do contratado não são pagos pela Prefeitura.</p></div><span class="chip">Limite</span></div>
@@ -615,19 +627,20 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
 
     <section class="view" id="v-usuarios">
     <div class="topbar">
-      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Alternativa Cultural</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span>Administração</span></nav><h1>Quem acessa o sistema</h1><p>Cadastre o e-mail de cada pessoa e o papel dela. A pessoa cria a própria senha na tela de entrada, em "Criar minha conta", com o mesmo e-mail.</p></div>
+      <div><nav class="crumb" aria-label="Você está em"><a href="#projetos">Alternativa Cultural</a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span>Administração</span></nav><h1>Quem acessa o sistema</h1><p>Cadastre o e-mail de cada pessoa e libere, projeto a projeto, as áreas que ela vê e se vê os valores. A pessoa cria a própria senha na tela de entrada, em "Criar minha conta", com o mesmo e-mail.</p></div>
     </div>
-    <div class="card"><div class="card-h"><h2>Cadastrar acesso</h2><span class="label">campos com * são obrigatórios</span></div>
+    <div class="card"><div class="card-h"><h2 id="usFormT">Cadastrar acesso</h2><span class="label">campos com * são obrigatórios</span></div>
       <form class="form" id="usForm">
         <label class="f" for="usEmail">E-mail *<input type="email" id="usEmail" required placeholder="nome@empresa.com.br"></label>
         <label class="f" for="usNome">Nome<input type="text" id="usNome" placeholder="Como aparece na equipe"></label>
-        <label class="f" for="usPapel">Papel *<select id="usPapel"><option value="editor">Editor: registra e anexa</option><option value="leitura">Leitura: só consulta</option><option value="admin">Administrador: tudo + usuários</option></select></label>
-        <div class="row" style="justify-content:flex-end;align-items:end"><button class="btn p" type="submit">Salvar acesso</button></div>
+        <label class="f w2" for="usPapel">Tipo de acesso *<select id="usPapel"><option value="membro">Equipe: acesso definido por projeto e por área</option><option value="admin">Administrador: todos os projetos e esta aba</option></select></label>
+        <div class="w4" id="usProj"></div>
+        <div class="w4 row" style="justify-content:space-between"><span class="err" id="usMsg" role="alert"></span><div class="row"><button class="btn" type="button" id="usCancel" hidden>Cancelar edição</button><button class="btn p" type="submit">Salvar acesso</button></div></div>
       </form>
     </div>
     <div class="card"><div class="card-h"><h2>Acessos cadastrados</h2><span class="label" id="usCount"></span></div>
-      <div class="tw"><table><thead><tr><th>E-mail</th><th>Nome</th><th>Papel</th><th>Cadastrado por</th><th></th></tr></thead><tbody id="usBody"></tbody></table></div>
-      <div class="note" style="margin-top:12px"><b>Papéis.</b> Administrador: tudo, inclusive esta aba. Editor: cadastra, paga, anexa e registra chamados. Leitura: vê tudo, não altera nada. Remover um acesso impede a entrada na hora seguinte; a senha da pessoa continua existindo no Firebase, mas sem permissão.</div>
+      <div class="tw"><table><thead><tr><th>E-mail</th><th>Nome</th><th>Acesso</th><th>Cadastrado por</th><th></th></tr></thead><tbody id="usBody"></tbody></table></div>
+      <div class="note" style="margin-top:12px"><b>Como funciona.</b> O administrador vê e altera todos os projetos, inclusive esta aba. A equipe recebe acesso projeto a projeto: <b>Edita</b> ou <b>Só consulta</b>, nas áreas marcadas. Sem "Vê valores financeiros", a pessoa não carrega pagamentos nem a planilha de custo, e os valores aparecem ocultos (R$ •••). Painel, Financeiro e Relatórios exigem ver valores. A aba Edital aparece para todos que têm acesso ao projeto. Remover um acesso impede a entrada; a senha continua existindo no Firebase, mas sem permissão.</div>
     </div>
   </section>
   <footer class="foot"><span>Alternativa Cultural · Produção de Eventos</span><span class="st">Sistema <b>ST Solutions</b></span></footer>
@@ -640,8 +653,9 @@ td .seg button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
 (function(){
 "use strict";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const brl=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const brl0=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+let NV=false; // NV = a pessoa não vê valores financeiros neste projeto
+const brl=v=>NV?"R$ •••":(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const brl0=v=>NV?"R$ •••":(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
 const pct=v=>(isFinite(v)?v*100:0).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const r2=v=>Math.round((+v||0)*100)/100;
@@ -655,16 +669,16 @@ function fmtDoc(s){const d=digits(s);if(d.length===11)return d.replace(/(\d{3})(
 function toast(m,bad){const t=$("#toast");t.textContent=m;t.classList.toggle("bad",!!bad);t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("on"),2600);}
 
 /* ================= CONTRATO (proposta readequada) ================= */
-const TETO=269500, VERBA=50000, ART_MIN=35, ART_MAX=100;
-const SETORES=[
+let TETO=269500, VERBA=50000, ART_MIN=35, ART_MAX=100;
+let SETORES=[
  {k:"rider",n:"Rider técnico",c:"var(--s-rider)"},
  {k:"staff",n:"Staff",c:"var(--s-staff)"},
  {k:"licencas",n:"Licenças",c:"var(--s-lic)"},
  {k:"artistico",n:"Artístico",c:"var(--s-art)"},
  {k:"estrutura",n:"Estrutura e acessibilidade",c:"var(--s-est)"}];
-const SET=Object.fromEntries(SETORES.map(s=>[s.k,s]));
+let SET=Object.fromEntries(SETORES.map(s=>[s.k,s]));
 // lim: "qtd" soma das quantidades ≤ q · "count" nº de contratações ≤ max · "art" regra dos artistas · "sem" sem previsão na proposta
-const FUNCS=[
+let FUNCS=[
  {k:"rider_coreto",n:"Rider Coreto",s:"rider",it:"1",un:"diária",q:32,d:2000,lim:"qtd",det:"Som, luz, estrutura, energia e operação · FOH obrigatório"},
  {k:"rider_matriz",n:"Rider Matriz",s:"rider",it:"3",un:"diária",q:40,d:2000,lim:"qtd",det:"Som, luz, tablado, box truss, energia e operação"},
  {k:"vigia",n:"Vigia noturno",s:"staff",it:"2.1",un:"diária 12h",q:93,d:160,lim:"qtd",sub:true},
@@ -681,11 +695,11 @@ const FUNCS=[
  {k:"casinhas_pint",n:"Pintura dos telhados",s:"estrutura",it:"6.2",un:"serviço",q:1,d:600,lim:"count",max:1,det:"Antes do transporte"},
  {k:"acessibilidade",n:"Acessibilidade",s:"estrutura",it:"8",un:"serviço",q:1,d:1500,lim:"count",max:3,det:"Libras (3 datas), 2 mapas táteis, áreas reservadas"}];
 FUNCS.forEach(f=>f.tot=f.q*f.d);
-const FN=Object.fromEntries(FUNCS.map(f=>[f.k,f]));
+let FN=Object.fromEntries(FUNCS.map(f=>[f.k,f]));
 const unitWord=f=>f.un.startsWith("diária")?"diárias":(f.un==="hora"?"horas":(f.un==="cachê"?"apresentações":"serviço"));
 const setBudget=k=>FUNCS.filter(f=>f.s===k).reduce((a,f)=>a+f.tot,0);
 
-const DOCS=[
+let DOCS=[
  {k:"decl",n:"Declaração Conjunta de pré-contratação",d:"Responsável técnico com contato direto com a SMTC · garantia de funcionamento e manutenção preventiva e corretiva de som e luz · descarte adequado de resíduos e limpeza final",pz:"48h úteis após a convocação",r:"Perda do direito à contratação"},
  {k:"crono",n:"Cronograma físico-financeiro aprovado",pz:"Pré-contratação (48h úteis)",r:"Base das multas por atraso: 1% por dia"},
  {k:"os",n:"Contrato assinado e Ordem de Serviço",pz:"Antes de executar",r:"Diárias só contam após a OS"},
@@ -701,7 +715,7 @@ const DOCS=[
  {k:"energ",n:"Aprovação da SMTC das instalações elétricas",d:"A SMTC testa e aprova a instalação e o aterramento antes de liberar a energização definitiva de som e luz",pz:"Antes de ligar som e luz",r:"Sem aprovação não há energização"},
  {k:"simples",n:"Declaração do Simples Nacional (Anexo VIII, IN RFB 1234)",d:"Só se a contratada for optante; vai junto com cada nota fiscal",pz:"Com cada NF",r:"Retenção de tributos na NF"},
  {k:"cert",n:"Certidões de regularidade",pz:"Todo o contrato",r:"Pagamento retido"}];
-const RIDER=[
+let RIDER=[
  ["Sistema principal","Colunas line array compactas L/R, full-range, dispersão ≥ 90° H, alcance útil de 15 m; sub 12–15\" opcional (até 1 por lado); DSP com crossover, delay e limiter","Igual ao Coreto"],
  ["Mesa de áudio","Mesa digital ~16 canais (TF1, Si Impact, XR18, Ui24 ou equivalente) com EQ, dinâmica e efeitos, mín. 4 auxiliares; operação discreta com controle remoto; stagebox integrado","Igual ao Coreto, operada ao lado ou atrás do minipalco"],
  ["Monitores","Até 4 wedges 10–12\" independentes (mín. 2), EQ gráfico de 31 bandas nas vias","Não previsto no Memorial"],
@@ -715,9 +729,9 @@ const RIDER=[
  ["Estrutura e acabamento","Estruturas leves e trechos curtos de truss; capas e toldos para mesa, caixas e FOH; saias, tapetes, canaletas e rampas; coreto sem cabos soltos","Tablado ≥ 2 × 2 m, altura 10–20 cm, carpete preto ou linóleo, saia e testeira pretas; kit trave box truss Q20 (torres de 2,5 m, contrapesos sem furo, viga de 2,5 m); mesmo acabamento do Coreto"],
  ["Energia e segurança","Ponto 110/220 V estabilizado; disjuntores, DR e DPS; aterramento e polaridade verificados; NBR 5410/5419; sinalização de cabos e EPIs da equipe","Igual ao Coreto"],
  ["Operação","1 operador(a) de áudio e luz em todas as apresentações (montagem, passagem, operação e desmontagem), com 2 eventos similares nos últimos 36 meses e prática em mixagem de fala e sistemas sem fio","Igual ao Coreto"]];
-const RIDER_INFO={rider_coreto:"Aldeia do Sonho · público de 50–70 pessoas",rider_matriz:"Praça da Matriz (Catedral de Pedra) · público de 50–100 pessoas"};
+let RIDER_INFO={rider_coreto:"Aldeia do Sonho · público de 50–70 pessoas",rider_matriz:"Praça da Matriz (Catedral de Pedra) · público de 50–100 pessoas"};
 // multas do item 6.3.1 do TR (sobre o valor do contrato) · dia=true: multa diária, máx. 10 dias
-const MULTAS=[
+let MULTAS=[
  {k:"p12",n:"Prazo de 12h estourado (risco grave iminente)",pct:.05,h:12},
  {k:"p24",n:"Prazo de 24h estourado (integridade do elemento)",pct:.02,h:24},
  {k:"p48",n:"Prazo de 48h estourado (manutenção regular)",pct:.01,h:48},
@@ -740,27 +754,120 @@ const MULTAS=[
  {k:"t",n:"Falha de qualidade, estabilidade ou segurança (t)",pct:.10},
  {k:"u",n:"Sinistro sem reposição em 24h (u)",pct:.02},
  {k:"glosa",n:"Glosa definida pela SMTC (uniforme, crachá, EPI, desorganização)",pct:0,livre:true}];
-const MULTA_TETO=r2(TETO*.30),MULTA_DIAS_MAX=10;
-const MK=Object.fromEntries(MULTAS.map(m=>[m.k,m]));
+let MULTA_PCT=.30,MULTA_TETO=r2(TETO*.30),MULTA_DIAS_MAX=10;
+let MK=Object.fromEntries(MULTAS.map(m=>[m.k,m]));
+/* ================= PROJETOS: uma ficha de edital por projeto ================= */
+// O 39º Sonho de Natal é o projeto de origem: a ficha dele fica aqui no código e os dados continuam
+// nas coleções da raiz do banco (contratados, pagamentos, ocorrencias, config).
+// Os projetos novos vêm de projetos/<id>.json (listados em projetos/registro.json) e guardam os dados
+// em projetos/<id>/contratados, projetos/<id>/pagamentos etc. Nada se mistura entre contratos.
+const LEGADO="sonho-natal-2026";
+const SETOR_CORES=["var(--s-rider)","var(--s-staff)","var(--s-lic)","var(--s-art)","var(--s-est)"];
+const MODULOS=[["painel","Painel"],["contratados","Contratados"],["financeiro","Financeiro"],["programacao","Programação"],["riders","Riders"],["documentos","Documentos"],["ocorrencias","Ocorrências"],["relatorios","Relatórios"],["edital","Edital"]];
+const MOD_N=Object.fromEntries(MODULOS);
+const MONEY_AREAS=new Set(["painel","financeiro","relatorios"]);
+const AREA_VIEW={painel:"painel",contratados:"contratados",planilha:"financeiro",pagamentos:"financeiro",programacao:"programacao",riders:"riders",documentos:"documentos",ocorrencias:"ocorrencias",relatorios:"relatorios",edital:"edital"};
+const SONHO={id:LEGADO,legado:true,nome:"39º Sonho de Natal",curto:"Sonho de Natal",contratante:"Prefeitura de Canela/RS · SMTC",orgao:"SMTC",orgaoFrase:"a SMTC",
+  contrato:"Pregão Eletrônico 60/2026",local:"Canela/RS",teto:TETO,arquivo:"sonho-de-natal",status:"execucao",
+  relatorio:"Prefeitura de Canela · SMTC · Pregão 60/2026",vigencia:{fim:"2027-01-10"},aliquota:.125,
+  setores:SETORES,funcs:FUNCS.map(f=>({...f})),docs:DOCS,
+  artistico:{verba:VERBA,min:ART_MIN,max:ART_MAX,rouanet:true,item:"Item 4 do Memorial",media:500},
+  subcontratacao:{pct:.25},
+  multas:{ref:"TR 6.3.1",tetoPct:.30,diasMax:10,itens:MULTAS},
+  ocorrencias:{prazos:[{h:12,n:"Risco grave",pct:.05},{h:24,n:"Integridade",pct:.02},{h:48,n:"Manutenção regular",pct:.01}],locais:["Coreto · Aldeia do Sonho","Praça da Matriz","Casinhas","Área geral"]},
+  rider:{funcs:["rider_coreto","rider_matriz"],cols:["Coreto","Praça da Matriz"],itens:RIDER,info:RIDER_INFO},
+  nfs:[["NF 1",.2],["NF 2",.4],["NF 3",.4]],
+  meses:[["2026-11","Novembro","nov/26"],["2026-12","Dezembro","dez/26"],["2027-01","Janeiro","jan/27"]],
+  modulos:["painel","contratados","financeiro","programacao","riders","documentos","ocorrencias","relatorios","edital"]};
+let PROJ=SONHO,ART=SONHO.artistico,SUB_PCT=.25,PRAZOS=SONHO.ocorrencias.prazos,ORG="SMTC",RID=SONHO.rider,MUL_REF="TR 6.3.1",ORG_F="a SMTC";
+function fichaOk(f){const o={...f};o.legado=false;o.nome=o.nome||o.id;o.curto=o.curto||o.nome;o.arquivo=o.arquivo||o.id;o.status=o.status||"execucao";
+  o.modulos=(Array.isArray(o.modulos)&&o.modulos.length?o.modulos:["painel","contratados","financeiro","documentos","relatorios","edital"]).filter(m=>MOD_N[m]);
+  if(!o.modulos.includes("edital"))o.modulos.push("edital");
+  o.setores=(o.setores||[]).map((x,i)=>({...x,c:x.c||SETOR_CORES[i%SETOR_CORES.length]}));o.funcs=o.funcs||[];o.docs=o.docs||[];
+  if(!o.artistico)o.modulos=o.modulos.filter(m=>m!=="programacao");if(!o.rider)o.modulos=o.modulos.filter(m=>m!=="riders");
+  if(!o.ocorrencias)o.modulos=o.modulos.filter(m=>m!=="ocorrencias");return o;}
+function applyFicha(P){PROJ=P;TETO=+P.teto||0;
+  SETORES=P.setores||[];SET=Object.fromEntries(SETORES.map(x=>[x.k,x]));
+  FUNCS=(P.funcs||[]).map(f=>({...f,tot:(+f.q||0)*(+f.d||0)}));FN=Object.fromEntries(FUNCS.map(f=>[f.k,f]));
+  DOCS=P.docs||[];ART=P.artistico||null;VERBA=ART?+ART.verba||0:0;ART_MIN=ART?+ART.min||0:0;ART_MAX=ART?+ART.max||0:0;
+  const M=P.multas||{};MULTAS=M.itens||[{k:"glosa",n:"Glosa ou multa aplicada pelo contratante",pct:0,livre:true}];MK=Object.fromEntries(MULTAS.map(m=>[m.k,m]));
+  MULTA_PCT=M.tetoPct==null?.30:+M.tetoPct;MULTA_TETO=r2(TETO*MULTA_PCT);MULTA_DIAS_MAX=+M.diasMax||10;MUL_REF=M.ref||"";
+  PRAZOS=(P.ocorrencias||{}).prazos||[];SUB_PCT=P.subcontratacao?+P.subcontratacao.pct||0:0;ORG=P.orgao||"contratante";ORG_F=P.orgaoFrase||"o contratante";
+  RID=P.rider||null;RIDER=RID?(RID.itens||[]):[];RIDER_INFO=RID?(RID.info||{}):{};}
+const DATA={};const blank=()=>({contratados:{},pagamentos:{},ocorrencias:{},config:{}});
+DATA[LEGADO]=blank();
+let S=DATA[LEGADO];
+const FICHAS={[LEGADO]:SONHO};const FICHAS_ORDEM=[LEGADO];
+const FICHAS_OK=(async()=>{try{const r=await fetch("projetos/registro.json",{cache:"no-cache"});if(!r.ok)return;const reg=await r.json();
+  for(const it of (reg.projetos||[])){const id=typeof it==="string"?it:(it&&it.id);if(!id||FICHAS[id]||!/^[a-z0-9-]+$/.test(id))continue;
+    try{const x=await fetch(`projetos/${id}.json`,{cache:"no-cache"});if(!x.ok)throw new Error(x.status);const f=await x.json();f.id=id;FICHAS[id]=fichaOk(f);FICHAS_ORDEM.push(id);DATA[id]=DATA[id]||blank();}
+    catch(e){console.error("Ficha de edital inválida:",id,e);}}}catch(e){}})();
+// Quem vê o quê: espelho, na tela, das regras do Firestore (firestore.rules)
+function acc(pid){if(Store.mode!=="web")return{all:true,edita:Store.canWrite!==false,valores:true,areas:null,papel:"local"};
+  const u=Store.user;if(!u||!FICHAS[pid])return null;
+  if(u.papel==="admin")return{all:true,edita:true,valores:true,areas:null,papel:"admin"};
+  if(pid===LEGADO&&(u.papel==="editor"||u.papel==="leitura"))return{all:true,edita:u.papel==="editor",valores:true,areas:null,papel:u.papel};
+  const m=(u.projetos||{})[pid];if(!m||!m.papel)return null;
+  return{all:!!m.todas,edita:m.papel==="editor",valores:!!m.valores,areas:m.todas?null:(m.areas||[]),papel:m.papel};}
+function veArea(pid,area){const a=acc(pid);const P=FICHAS[pid];if(!a||!P||!area)return false;if(!(P.modulos||[]).includes(area))return false;
+  if(area==="edital")return true;if(MONEY_AREAS.has(area)&&!a.valores)return false;return a.areas==null||a.areas.includes(area);}
+function editaArea(pid,area){const a=acc(pid);return !!a&&a.edita&&veArea(pid,area)&&(a.areas==null||a.areas.includes(area))&&area!=="edital";}
+function areasTxt(a){if(!a)return"sem acesso";if(a.papel==="admin")return"administrador";const ar=a.areas==null?"todas as áreas":(a.areas.map(x=>MOD_N[x]||x).join(", ")||"nenhuma área");return `${a.edita?"edita":"só consulta"} · ${ar}${a.valores?"":" · sem valores"}`;}
+function comProjeto(pid,fn){const P0=PROJ,S0=S,N0=NV;applyFicha(FICHAS[pid]);S=DATA[pid]||blank();const a=acc(pid);NV=!!a&&!a.valores;try{return fn();}finally{applyFicha(P0);S=S0;NV=N0;}}
+function setAtivo(pid,semSalvar){if(!FICHAS[pid])pid=LEGADO;applyFicha(FICHAS[pid]);S=DATA[pid]||(DATA[pid]=blank());const a=acc(pid);NV=!!a&&!a.valores;document.body.classList.toggle("nv",NV);
+  if(!semSalvar)try{localStorage.setItem("ac-projeto-ativo",pid);}catch(e){}
+  if(Store.mode==="web"&&Store.B)Store.assets=(Store.B.storageAvailable&&a&&a.edita)?{upload:(file,o)=>Store.B.upload(file,(o||{}).type,pid===LEGADO?"anexos":`projetos/${pid}/anexos`)}:null;
+  if(Store.mode==="local")Store.loadLocalOne(pid);
+  applyTextos();syncCForm();schedule();}
+function escolherAtivo(){let p=null;try{p=localStorage.getItem("ac-projeto-ativo");}catch(e){}if(p&&FICHAS[p]&&acc(p))return p;return FICHAS_ORDEM.find(x=>acc(x))||LEGADO;}
+const colPath=col=>PROJ.legado?col:(Store.mode==="web"?`projetos/${PROJ.id}/${col}`:`${PROJ.id}__${col}`);
+// Textos que mudam de um edital para outro. No Sonho de Natal ficam os do próprio HTML.
+const TXT0={};
+const TXT_GEN={
+  d_programacao:()=>ART?`Cada linha é uma apresentação; o cachê é por apresentação. O edital pede no mínimo ${ART_MIN} cachês somando ${brl(VERBA)}. Clique na linha para abrir o contrato; marque cada apresentação como realizada no dia.`:"Cada linha é uma apresentação. Clique na linha para abrir o contrato; marque cada apresentação como realizada no dia.",
+  t_riders:()=>(RID&&RID.titulo)||"Riders técnicos",
+  d_riders:()=>(RID&&RID.descricao)||"Diárias contratadas e checklist conferido com o Termo de Referência.",
+  pill_documentos:()=>PROJ.alertaDocs?`<i></i>${esc(PROJ.alertaDocs)}`:"",
+  d_ocorrencias:()=>`O prazo começa na hora da notificação oficial${PRAZOS.length?": "+PRAZOS.map(p=>`${p.h}h para ${esc(String(p.n).toLowerCase())}`).join(", "):""}. Se o contratante aplicar multa, registre aqui: ela entra na planilha, nos pagamentos e no painel.`,
+  pill_ocorrencias:()=>MULTA_PCT?`<i></i>Limite de multas: ${pct(MULTA_PCT)} do contrato`:"",
+  nota_planilha:()=>"",
+  edital_regras:()=>{const card=(t,L)=>L&&L.length?`<div class="card"><div class="card-h"><h2>${esc(t)}</h2></div><div class="alerts">${L.map(x=>`<div class="al"><span class="d ${esc(x.nivel||"lo")}"></span><div><b>${esc(x.t)}</b><p>${esc(x.d||"")}</p></div>${x.chip?`<span class="chip ${x.nivel==="md"?"w":""}">${esc(x.chip)}</span>`:""}</div>`).join("")}</div></div>`:"";
+    return card("Regras de valor",PROJ.regras)+card("Pontos a formalizar com o contratante",PROJ.pendencias);}};
+function applyTextos(){
+  $$("[data-pt]").forEach(el=>{const k=el.dataset.pt;let t;if(PROJ.legado)t=TXT0[k];else{const o=(PROJ.textos||{})[k];t=o!=null?o:(TXT_GEN[k]?TXT_GEN[k]():"");}el.innerHTML=t||"";el.hidden=!t;});
+  $$(".pnome").forEach(e=>e.textContent=PROJ.nome);
+  $("#ctrNome").textContent=PROJ.nome;$("#ctrSub").textContent=[PROJ.local,PROJ.contrato].filter(Boolean).join(" · ");$("#ctrTeto").textContent="Homologado "+brl(TETO);
+  $("#ocGrav").innerHTML=PRAZOS.map(p=>`<option value="${+p.h}">${esc(p.n)} · ${+p.h}h</option>`).join("");
+  $("#ocLocal").innerHTML=(((PROJ.ocorrencias||{}).locais)||["Área geral"]).map(l=>`<option>${esc(l)}</option>`).join("");
+  $("#cFunc").innerHTML=funcOptions(FN.artista?"artista":(FUNCS[0]||{}).k);
+  $("#cSetF").innerHTML=`<option value="">Todos os setores</option>`+SETORES.map(x=>`<option value="${x.k}">${esc(x.n)}</option>`).join("");
+  $("#cFonteF").hidden=!(ART&&ART.rouanet);if(!(ART&&ART.rouanet))$("#cFonte").value="contrato";
+  const vb=$('#rpType [data-t="verba"]');vb.hidden=!ART;if(!ART&&rpT==="verba"){rpT="setor";$$("#rpType button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.t==="setor"));}
+  $("#prNew").hidden=!ART;}
+function mesesProjeto(){if(PROJ.meses)return PROJ.meses;const NM=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const v=PROJ.vigencia||{};let ini=v.ini,fim=v.fim;if(!ini||!fim){const ds=payList().map(p=>p.data).filter(Boolean).sort();ini=ini||ds[0]||TODAY;fim=fim||ds[ds.length-1]||ini;}
+  const out=[];let [y,m]=ini.split("-").map(Number);const [fy,fm]=fim.split("-").map(Number);
+  while((y<fy||(y===fy&&m<=fm))&&out.length<12){out.push([`${y}-${pad(m)}`,NM[m-1],`${NM[m-1].slice(0,3).toLowerCase()}/${String(y).slice(2)}`]);m++;if(m>12){m=1;y++;}}
+  return out.slice(-6);}
 /* ================= ESTADO ================= */
-const S={contratados:{},pagamentos:{},ocorrencias:{},config:{}};
 const cfg=k=>S.config[k]||{};
-const aliq=()=>{const a=cfg("planilha").aliquota;return a==null?0.125:+a;};
+const aliq=()=>{const a=cfg("planilha").aliquota;return a==null?(PROJ.aliquota==null?0.125:+PROJ.aliquota):+a;};
 
 /* ================= ARMAZENAMENTO ================= */
 const COLS=["contratados","pagamentos","ocorrencias","config"];
-S.usuarios={};
-const LKEY="st-sonho-natal-v2";
+let USR={};
+const lkey=pid=>pid===LEGADO?"st-sonho-natal-v2":"alternativa-"+pid+"-v1";
 const Store={mode:"loading",db:null,assets:null,downloads:null,canWrite:true,
   newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);},
   user:null,B:null,
-  async set(col,id,data){if(this.mode==="web"){if(!this.canWrite){toast("Seu acesso é só de leitura.",true);throw new Error("ro");}const d={...data,_por:this.user.email,_em:Date.now()};const prev=S[col][id];S[col][id]=d;schedule();try{await this.B.set(col,id,d);}catch(e){if(prev)S[col][id]=prev;else delete S[col][id];schedule();this.fail(e);throw e;}return;}
-    S[col][id]=data;schedule();if(this.mode==="db"){try{await this.db.collection(col).doc(id).set(data);}catch(e){this.fail(e);throw e;}}else this.saveLocal();},
-  async del(col,id){if(this.mode==="web"){if(!this.canWrite){toast("Seu acesso é só de leitura.",true);throw new Error("ro");}const prev=S[col][id];delete S[col][id];schedule();try{await this.B.del(col,id);}catch(e){if(prev)S[col][id]=prev;schedule();this.fail(e);throw e;}return;}
-    delete S[col][id];schedule();if(this.mode==="db"){try{await this.db.collection(col).doc(id).delete();}catch(e){this.fail(e);throw e;}}else this.saveLocal();},
+  async set(col,id,data){if(this.mode==="web"){if(!this.canWrite){toast("Seu acesso é só de leitura.",true);throw new Error("ro");}const d={...data,_por:this.user.email,_em:Date.now()};const prev=S[col][id];S[col][id]=d;schedule();try{await this.B.set(colPath(col),id,d);}catch(e){if(prev)S[col][id]=prev;else delete S[col][id];schedule();this.fail(e);throw e;}return;}
+    S[col][id]=data;schedule();if(this.mode==="db"){try{await this.db.collection(colPath(col)).doc(id).set(data);}catch(e){this.fail(e);throw e;}}else this.saveLocal();},
+  async del(col,id){if(this.mode==="web"){if(!this.canWrite){toast("Seu acesso é só de leitura.",true);throw new Error("ro");}const prev=S[col][id];delete S[col][id];schedule();try{await this.B.del(colPath(col),id);}catch(e){if(prev)S[col][id]=prev;schedule();this.fail(e);throw e;}return;}
+    delete S[col][id];schedule();if(this.mode==="db"){try{await this.db.collection(colPath(col)).doc(id).delete();}catch(e){this.fail(e);throw e;}}else this.saveLocal();},
   fail(e){const code=e&&e.code;if(code==="invalid_argument"||code==="permission-denied"){toast("Sem permissão para alterar os dados. Peça acesso de editor ao administrador.",true);}else if(code==="quota_exceeded"||code==="resource-exhausted"){toast("O banco de dados atingiu o limite de hoje.",true);}else if(code==="unavailable"){toast("Sem conexão. A alteração será enviada quando a internet voltar.");}else toast("Não foi possível salvar. Tente de novo.",true);},
-  saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(S));}catch(e){}},
-  loadLocal(){try{const raw=localStorage.getItem(LKEY);if(raw){const o=JSON.parse(raw);COLS.forEach(c=>S[c]=o[c]||{});}}catch(e){}},
+  saveLocal(){try{localStorage.setItem(lkey(PROJ.id),JSON.stringify(S));}catch(e){}},
+  loadLocalOne(pid){const d=DATA[pid]||(DATA[pid]=blank());try{const raw=localStorage.getItem(lkey(pid));if(raw){const o=JSON.parse(raw);COLS.forEach(c=>d[c]=o[c]||{});}}catch(e){}},
+  loadLocal(){Object.keys(FICHAS).forEach(pid=>this.loadLocalOne(pid));S=DATA[PROJ.id];},
   setConn(cls,txt){const c=$("#conn");c.className="conn "+cls;c.querySelector("span").textContent=txt;}
 };
 function upMsg(x){const c=(x&&x.code)||"";if(c==="too_large")return"Arquivo grande demais (máx. 20 MB).";if(c==="unsupported_type")return"Tipo de arquivo não aceito (PDF, PNG, JPG ou WEBP).";if(c==="quota_or_state"||c==="storage/quota-exceeded")return"O espaço de anexos está cheio.";if(c==="storage/unauthorized")return"Sem permissão para anexar: só editores e administradores.";if(c==="storage_off"||c==="storage/unknown"||c==="storage/bucket-not-found"||c==="storage/project-not-found"||c==="storage/object-not-found")return"Anexos ainda não ativados: o Storage do Firebase precisa ser criado.";if(c==="storage/retry-limit-exceeded"||c==="storage/canceled")return"Sem conexão. Tente de novo.";return"Não foi possível enviar o arquivo. Tente de novo.";}
@@ -771,30 +878,41 @@ async function initStore(){
   if(cfgOk()&&window.STBackend===undefined){await new Promise(r=>{window.addEventListener("st-backend-ready",r,{once:true});setTimeout(r,8000);});}
   Store.downloads=blobSaver();
   const B=window.STBackend;
-  if(!B){Store.mode="local";Store.loadLocal();Store.setConn("local",cfgOk()?"Não foi possível carregar o Firebase. Modo local: dados só neste navegador.":"Firebase não configurado (firebase-config.js). Modo local: dados só neste navegador.");schedule();return;}
+  await FICHAS_OK;
+  if(!B){Store.mode="local";Store.loadLocal();setAtivo(escolherAtivo());Store.setConn("local",cfgOk()?"Não foi possível carregar o Firebase. Modo local: dados só neste navegador.":"Firebase não configurado (firebase-config.js). Modo local: dados só neste navegador.");schedule();return;}
   Store.mode="web";Store.B=B;
   B.onAuth(async user=>{
     stopSubs();document.body.classList.remove("ro","admin");Store.canWrite=true;Store.assets=null;
-    if(!user){Store.user=null;showLogin();Store.setConn("local","Entre com seu e-mail para acessar os dados.");return;}
-    const papel=await B.papel(user.email);
+    if(!user){Store.user=null;schedule();showLogin();Store.setConn("local","Entre com seu e-mail para acessar os dados.");return;}
+    const perfil=await B.usuario(user.email);const papel=perfil&&perfil.papel;
     if(!papel){Store.user=null;showLogin("semacesso",user.email);Store.setConn("local","E-mail sem acesso liberado.");return;}
-    Store.user={email:user.email,papel};Store.canWrite=papel!=="leitura";
-    document.body.classList.toggle("ro",!Store.canWrite);document.body.classList.toggle("admin",papel==="admin");
-    Store.assets=(B.storageAvailable&&Store.canWrite)?{upload:(file,o)=>B.upload(file,(o||{}).type)}:null;
-    hideLogin();renderWho();startSubs(papel==="admin");
+    Store.user={email:user.email,papel,projetos:perfil.projetos||{}};
+    document.body.classList.toggle("admin",papel==="admin");
+    Object.keys(DATA).forEach(k=>{DATA[k]=blank();});
+    hideLogin();renderWho();setAtivo(escolherAtivo());startSubs(papel==="admin");show();
   });
 }
 let SUBS=[];
 function stopSubs(){SUBS.forEach(u=>{try{u();}catch(e){}});SUBS=[];}
+// Cada projeto com acesso tem as próprias assinaturas. Sem "vê valores", pagamentos e a planilha de custo nem são carregados.
 function startSubs(admin){
-  const cols=admin?COLS.concat(["usuarios"]):COLS;let pending=cols.length;
+  const jobs=[];
+  FICHAS_ORDEM.forEach(pid=>{const a=acc(pid);if(!a)return;DATA[pid]=DATA[pid]||blank();const base=pid===LEGADO?"":`projetos/${pid}/`;
+    jobs.push({pid,c:"contratados",path:base+"contratados"},{pid,c:"ocorrencias",path:base+"ocorrencias"});
+    if(a.valores)jobs.push({pid,c:"pagamentos",path:base+"pagamentos"},{pid,c:"config",path:base+"config"});
+    else ["documentos","riders"].forEach(k=>jobs.push({pid,c:"config",doc:k,path:base+"config"}));});
+  if(admin)jobs.push({c:"usuarios",path:"usuarios"});
+  if(!jobs.length){Store.setConn("on","Conectado. Nenhum projeto liberado para este e-mail ainda.");schedule();return;}
+  let pending=jobs.length;
   const timer=setTimeout(()=>{if(pending>0)Store.setConn("local","Banco demorando a responder. Os dados podem estar desatualizados.");},10000);
-  cols.forEach(col=>{let first=true;
-    SUBS.push(Store.B.subscribe(col,(o,fromCache)=>{S[col]=o;if(first&&!fromCache){first=false;pending--;if(pending===0){clearTimeout(timer);Store.setConn("on",Store.canWrite?"Banco de dados conectado. Alterações salvas para toda a equipe.":"Conectado em modo leitura.");}}schedule();},
-      err=>{clearTimeout(timer);console.error(err);Store.setConn("local",(err&&err.code)==="permission-denied"?"Sem permissão para ler os dados. Fale com o administrador.":"Conexão com o banco perdida. Recarregue a página.");}));
-  });
+  jobs.forEach(j=>{let first=true;
+    const onData=(o,fromCache)=>{if(j.c==="usuarios")USR=o;else if(j.doc){const cf=DATA[j.pid].config;if(o)cf[j.doc]=o;else delete cf[j.doc];}else DATA[j.pid][j.c]=o;
+      if(first&&!fromCache){first=false;pending--;if(pending===0){clearTimeout(timer);Store.setConn("on","Banco de dados conectado. Alterações salvas para toda a equipe.");}}schedule();};
+    const onErr=err=>{clearTimeout(timer);console.error(j.path,err);Store.setConn("local",(err&&err.code)==="permission-denied"?`Sem permissão para ler ${j.pid&&FICHAS[j.pid]?FICHAS[j.pid].curto:"os dados"}. Fale com o administrador.`:"Conexão com o banco perdida. Recarregue a página.");};
+    SUBS.push(j.doc?Store.B.subscribeDoc(j.path,j.doc,onData,onErr):Store.B.subscribe(j.path,onData,onErr));});
 }
 async function initClaude(){
+  await FICHAS_OK;setAtivo(escolherAtivo());
   let db=null;
   try{db=await window.claude.use("db");}catch(e){db=null;}
   try{Store.assets=await window.claude.use("assets");}catch(e){}
@@ -804,7 +922,7 @@ async function initClaude(){
   Store.mode="db";Store.db=db;
   let pending=COLS.length;const timer=setTimeout(()=>{if(pending>0)Store.setConn("local","Banco demorando a responder. Os dados podem estar desatualizados.");},10000);
   COLS.forEach(col=>{let first=true;
-    db.collection(col).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data();});S[col]=o;
+    db.collection(colPath(col)).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data();});S[col]=o;
       if(first&&!snap.metadata.fromCache){first=false;pending--;if(pending===0){clearTimeout(timer);Store.setConn("on",Store.canWrite?"Banco de dados conectado. Alterações salvas para toda a equipe.":"Conectado em modo leitura.");}}
       schedule();},
     err=>{clearTimeout(timer);Store.setConn("local","Conexão com o banco perdida. Recarregue a página.");});
@@ -824,23 +942,51 @@ $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const B=S
   try{if(lgMode==="new")await B.signUp(em,pw);else await B.signIn(em,pw);}catch(x){$("#lgMsg").textContent=authMsg(x);}
   btn.disabled=false;});
 $("#lgReset").onclick=async()=>{const em=$("#lgEmail").value.trim();if(!em){$("#lgMsg").textContent="Digite o e-mail para receber o link de redefinição.";return;}try{await Store.B.reset(em);$("#lgMsg").textContent="Enviamos um e-mail com o link para criar uma nova senha.";}catch(x){$("#lgMsg").textContent=authMsg(x);}};
-$("#btnSair").onclick=()=>confirmBox("Sair do sistema?","Você precisará entrar de novo com e-mail e senha.","Sair",async()=>{try{await Store.B.signOut();}catch(e){}COLS.forEach(c=>S[c]={});S.usuarios={};if(location.hash==="#usuarios")location.hash="projetos";schedule();});
-const PAPEL={admin:"Administrador",editor:"Editor",leitura:"Leitura"};
+$("#btnSair").onclick=()=>confirmBox("Sair do sistema?","Você precisará entrar de novo com e-mail e senha.","Sair",async()=>{try{await Store.B.signOut();}catch(e){}Object.keys(DATA).forEach(k=>{DATA[k]=blank();});S=DATA[PROJ.id];USR={};if(location.hash==="#usuarios")location.hash="projetos";schedule();});
+const PAPEL={admin:"Administrador",editor:"Editor",leitura:"Leitura",membro:"Equipe"};
 function renderWho(){const u=Store.user;if(!u){$("#who").hidden=true;return;}$("#who").hidden=false;$("#whoAv").textContent=u.email.slice(0,2).toUpperCase();$("#whoEmail").textContent=u.email;$("#whoEmail").title=u.email;$("#whoPapel").textContent=PAPEL[u.papel]||u.papel;}
 /* ================= USUÁRIOS ================= */
-function rUsers(){const L=Object.entries(S.usuarios||{}).map(([email,u])=>({email,...u})).sort((a,b)=>a.email.localeCompare(b.email));
+let usEdit=null;
+function accTxtUser(u){if(u.papel==="admin")return['<span class="chip g">Administrador · todos os projetos</span>'];const out=[];
+  if(u.papel==="editor"||u.papel==="leitura")out.push(`<span class="chip v" title="Formato anterior: vale só para o ${esc(SONHO.nome)}">${esc(SONHO.curto)} · ${u.papel==="editor"?"edita":"só consulta"} · todas as áreas</span>`);
+  Object.entries(u.projetos||{}).forEach(([pid,m])=>{if(!m||!m.papel||!FICHAS[pid])return;const a={edita:m.papel==="editor",valores:!!m.valores,areas:m.todas?null:(m.areas||[]),papel:m.papel};out.push(`<span class="chip ${a.edita?"v":""}">${esc(FICHAS[pid].curto)} · ${esc(areasTxt(a))}</span>`);});
+  return out.length?out:['<span class="chip w">Sem projeto liberado</span>'];}
+function usProjForm(u){const pr=(u&&u.projetos)||{};const leg=u&&(u.papel==="editor"||u.papel==="leitura");
+  $("#usProj").innerHTML=`<span class="label" style="display:block;margin-bottom:8px">Acesso por projeto</span>`+FICHAS_ORDEM.map(pid=>{const P=FICHAS[pid];let m=pr[pid]||null;
+    if(!m&&leg&&pid===LEGADO)m={papel:u.papel,todas:true,valores:true,areas:[]};m=m||{};const ar=P.modulos.filter(x=>x!=="edital");
+    return `<fieldset class="usp ${m.papel?"":"off"}" data-pid="${esc(pid)}"><legend>${esc(P.nome)}<span class="sub">${esc(P.contrato||"")}</span></legend>
+      <div class="row"><select data-k="papel" aria-label="Acesso ao ${esc(P.nome)}"><option value="">Sem acesso</option><option value="leitura" ${m.papel==="leitura"?"selected":""}>Só consulta</option><option value="editor" ${m.papel==="editor"?"selected":""}>Edita</option></select>
+      <label class="chkl"><input type="checkbox" class="chk" data-k="valores" ${m.valores?"checked":""}>Vê valores financeiros</label>
+      <label class="chkl"><input type="checkbox" class="chk" data-k="todas" ${m.todas?"checked":""}>Todas as áreas</label></div>
+      <div class="row areas">${ar.map(x=>`<label class="chkl"><input type="checkbox" class="chk" data-area="${x}" ${(m.todas||(m.areas||[]).includes(x))?"checked":""} ${m.todas?"disabled":""}>${MOD_N[x]}${MONEY_AREAS.has(x)?' <span class="muted">(com valores)</span>':""}</label>`).join("")}</div></fieldset>`;}).join("");
+  $$("#usProj .usp").forEach(fs=>{const sync=()=>{const on=!!fs.querySelector('[data-k="papel"]').value;fs.classList.toggle("off",!on);const all=fs.querySelector('[data-k="todas"]').checked;fs.querySelectorAll("[data-area]").forEach(c=>{c.disabled=all;if(all)c.checked=true;});};
+    fs.querySelector('[data-k="papel"]').onchange=sync;fs.querySelector('[data-k="todas"]').onchange=sync;});
+  $("#usProj").hidden=$("#usPapel").value==="admin";}
+$("#usPapel").onchange=()=>{$("#usProj").hidden=$("#usPapel").value==="admin";};
+function usReset(){usEdit=null;$("#usForm").reset();$("#usEmail").readOnly=false;$("#usFormT").textContent="Cadastrar acesso";$("#usCancel").hidden=true;$("#usMsg").textContent="";usProjForm(null);}
+$("#usCancel").onclick=usReset;
+function rUsers(){const L=Object.entries(USR||{}).map(([email,u])=>({email,...u})).sort((a,b)=>a.email.localeCompare(b.email));
   $("#usCount").textContent=`${L.length} acesso(s)`;
-  $("#usBody").innerHTML=L.length?L.map(u=>`<tr><td class="mono">${esc(u.email)}</td><td>${esc(u.nome||"—")}</td><td><span class="chip ${u.papel==="admin"?"g":(u.papel==="leitura"?"":"b")}">${esc(PAPEL[u.papel]||u.papel)}</span></td><td class="muted">${esc(u._por||"—")}${u._em?`<span class="sub">${fd(iso(new Date(u._em)))}</span>`:""}</td><td class="r">${u.email===(Store.user||{}).email?'<span class="muted">você</span>':`<button class="btn sm ghost" type="button" data-usdel="${esc(u.email)}">Remover</button>`}</td></tr>`).join(""):`<tr><td colspan="5"><div class="empty">Nenhum acesso cadastrado além do seu.</div></td></tr>`;
-  $$("#usBody [data-usdel]").forEach(b=>b.onclick=()=>confirmBox("Remover acesso?",`${b.dataset.usdel} não conseguirá mais entrar.`,"Remover",async()=>{try{await Store.B.delUsuario(b.dataset.usdel);toast("Acesso removido");}catch(e){Store.fail(e);}}));}
-$("#usForm").addEventListener("submit",async e=>{e.preventDefault();const em=$("#usEmail").value.trim().toLowerCase();if(!em)return;const prev=S.usuarios[em]||{};
-  try{await Store.B.setUsuario(em,{...prev,papel:$("#usPapel").value,nome:$("#usNome").value.trim(),_por:Store.user.email,_em:prev._em||Date.now()});e.target.reset();toast(`Acesso de ${em} salvo`);}catch(x){Store.fail(x);}});
+  if(!$("#usProj").children.length||$("#usProj").dataset.n!==String(FICHAS_ORDEM.length)){usProjForm(usEdit?USR[usEdit]:null);$("#usProj").dataset.n=String(FICHAS_ORDEM.length);}
+  $("#usBody").innerHTML=L.length?L.map(u=>`<tr><td class="mono">${esc(u.email)}</td><td>${esc(u.nome||"—")}</td><td><div class="acc-chips">${accTxtUser(u).join("")}</div></td><td class="muted">${esc(u._por||"—")}${u._em?`<span class="sub">${fd(iso(new Date(u._em)))}</span>`:""}</td><td class="r" style="white-space:nowrap"><button class="btn sm" type="button" data-usedit="${esc(u.email)}">Editar</button> ${u.email===(Store.user||{}).email?'<span class="muted">você</span>':`<button class="btn sm ghost" type="button" data-usdel="${esc(u.email)}">Remover</button>`}</td></tr>`).join(""):`<tr><td colspan="5"><div class="empty">Nenhum acesso cadastrado além do seu.</div></td></tr>`;
+  $$("#usBody [data-usedit]").forEach(b=>b.onclick=()=>{const em=b.dataset.usedit;const u=USR[em];if(!u)return;usEdit=em;$("#usEmail").value=em;$("#usEmail").readOnly=true;$("#usNome").value=u.nome||"";$("#usPapel").value=u.papel==="admin"?"admin":"membro";$("#usFormT").textContent=`Editar acesso de ${em}`;$("#usCancel").hidden=false;$("#usMsg").textContent="";usProjForm(u);$("#usForm").scrollIntoView({behavior:"smooth",block:"start"});});
+  $$("#usBody [data-usdel]").forEach(b=>b.onclick=()=>confirmBox("Remover acesso?",`${b.dataset.usdel} não conseguirá mais entrar em nenhum projeto.`,"Remover",async()=>{try{await Store.B.delUsuario(b.dataset.usdel);toast("Acesso removido");if(usEdit===b.dataset.usdel)usReset();}catch(e){Store.fail(e);}}));}
+$("#usForm").addEventListener("submit",async e=>{e.preventDefault();const em=$("#usEmail").value.trim().toLowerCase();if(!em)return;const prev=USR[em]||{};const papel=$("#usPapel").value;
+  if(em===(Store.user||{}).email&&papel!=="admin"){$("#usMsg").textContent="Você não pode tirar o seu próprio acesso de administrador.";return;}
+  const projetos={};
+  if(papel!=="admin")$$("#usProj .usp").forEach(fs=>{const pp=fs.querySelector('[data-k="papel"]').value;if(!pp)return;const todas=fs.querySelector('[data-k="todas"]').checked;
+    projetos[fs.dataset.pid]={papel:pp,valores:fs.querySelector('[data-k="valores"]').checked,todas,areas:todas?[]:[...fs.querySelectorAll("[data-area]:checked")].map(c=>c.dataset.area)};});
+  if(papel!=="admin"){const ks=Object.keys(projetos);if(!ks.length){$("#usMsg").textContent="Libere pelo menos um projeto ou escolha Administrador.";return;}
+    const semArea=ks.find(k=>!projetos[k].todas&&!projetos[k].areas.length);if(semArea){$("#usMsg").textContent=`Marque pelo menos uma área em ${FICHAS[semArea].nome}.`;return;}}
+  const data={nome:$("#usNome").value.trim(),papel,projetos,_por:Store.user.email,_em:prev._em||Date.now(),_alt:Date.now()};
+  try{await Store.B.setUsuario(em,data);toast(`Acesso de ${em} salvo`);usReset();}catch(x){Store.fail(x);}});
 
 /* ================= CÁLCULOS ================= */
 const contrList=()=>Object.entries(S.contratados).map(([id,c])=>({id,...c}));
 const payList=()=>Object.entries(S.pagamentos).map(([id,p])=>({id,...p}));
 const ROU_ATR=new Set(["contos e cancoes", "o natal de anelise", "natal encantado - sons do brasil", "show da caixinha", "sarau do noel", "flocos e o misterio do natal", "a menina e o tempo", "the rudolphs", "santo reis", "make infantil com palhacinha patinete"]);
 const normTxt=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
-const cFonte=c=>c&&c.funcao==="artista"?(c.fonte||(ROU_ATR.has(normTxt(c.atracao))?"rouanet":"contrato")):"contrato";
+const cFonte=c=>c&&c.funcao==="artista"?(c.fonte||(PROJ.legado&&ROU_ATR.has(normTxt(c.atracao))?"rouanet":"contrato")):"contrato";
 const isRou=c=>cFonte(c)==="rouanet";
 const ROU_TXT="Lei Rouanet";
 const cTotal=c=>isRou(c)?0:r2((+c.diaria||0)*(+c.qtd||0));
@@ -889,9 +1035,9 @@ function alerts(){const al=[];const t=totals();
   const semRealC=FUNCS.filter(f=>{const a=itemAgg(f);return a.real==null&&a.n;});
   if(semRealC.length)al.push(["lo","Contratado sem Valor Real lançado",semRealC.map(f=>f.n).join(" · ")+". O previsto usa o valor contratado até você lançar o Valor Real.","planilha"]);
   const aa=artAgg();
-  if(aa.contr>VERBA)al.push(["hi","Cachês acima de R$ 50.000",`${brl(aa.contr-VERBA)} acima da verba fixa.`,"programacao"]);
-  else if(aa.falta>0||aa.cach<ART_MIN)al.push(["md",`Verba artística: falta contratar ${brl(Math.max(0,aa.falta))}`,`${aa.cach} de no mínimo ${ART_MIN} cachês.`,"programacao"]);
-  if(aa.semDoc)al.push(["md",`${aa.semDoc} artista(s) sem CPF/CNPJ`,"Complete o documento antes de agendar o pagamento: o edital exige recibo e comprovante por artista.","programacao"]);
+  if(ART&&aa.contr>VERBA)al.push(["hi",`Cachês acima de ${brl0(VERBA)}`,`${brl(aa.contr-VERBA)} acima da verba fixa.`,"programacao"]);
+  else if(ART&&(aa.falta>0||aa.cach<ART_MIN))al.push(["md",`Verba artística: falta contratar ${brl(Math.max(0,aa.falta))}`,`${aa.cach} de no mínimo ${ART_MIN} cachês.`,"programacao"]);
+  if(ART&&aa.semDoc)al.push(["md",`${aa.semDoc} artista(s) sem CPF/CNPJ`,"Complete o documento antes de agendar o pagamento: o edital exige recibo e comprovante por artista.","programacao"]);
   const sem=FUNCS.filter(f=>f.lim!=="sem"&&f.lim!=="art"&&!itemAgg(f).n);
   if(sem.length)al.push(["md",`${sem.length} item(ns) da planilha sem contratado`,sem.map(f=>f.n).join(" · "),"planilha"]);
   const inc=FUNCS.filter(f=>{if(f.lim!=="qtd")return false;const a=itemAgg(f);return a.n&&a.qtd<f.q;});
@@ -901,9 +1047,9 @@ function alerts(){const al=[];const t=totals();
   const fora=FUNCS.filter(f=>f.lim==="sem"&&itemAgg(f).n);
   if(fora.length)al.push(["md","Contratações fora da proposta",fora.map(f=>`${f.n}: ${brl(itemAgg(f).contratado)}`).join(" · "),"planilha"]);
   const sub=FUNCS.filter(f=>f.sub).reduce((a,f)=>a+itemAgg(f).contratado,0);
-  if(sub>TETO*.25)al.push(["hi","Subcontratação acima de 25%",`${brl(sub)} em serviços subcontratáveis.`,"planilha"]);
+  if(SUB_PCT&&sub>TETO*SUB_PCT)al.push(["hi",`Subcontratação acima de ${pct(SUB_PCT)}`,`${brl(sub)} em serviços subcontratáveis.`,"planilha"]);
   const ocA=ocList().filter(o=>ocEstourou(o)&&!o.multa);
-  if(ocA.length)al.push(["hi",`${ocA.length} chamado(s) com prazo estourado sem multa registrada`,`Multa prevista: ${brl(ocA.reduce((a,o)=>a+TETO*({12:.05,24:.02,48:.01}[o.h]||0),0))}. Registre a multa se a SMTC aplicar.`,"ocorrencias"]);
+  if(ocA.length)al.push(["hi",`${ocA.length} chamado(s) com prazo estourado sem multa registrada`,`Multa prevista: ${brl(ocA.reduce((a,o)=>a+TETO*multaPrev(o),0))}. Registre a multa se ${ORG_F} aplicar.`,"ocorrencias"]);
   const mt=multaTotals();
   if(mt.pend>0)al.push(["hi",`${mt.np} multa(s) pendente(s) · ${brl(mt.pend)}`,"A Prefeitura retém o pagamento das notas fiscais enquanto houver multa não quitada.","ocorrencias"]);
   if(mt.tot>=MULTA_TETO)al.push(["hi","Multas atingiram o limite de 30% do contrato",`${brl(mt.tot)} de ${brl(MULTA_TETO)}. Acima disso a Prefeitura pode rescindir o contrato.`,"ocorrencias"]);
@@ -911,35 +1057,60 @@ function alerts(){const al=[];const t=totals();
   return al;}
 
 /* ================= PROJETOS (portal da empresa) ================= */
-function rProjetos(){const t=totals();const ds=[];contrList().filter(c=>c.funcao==="artista").forEach(c=>cDatas(c).forEach(x=>{if(x.d)ds.push(x.d);}));ds.sort();
-  const per=ds.length?`${fd(ds[0])} a ${fd(ds[ds.length-1])}`:"A confirmar";const nC=contrList().length;const pend=payList().filter(p=>payStatus(p)!=="pago").length;
-  const pPago=Math.min(1,t.pago/TETO),pPrev=Math.min(1,Math.max(0,t.prev-t.pago)/TETO);
-  const st=t.atr?`<span class="pill bad"><i></i>${t.atr} pagamento(s) atrasado(s)</span>`:`<span class="pill"><i></i>Em execução</span>`;
-  $("#projGrid").innerHTML=`<a class="proj" href="#painel" aria-label="Abrir o painel do 39º Sonho de Natal">
-    <div class="proj-cover"><img class="pc-mark" src="assets/brand/alternativa-cultural-simbolo-fundo-escuro.svg" alt="" aria-hidden="true"><span class="pc-tag">${st}</span><h2>39º Sonho de Natal</h2></div>
+const ST_PROJ={execucao:"Em execução",preparacao:"Em preparação",encerrado:"Encerrado"};
+function rProjetos(){const ids=FICHAS_ORDEM.filter(pid=>acc(pid));const admin=document.body.classList.contains("admin");
+  const K={exec:0,teto:0,pago:0,prev:0,atr:0,atrV:0,oc:0,est:0,mult:0,semV:0};
+  const cards=ids.map(pid=>comProjeto(pid,()=>{const P=PROJ;const a=acc(pid);const t=totals();
+    const ds=[];if(ART)contrList().filter(c=>c.funcao==="artista").forEach(c=>cDatas(c).forEach(x=>{if(x.d)ds.push(x.d);}));ds.sort();
+    const per=ds.length?`${fd(ds[0])} a ${fd(ds[ds.length-1])}`:(P.vigencia&&P.vigencia.fim?`${P.vigencia.ini?fd(P.vigencia.ini)+" a ":"até "}${fd(P.vigencia.fim)}`:"A confirmar");
+    const nC=contrList().length;const pend=payList().filter(p=>payStatus(p)!=="pago").length;const ocA=ocList().filter(o=>ocSt(o)!=="resolvido");const ocE=ocA.filter(ocEstourou).length;
+    if((P.status||"execucao")==="execucao")K.exec++;K.teto+=TETO;K.oc+=ocA.length;K.est+=ocE;
+    if(a.valores){K.pago+=t.pago;K.prev+=t.prev;K.atr+=t.atr;K.atrV+=t.atrV;K.mult+=t.multasPend;}else K.semV++;
+    const first=primeiraView()||"edital";
+    const st=a.valores&&t.atr?`<span class="pill bad"><i></i>${t.atr} pagamento(s) atrasado(s)</span>`:`<span class="pill"><i></i>${ST_PROJ[P.status]||ST_PROJ.execucao}</span>`;
+    const pPago=TETO?Math.min(1,t.pago/TETO):0,pPrev=TETO?Math.min(1,Math.max(0,t.prev-t.pago)/TETO):0;
+    const prog=a.valores?`<div class="proj-prog"><div class="row"><span>Pago <b class="num" style="color:var(--brand)">${brl0(t.pago)}</b> · previsto ${brl0(t.prev)}</span><span class="num">${pct(TETO?t.pago/TETO:0)}</span></div>
+        <span class="bar" title="Pago ${esc(brl(t.pago))} de ${esc(brl(TETO))}"><i style="width:${(pPago*100).toFixed(2)}%;background:var(--ok)"></i><i style="width:${(pPrev*100).toFixed(2)}%;background:var(--gray)"></i></span></div>`
+      :`<p class="muted" style="margin:0;font-size:13px">Seu acesso: ${esc(areasTxt(a))}</p>`;
+    return `<a class="proj" href="#${first}" data-proj="${esc(pid)}" aria-label="Abrir o painel do ${esc(P.nome)}">
+    <div class="proj-cover"><img class="pc-mark" src="assets/brand/alternativa-cultural-simbolo-fundo-escuro.svg" alt="" aria-hidden="true"><span class="pc-tag">${st}</span><h2>${esc(P.nome)}</h2></div>
     <div class="proj-body">
-      <dl class="proj-meta"><div><dt>Contratante</dt><dd>Prefeitura de Canela/RS · SMTC</dd></div><div><dt>Contrato</dt><dd>Pregão Eletrônico 60/2026</dd></div><div><dt>Valor homologado</dt><dd class="num">${brl(TETO)}</dd></div><div><dt>Programação</dt><dd>${esc(per)}</dd></div></dl>
-      <div class="proj-prog"><div class="row"><span>Pago <b class="num" style="color:var(--brand)">${brl0(t.pago)}</b> · previsto ${brl0(t.prev)}</span><span class="num">${pct(t.pago/TETO)}</span></div>
-        <span class="bar" title="Pago ${esc(brl(t.pago))} de ${esc(brl(TETO))}"><i style="width:${(pPago*100).toFixed(2)}%;background:var(--ok)"></i><i style="width:${(pPrev*100).toFixed(2)}%;background:var(--gray)"></i></span></div>
-      <div class="row" style="gap:6px"><span class="chip">${nC} contratado(s)</span><span class="chip">${pend} pagamento(s) em aberto</span>${t.multas?`<span class="chip b">Multas ${brl0(t.multas)}</span>`:""}</div>
+      <dl class="proj-meta"><div><dt>Contratante</dt><dd>${esc(P.contratante||"—")}</dd></div><div><dt>Contrato</dt><dd>${esc(P.contrato||"—")}</dd></div><div><dt>Valor homologado</dt><dd class="num">${brl(TETO)}</dd></div><div><dt>${ART?"Programação":"Vigência"}</dt><dd>${esc(per)}</dd></div></dl>
+      ${prog}
+      <div class="row" style="gap:6px"><span class="chip">${nC} contratado(s)</span>${a.valores?`<span class="chip">${pend} pagamento(s) em aberto</span>`:""}${ocA.length?`<span class="chip ${ocE?"b":""}">${ocA.length} chamado(s) aberto(s)</span>`:""}${a.valores&&t.multas?`<span class="chip b">Multas ${brl0(t.multas)}</span>`:""}</div>
       <span class="proj-go">Abrir painel do projeto<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-    </div></a>
-    <div class="proj add"><h2>Próximo projeto</h2><p>Cada projeto entra com o próprio teto, os itens do contrato e a equipe. Para incluir o próximo, solicite a configuração ao suporte do sistema.</p></div>`;}
+    </div></a>`;}));
+  const add=admin?`<div class="proj add"><h2>Novo projeto</h2><p>Cada projeto entra com a ficha do próprio edital: teto, itens da proposta, regras, prazos, documentos exigidos e módulos. Para incluir o próximo, envie o edital e os anexos ao Claude no Projeto "ST Alternativa Cultural". Depois de publicado, libere a equipe na aba Usuários.</p></div>`:"";
+  $("#projGrid").innerHTML=cards.join("")+add||`<div class="empty">Nenhum projeto liberado para este e-mail ainda. Peça acesso ao administrador.</div>`;
+  if(!ids.length&&!add)$("#projGrid").innerHTML=`<div class="empty">Nenhum projeto liberado para este e-mail ainda. Peça acesso ao administrador.</div>`;
+  const vis=ids.length-K.semV;const nv0=NV;NV=false;
+  $("#projKpis").innerHTML=ids.length&&vis?[
+   `<div class="card kpi"><span class="label">Em execução</span><div class="v num">${K.exec}</div><div class="s">${ids.length} projeto(s) no total</div></div>`,
+   `<div class="card kpi"><span class="label">Carteira homologada</span><div class="v num">${brl0(K.teto)}</div><div class="s">soma dos contratos${K.semV?" com acesso":""}</div></div>`,
+   `<div class="card kpi"><span class="label">Pago</span><div class="v num" style="color:var(--ok)">${brl0(K.pago)}</div><div class="s">previsto ${brl0(K.prev)}${K.semV?` · ${K.semV} projeto(s) sem valores`:""}</div></div>`,
+   `<div class="card kpi ${K.atr?"alert":""}"><span class="label">Pagamentos atrasados</span><div class="v num">${K.atr}</div><div class="s">${brl0(K.atrV)}</div></div>`,
+   `<div class="card kpi ${K.est||K.mult?"alert":(K.oc?"warnb":"")}"><span class="label">Chamados abertos</span><div class="v num">${K.oc}</div><div class="s">${K.est?`${K.est} com prazo estourado`:"nenhum estourado"}${K.mult?` · multas pendentes ${brl0(K.mult)}`:""}</div></div>`].join(""):"";
+  NV=nv0;
+  $$("#projGrid [data-proj]").forEach(el=>el.onclick=e=>{e.preventDefault();setAtivo(el.dataset.proj);const v=primeiraView()||"edital";if(location.hash.slice(1)===v)show();else location.hash=v;});}
 
 /* ================= NAVEGAÇÃO ================= */
 const NAV=[["painel","Painel"],["contratados","Contratados"],["planilha","Financeiro","fin"],["programacao","Programação"],["riders","Riders"],["documentos","Documentos"],["ocorrencias","Ocorrências"],["relatorios","Relatórios"],["edital","Edital"],["usuarios","Usuários","adm"]];
 const ICON={"projetos": "<rect x=\"3\" y=\"3\" width=\"7.5\" height=\"7.5\" rx=\"2\"/><rect x=\"13.5\" y=\"3\" width=\"7.5\" height=\"7.5\" rx=\"2\"/><rect x=\"3\" y=\"13.5\" width=\"7.5\" height=\"7.5\" rx=\"2\"/><rect x=\"13.5\" y=\"13.5\" width=\"7.5\" height=\"7.5\" rx=\"2\"/>", "painel": "<path d=\"M3.5 18a8.5 8.5 0 1 1 17 0\"/><path d=\"M12 18l4.2-5.2\"/><path d=\"M3.5 18h17\"/>", "contratados": "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5\"/><path d=\"M16 4.6a3.5 3.5 0 0 1 0 6.8\"/><path d=\"M18 14.8c1.9.7 3.1 2.5 3.5 5.2\"/>", "planilha": "<rect x=\"3\" y=\"5.5\" width=\"18\" height=\"14\" rx=\"2.5\"/><path d=\"M3 10h18\"/><path d=\"M7 15h4\"/>", "programacao": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M8 3v4M16 3v4M3.5 10h17\"/><path d=\"M9 15l2 2 4-4\"/>", "riders": "<path d=\"M5 3v18M12 3v18M19 3v18\"/><rect x=\"3\" y=\"6\" width=\"4\" height=\"3.5\" rx=\"1\"/><rect x=\"10\" y=\"13\" width=\"4\" height=\"3.5\" rx=\"1\"/><rect x=\"17\" y=\"9\" width=\"4\" height=\"3.5\" rx=\"1\"/>", "documentos": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "ocorrencias": "<path d=\"M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9.5v4.5M12 17.3v.2\"/>", "relatorios": "<path d=\"M3 20.5h18\"/><path d=\"M6.5 20.5v-7M11.5 20.5V5M16.5 20.5v-10\"/>", "edital": "<path d=\"M4 5.5C6.5 4 9.5 4 12 5.5v14C9.5 18 6.5 18 4 19.5z\"/><path d=\"M20 5.5C17.5 4 14.5 4 12 5.5v14c2.5-1.5 5.5-1.5 8 0z\"/>", "usuarios": "<circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"M11 12l9-9M17 6l3 3M14.5 8.5l2 2\"/>"};
 const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||""}</svg>`;
 const VIEWS=["projetos","painel","contratados","planilha","pagamentos","programacao","riders","documentos","ocorrencias","relatorios","edital","usuarios"];
-function current(){const h=location.hash.slice(1);if(h==="usuarios"&&!document.body.classList.contains("admin"))return"projetos";return VIEWS.includes(h)?h:"projetos";}
+const veView=v=>v==="projetos"||v==="usuarios"||veArea(PROJ.id,AREA_VIEW[v]);
+const primeiraView=()=>["painel","contratados","planilha","programacao","riders","documentos","ocorrencias","relatorios","edital"].find(veView);
+function current(){const h=location.hash.slice(1);if(h==="usuarios")return document.body.classList.contains("admin")?"usuarios":"projetos";if(!VIEWS.includes(h)||h==="projetos")return"projetos";return veView(h)?h:(primeiraView()||"projetos");}
 function renderNav(){const cur=current();const atr=payList().filter(p=>payStatus(p)==="atrasado").length;const oc=Object.values(S.ocorrencias).filter(o=>!o.ok).length;
   const tab=([k,l])=>{const on=k===cur||(k==="planilha"&&cur==="pagamentos");const b=k==="planilha"?atr:(k==="ocorrencias"?oc:0);return `<a class="tab" href="#${k}" ${on?'aria-current="page"':""}>${ico(k)}<span>${l}</span>${b?`<span class="badge" title="${k==="planilha"?"pagamentos atrasados":"chamados abertos"}">${b}</span>`:""}</a>`;};
   $("#tabsCo").innerHTML=tab(["projetos","Projetos"]);
-  $("#tabs").innerHTML=NAV.filter(x=>x[2]!=="adm").map(tab).join("")+`<span class="navsep adm" aria-hidden="true">Administração</span>`+NAV.filter(x=>x[2]==="adm").map(tab).join("");}
-function show(){const c=current();$$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+c));window.scrollTo(0,0);render();}
+  const temProj=!!acc(PROJ.id);$("#ctrCard").hidden=!temProj;$("#ctrCard").href="#"+(primeiraView()||"projetos");
+  $("#tabs").innerHTML=NAV.filter(x=>x[2]!=="adm"&&temProj&&veView(x[0])).map(tab).join("")+`<span class="navsep adm" aria-hidden="true">Administração</span>`+NAV.filter(x=>x[2]==="adm").map(tab).join("");}
+function show(){const c=current();
+  if(Store.mode==="web"&&Store.user){const ar=AREA_VIEW[c];Store.canWrite=ar?editaArea(PROJ.id,ar):false;document.body.classList.toggle("ro",!!ar&&!Store.canWrite);document.body.classList.toggle("nofin",!editaArea(PROJ.id,"financeiro"));}$$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+c));window.scrollTo(0,0);render();}
 window.addEventListener("hashchange",show);
 let _raf=0;function schedule(){if(_raf)return;_raf=requestAnimationFrame(()=>{_raf=0;render();});}
-function sideProg(){const el=$("#sideProg");if(!el)return;const ds=[];contrList().filter(c=>c.funcao==="artista").forEach(c=>cDatas(c).forEach(x=>{if(x.d)ds.push(x.d);}));if(!ds.length){el.textContent="Programação e datas: a confirmar";return;}ds.sort();el.textContent=`Programação: ${fd(ds[0])} a ${fd(ds[ds.length-1])} · ${ds.length} apresentações`;}
+function sideProg(){const el=$("#sideProg");if(!el)return;if(!ART){const v=PROJ.vigencia||{};el.textContent=v.fim?`Vigência: ${v.ini?fd(v.ini)+" a ":"até "}${fd(v.fim)}`:"Vigência: a confirmar";return;}const ds=[];contrList().filter(c=>c.funcao==="artista").forEach(c=>cDatas(c).forEach(x=>{if(x.d)ds.push(x.d);}));if(!ds.length){el.textContent="Programação e datas: a confirmar";return;}ds.sort();el.textContent=`Programação: ${fd(ds[0])} a ${fd(ds[ds.length-1])} · ${ds.length} apresentações`;}
 function render(){renderNav();sideProg();const c=current();const fn={projetos:rProjetos,painel:rPainel,contratados:rContr,planilha:rPlan,pagamentos:rPag,programacao:rProg,riders:rRiders,documentos:rDocs,ocorrencias:rOc,relatorios:rRep,edital:rEdital,usuarios:rUsers}[c];try{fn();}catch(e){console.error(e);}if(openDrawer)openDrawer.refresh();}
 
 /* ================= PAINEL ================= */
@@ -981,7 +1152,7 @@ function rPainel(){
    const leg=fat.map(x=>`<li class="${x.v>0?"":"zero"}" title="${esc(x.n)}: ${esc(brl(x.v))}"><b style="background:${x.c}"></b><span>${esc(x.n)}</span></li>`).join("")+`<li title="${livre<0?"Acima do homologado":"Não alocado"}: ${esc(brl(Math.abs(livre)))}"><b style="background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line2)"></b><span>${livre<0?'<span class="neg">Acima do homologado</span>':"Não alocado"}</span></li>`;
    $("#pnlPie").innerHTML=`<svg viewBox="0 0 220 122" role="img" aria-label="Divisão do orçamento homologado por setor">${paths}${texts}${center}</svg><ul>${leg}</ul>`;}
   // pagamentos por mês (novembro, dezembro, janeiro) · ligado à aba Pagamentos
-  {const MESES=[["2026-11","Novembro","nov/26"],["2026-12","Dezembro","dez/26"],["2027-01","Janeiro","jan/27"]];
+  {const MESES=mesesProjeto();
    const M=MESES.map(([k,n,c])=>{let pago=0,pend=0,atr=0,np=0,nq=0;payList().forEach(p=>{const st=payStatus(p);if(st==="pago"){if((p.pagoEm||p.data).slice(0,7)===k){pago+=+p.valor||0;np++;}}else if(p.data.slice(0,7)===k){if(st==="atrasado")atr+=+p.valor||0;else pend+=+p.valor||0;nq++;}});return{k,n,c,pago:r2(pago),pend:r2(pend),atr:r2(atr),np,nq};});
    const fora=payList().filter(p=>{const k=(p.status==="pago"?(p.pagoEm||p.data):p.data).slice(0,7);return !MESES.some(m=>m[0]===k);});
    const mx=Math.max(...M.map(m=>m.pago+m.pend+m.atr),0);
@@ -1026,7 +1197,7 @@ function validateC(d,excludeId){
   if(!d.nome)return"Informe o nome.";
   const dg=digits(d.doc);if(!isRou(d)&&dg.length!==11&&dg.length!==14)return"CPF deve ter 11 dígitos e CNPJ, 14.";
   const f=FN[d.funcao];if(!f)return"Escolha a função.";
-  if(!(d.diaria>0))return`Informe o ${f.lim==="art"?"valor do cachê":"valor da "+(f.un==="hora"?"hora":(f.un==="serviço"?"serviço":"diária"))}.`;
+  if(!NV&&!(d.diaria>0))return`Informe o ${f.lim==="art"?"valor do cachê":"valor da "+(f.un==="hora"?"hora":(f.un==="serviço"?"serviço":"diária"))}.`;
   if(!(d.qtd>0))return`Informe a quantidade de ${unitWord(f)}.`;
   const ci=capInfo(f,excludeId);
   if(f.lim==="qtd"&&d.qtd>ci.rest)return`Limite da proposta: restam ${Math.max(0,ci.rest)} ${unitWord(f)} em ${f.n}.`;
@@ -1035,7 +1206,7 @@ function validateC(d,excludeId){
   const ps=excludeId?cPays(excludeId):[];const ag=ps.reduce((a,p)=>a+(+p.valor||0),0);
   if(r2(d.diaria*d.qtd)+0.001<ag)return`Já há ${brl(ag)} agendado para este contratado. Reduza as parcelas antes.`;
   return"";}
-function validateWarn(d,excludeId){const f=FN[d.funcao];if(!f||f.lim!=="art"||isRou(d))return"";const ci=capInfo(f,excludeId);const tot=r2(ci.u.valor+d.diaria*d.qtd);if(tot>VERBA+0.001)return`Com este cachê, os artistas somam ${brl(tot)}, ${brl(tot-VERBA)} acima da verba fixa de R$ 50.000 do edital. Salvar mesmo assim?`;return"";}
+function validateWarn(d,excludeId){const f=FN[d.funcao];if(!f||f.lim!=="art"||isRou(d))return"";const ci=capInfo(f,excludeId);const tot=r2(ci.u.valor+d.diaria*d.qtd);if(tot>VERBA+0.001)return`Com este cachê, os artistas somam ${brl(tot)}, ${brl(tot-VERBA)} acima da verba fixa de ${brl0(VERBA)} do edital. Salvar mesmo assim?`;return"";}
 function confirmAsync(t,txt,okLbl){return new Promise(res=>{const m=modalHost();m.innerHTML=`<div class="ovl center" style="z-index:70"><div class="modal" role="alertdialog" aria-modal="true"><h2 style="font-size:18px">${esc(t)}</h2><p class="muted" style="margin:0">${esc(txt)}</p><div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="cbN">Cancelar</button><button class="btn p" type="button" id="cbY">${esc(okLbl)}</button></div></div></div>`;$("#cbN").onclick=()=>{closeModal();res(false);};$("#cbY").onclick=()=>{closeModal();res(true);};});}
 function readCForm(){return{nome:$("#cNome").value.trim(),doc:fmtDoc($("#cDoc").value.trim()),tipo:$("#cTipo").value,tel:$("#cTel").value.trim(),funcao:$("#cFunc").value,servico:$("#cServ").value,diaria:r2($("#cDiaria").value),qtd:+$("#cQtd").value||0,data:$("#cData").value,obs:$("#cObs").value.trim(),fonte:$("#cFonte").value,atracao:$("#cAtr").value.trim(),estilo:$("#cEstilo").value.trim(),elenco:$("#cElenco").value.trim(),datas:readDateRows($("#cDatas"))};}
 function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
@@ -1046,7 +1217,7 @@ function syncCForm(){const f=FN[$("#cFunc").value];if(!f)return;
   const q=$("#cQtd");if(f.un==="serviço"){q.value=1;q.readOnly=true;}else{q.readOnly=false;if(f.lim==="art"&&!q.value)q.value=1;}
   $("#cDataLbl").textContent=f.lim==="art"?"Data da apresentação":"Data do serviço";
   $("#cForm").classList.toggle("art",f.lim==="art");
-  if(!$("#cDiaria").value&&f.d&&f.lim!=="art")$("#cDiaria").placeholder="Proposta: "+brl(f.d);else if(f.lim==="art")$("#cDiaria").placeholder="Média: R$ 500,00";
+  if(!$("#cDiaria").value&&f.d&&f.lim!=="art")$("#cDiaria").placeholder="Proposta: "+brl(f.d);else if(f.lim==="art")$("#cDiaria").placeholder=ART&&ART.media?"Média: "+brl(ART.media):"";
   calcCTotal();}
 function calcCTotal(){const rou=$("#cForm").classList.contains("art")&&$("#cFonte").value==="rouanet";const v=rou?0:r2((+$("#cDiaria").value||0)*(+$("#cQtd").value||0));$("#cTotal").value=rou?"R$ 0,00 · "+ROU_TXT:brl(v);$("#cDoc").required=!rou;}
 $("#cFonte").onchange=calcCTotal;
@@ -1063,7 +1234,7 @@ $("#cForm").addEventListener("submit",async e=>{e.preventDefault();const d=readC
   $("#cForm").reset();dateRows($("#cDatas"),[]);$("#cDatasHint").textContent="";$("#cFunc").value=d.funcao;syncCForm();toast("Contratado salvo. Agende os pagamentos.");openContr(id);});
 $("#cSetF").innerHTML=`<option value="">Todos os setores</option>`+SETORES.map(s=>`<option value="${s.k}">${s.n}</option>`).join("");
 $("#cSetF").onchange=()=>rContr();$("#cSearch").oninput=()=>rContr();
-function payBadge(a){if(!a.n)return`<span class="pill warn"><i></i>Não agendado</span>`;if(a.atrasados)return`<span class="pill bad"><i></i>${a.atrasados} atrasado(s)</span>`;if(a.pago>=a.total-0.5&&a.total>0)return`<span class="pill ok"><i></i>Quitado</span>`;if(a.falta>0.5)return`<span class="pill warn"><i></i>Falta agendar ${brl0(a.falta)}</span>`;return`<span class="pill info"><i></i>Em dia</span>`;}
+function payBadge(a){if(NV)return`<span class="muted">—</span>`;if(!a.n)return`<span class="pill warn"><i></i>Não agendado</span>`;if(a.atrasados)return`<span class="pill bad"><i></i>${a.atrasados} atrasado(s)</span>`;if(a.pago>=a.total-0.5&&a.total>0)return`<span class="pill ok"><i></i>Quitado</span>`;if(a.falta>0.5)return`<span class="pill warn"><i></i>Falta agendar ${brl0(a.falta)}</span>`;return`<span class="pill info"><i></i>Em dia</span>`;}
 function rContr(){
   syncCForm();
   $("#funcBody").innerHTML=FUNCS.map(f=>{const u=funcUse(f.k);let lim,used,disp,p;
@@ -1093,14 +1264,14 @@ function openContr(id){
     const keepFocus=document.activeElement&&el.contains(document.activeElement)?document.activeElement.id:null;
     el.innerHTML=`
       <div class="dh"><div><span class="label"><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n} · ${esc(f.n)}</span><h2 id="dTitle" style="font-size:22px;margin-top:4px">${esc(c.nome)}</h2><span class="sub mono">${esc(c.doc)} · ${esc(c.tipo)}${c.tel?" · "+esc(c.tel):""}</span></div><button class="btn sm ghost" type="button" id="dClose" aria-label="Fechar">Fechar</button></div>
-      <div class="grid g3">
-        <div class="kpi"><span class="label">Valor total</span><div class="v num" style="font-size:20px">${brl(a.total)}</div><div class="s">${isRou(c)?`${ROU_TXT} · contratação direta da SMTC · ${c.qtd} cachê(s) de ${brl(c.diaria)} fora do contrato`:`${brl(c.diaria)} × ${c.qtd} ${unitWord(f)}`}</div></div>
+      <div class="grid g3 valOnly">
+        <div class="kpi"><span class="label">Valor total</span><div class="v num" style="font-size:20px">${brl(a.total)}</div><div class="s">${isRou(c)?`${ROU_TXT} · contratação direta da ${ORG} · ${c.qtd} cachê(s) de ${brl(c.diaria)} fora do contrato`:`${brl(c.diaria)} × ${c.qtd} ${unitWord(f)}`}</div></div>
         <div class="kpi"><span class="label">Pago</span><div class="v num" style="font-size:20px">${brl(a.pago)}</div><div class="s">${pct(a.total?a.pago/a.total:0)} do total</div></div>
         <div class="kpi"><span class="label">Falta agendar</span><div class="v num ${a.falta>0.5?"wtxt":""}" style="font-size:20px">${brl(Math.max(0,a.falta))}</div><div class="s">${ps.length} parcela(s)</div></div>
       </div>
       <div class="row" style="justify-content:space-between"><div class="row"><span class="label">Serviço</span><div class="seg" role="group" aria-label="Situação do serviço"><button type="button" data-sv="a_prestar" aria-pressed="${c.servico!=="prestado"}">A prestar</button><button type="button" data-sv="prestado" class="s-ok" aria-pressed="${c.servico==="prestado"}">Prestado</button></div>${f.lim==="art"?(cDatas(c).length?`<span class="muted">${cDatas(c).length} apresentação(ões): ${cDatas(c).map(x=>fd(x.d)+(x.h?" "+x.h:"")).join(" · ")}</span>`:""):(c.data?`<span class="muted">Serviço: ${fd(c.data)}</span>`:"")}</div><button class="btn sm" type="button" id="dEdit">${editing?"Cancelar edição":"Editar dados"}</button></div>
       ${editing?editForm(c):""}
-      <div class="card" style="padding:14px 16px">
+      <div class="card valOnly" style="padding:14px 16px">
         <div class="card-h" style="margin-bottom:6px"><h2>Datas de pagamento</h2><span class="label">${brl(a.agendado)} agendado de ${brl(a.total)}</span></div>
         ${ps.length?ps.map(p=>parcRow(p,c)).join(""):`<div class="empty">Nenhuma parcela agendada.</div>`}
         ${a.falta>0.5?`<form class="form" id="pForm" style="grid-template-columns:1fr 1fr auto;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
@@ -1110,7 +1281,7 @@ function openContr(id){
           <span class="err" id="pMsg" style="grid-column:1/-1"></span></form>`:`<p class="okmsg" style="margin:10px 0 0">Valor total agendado.</p>`}
       </div>
       ${c.obs?`<div class="note"><b>Observações:</b> ${esc(c.obs)}</div>`:""}
-      <div class="row" style="justify-content:space-between;margin-top:auto"><span class="sub">Cadastrado em ${c.criadoEm?new Date(c.criadoEm).toLocaleDateString("pt-BR"):"—"}</span><button class="btn sm d" type="button" id="dDel">Excluir contratado</button></div>`;
+      <div class="row" style="justify-content:space-between;margin-top:auto"><span class="sub">Cadastrado em ${c.criadoEm?new Date(c.criadoEm).toLocaleDateString("pt-BR"):"—"}</span><button class="btn sm d valOnly" type="button" id="dDel">Excluir contratado</button></div>`;
     $("#dClose").onclick=closeOvl;
     $("#dEdit").onclick=()=>{editing=!editing;draw();};
     $$("#drawer [data-sv]").forEach(b=>b.onclick=async()=>{if(c.servico===b.dataset.sv)return;const n={...c0,servico:b.dataset.sv};try{await Store.set("contratados",id,n);toast(b.dataset.sv==="prestado"?"Serviço marcado como prestado":"Serviço marcado como a prestar");}catch(e){}});
@@ -1131,8 +1302,8 @@ function editForm(c){return `<form class="form card" id="eForm" style="grid-temp
   <label class="f" for="eTipo">Tipo de contratação<select id="eTipo">${["Pessoa física (recibo/RPA)","MEI","Pessoa jurídica","Associação ou cooperativa"].map(t=>`<option ${t===c.tipo?"selected":""}>${t}</option>`).join("")}</select></label>
   <label class="f" for="eTel">Telefone<input type="tel" id="eTel" value="${esc(c.tel)}"></label>
   <label class="f" for="eFunc">Função<select id="eFunc">${funcOptions(c.funcao)}</select></label>
-  ${FN[c.funcao]&&FN[c.funcao].lim==="art"?`<label class="f" for="eAtr">Atração / espetáculo<input type="text" id="eAtr" value="${esc(c.atracao||"")}"></label><label class="f" for="eFonte">Origem do cachê<select id="eFonte"><option value="contrato" ${cFonte(c)==="contrato"?"selected":""}>Contrato · Alternativa Cultural</option><option value="rouanet" ${cFonte(c)==="rouanet"?"selected":""}>Lei Rouanet · SMTC (R$ 0,00)</option></select></label><label class="f" for="eEstilo">Estilo<input type="text" id="eEstilo" value="${esc(c.estilo||"")}"></label><label class="f" for="eElenco">Elenco<input type="text" id="eElenco" value="${esc(c.elenco||"")}"></label><div class="f" style="grid-column:1/-1"><span>Datas e horários das apresentações</span><div class="dl" id="eDatas"></div><div class="row" style="margin-top:6px"><button class="btn sm" type="button" id="eDataAdd">+ Adicionar data</button></div></div>`:`<label class="f" for="eData">Data do serviço<input type="date" id="eData" value="${esc(c.data)}"></label>`}
-  <label class="f" for="eDiaria">Valor unitário (R$)<input type="number" id="eDiaria" step="0.01" min="0" value="${c.diaria}" class="in-num" style="max-width:none"></label>
+  ${FN[c.funcao]&&FN[c.funcao].lim==="art"?`<label class="f" for="eAtr">Atração / espetáculo<input type="text" id="eAtr" value="${esc(c.atracao||"")}"></label><label class="f" for="eFonte" ${ART&&ART.rouanet?"":"hidden"}>Origem do cachê<select id="eFonte"><option value="contrato" ${cFonte(c)==="contrato"?"selected":""}>Contrato · Alternativa Cultural</option><option value="rouanet" ${cFonte(c)==="rouanet"?"selected":""}>Lei Rouanet · ${ORG} (R$ 0,00)</option></select></label><label class="f" for="eEstilo">Estilo<input type="text" id="eEstilo" value="${esc(c.estilo||"")}"></label><label class="f" for="eElenco">Elenco<input type="text" id="eElenco" value="${esc(c.elenco||"")}"></label><div class="f" style="grid-column:1/-1"><span>Datas e horários das apresentações</span><div class="dl" id="eDatas"></div><div class="row" style="margin-top:6px"><button class="btn sm" type="button" id="eDataAdd">+ Adicionar data</button></div></div>`:`<label class="f" for="eData">Data do serviço<input type="date" id="eData" value="${esc(c.data)}"></label>`}
+  <label class="f valOnly" for="eDiaria">Valor unitário (R$)<input type="number" id="eDiaria" step="0.01" min="0" value="${c.diaria}" class="in-num" style="max-width:none"></label>
   <label class="f" for="eQtd">Quantidade<input type="number" id="eQtd" step="1" min="0" value="${c.qtd}" class="in-num" style="max-width:none"></label>
   <label class="f" for="eObs" style="grid-column:1/-1">Observações<input type="text" id="eObs" value="${esc(c.obs)}"></label>
   <span class="err" id="eMsg" style="grid-column:1/-1"></span>
@@ -1201,7 +1372,7 @@ function rPlan(){
       const dCls=dReal==null?"":(dReal>f.d+0.005?"neg":(dReal<f.d-0.005?"pos":""));
       const st=itemStatus(f,a).map(x=>`<span class="chip ${x[0]}">${x[1]}</span>`).join("");
       rows.push(`<tr><td><b>${f.n}</b><span class="sub">Item ${f.it}${f.det?" · "+f.det:""}</span></td><td class="r num">${qtdTxt}</td><td class="r num">${f.d?brl(f.d):"—"}${f.lim==="art"?'<span class="sub">média</span>':""}</td><td class="r num"><b>${f.tot?brl(f.tot):"—"}</b>${f.lim==="art"?'<span class="sub">fixo</span>':""}</td>
-        <td class="r"><input type="number" class="in-num" min="0" step="0.01" id="real_${f.k}" data-k="${f.k}" aria-label="Valor real de ${esc(f.n)}" placeholder="—" value="${a.real==null?"":a.real}"${f.k==="artista"?' title="Verba fixa do edital: R$ 50.000"':""}>${a.prev>(a.real||0)+0.5?`<span class="sub wtxt">previsto ${brl(a.prev)} (contratado)</span>`:""}</td>
+        <td class="r"><input type="number" class="in-num" min="0" step="0.01" id="real_${f.k}" data-k="${f.k}" aria-label="Valor real de ${esc(f.n)}" placeholder="—" value="${a.real==null?"":a.real}"${f.k==="artista"?` title="Verba fixa do edital: ${brl0(VERBA)}"`:""}>${a.prev>(a.real||0)+0.5?`<span class="sub wtxt">previsto ${brl(a.prev)} (contratado)</span>`:""}</td>
         <td class="r num ${dCls}">${dReal==null?"—":brl(dReal)}${dReal!=null&&f.d?`<span class="sub">${dReal>f.d?"+":""}${pct(dReal/f.d-1)}</span>`:""}</td>
         <td class="r num">${a.n?brl(a.contratado):"—"}<span class="sub">${a.n?`${a.n} contratado(s)${f.lim==="qtd"?` · ${a.qtd}/${f.q}`:""}`:""}</span></td>
         <td class="r num">${a.pago?brl(a.pago):"—"}${a.prev?`<span style="display:block;margin-top:5px">${finBar(a.pago,a.prev,0,6)}</span><span class="sub">${pct(a.pago/a.prev)} do previsto</span>`:""}</td><td>${st}</td></tr>`);});
@@ -1209,7 +1380,7 @@ function rPlan(){
     sumProp+=sp;sumReal+=sr;sumContr+=sc;sumPago+=spg;});
   rows.push(`<tr class="tot"><td>Total da proposta</td><td></td><td></td><td class="r num">${brl(sumProp)}</td><td class="r num">${brl(sumReal)}</td><td></td><td class="r num">${brl(sumContr)}</td><td class="r num">${brl(sumPago)}</td><td>${sumProp===TETO?'<span class="chip g">= homologado</span>':""}</td></tr>`);
   rows.push(`<tr><td class="muted">Impostos estimados (${pct(aliq())} do teto)</td><td></td><td></td><td></td><td class="r num">${brl(t.imp)}</td><td></td><td></td><td></td><td></td></tr>`);
-  rows.push(`<tr><td class="${t.multas?"":"muted"}">Multas e glosas <span class="sub">vêm da aba Ocorrências · limite ${brl(MULTA_TETO)} (30%)</span></td><td></td><td></td><td></td><td class="r num ${t.multas?"neg":""}">${t.multas?brl(t.multas):"—"}</td><td></td><td></td><td class="r num">${t.multasPagas?brl(t.multasPagas):"—"}</td><td>${t.multasPend?`<span class="chip b">${brl0(t.multasPend)} pendente</span>`:(t.multas?'<span class="chip g">Quitadas</span>':'<a class="btn sm" href="#ocorrencias">Ocorrências</a>')}</td></tr>`);
+  rows.push(`<tr><td class="${t.multas?"":"muted"}">Multas e glosas <span class="sub">vêm da aba Ocorrências · limite ${brl(MULTA_TETO)} (${pct(MULTA_PCT)})</span></td><td></td><td></td><td></td><td class="r num ${t.multas?"neg":""}">${t.multas?brl(t.multas):"—"}</td><td></td><td></td><td class="r num">${t.multasPagas?brl(t.multasPagas):"—"}</td><td>${t.multasPend?`<span class="chip b">${brl0(t.multasPend)} pendente</span>`:(t.multas?'<span class="chip g">Quitadas</span>':'<a class="btn sm" href="#ocorrencias">Ocorrências</a>')}</td></tr>`);
   const res=t.margem;
   $("#plBody").innerHTML=rows.join("");
   $$("#plBody input[data-k]").forEach(inp=>inp.addEventListener("change",async()=>{const k=inp.dataset.k;const v=inp.value===""?"":r2(inp.value);const p={...cfg("planilha")};p.real={...(p.real||{}),[k]:v};try{await Store.set("config","planilha",p);toast(v===""?"Valor real apagado":`Valor real de ${FN[k].n}: ${brl(v)}`);}catch(e){}}));
@@ -1305,10 +1476,10 @@ function rProg(){const aa=artAgg();const over=aa.contr>VERBA+0.001;
   $("#prKpis").innerHTML=[
    `<div class="card kpi ${aa.cach<ART_MIN?"warnb":""}"><span class="label">Cachês</span><div class="v num">${aa.cach} <span class="muted" style="font-size:15px">/ mín. ${ART_MIN}</span></div><div class="s">${aa.apresC} apresentação(ões) · ${aa.n} contrato(s) da contratada${aa.nRou?` · +${aa.apresRou} pela ${ROU_TXT}`:""}</div></div>`,
    `<div class="card kpi ${over?"alert":""}"><span class="label">Contratado</span><div class="v num ${over?"neg":""}">${brl0(aa.contr)}</div><div class="s">${pct(aa.contr/VERBA)} da verba de ${brl0(VERBA)}</div></div>`,
-   `<div class="card kpi ${aa.falta>0?"warnb":(over?"alert":"")}"><span class="label">${over?"Acima da verba":"Falta contratar"}</span><div class="v num ${aa.falta>0?"wtxt":(over?"neg":"")}">${brl0(Math.abs(aa.falta))}</div><div class="s">${over?"além dos R$ 50.000 do edital":"para fechar R$ 50.000"}</div></div>`,
+   `<div class="card kpi ${aa.falta>0?"warnb":(over?"alert":"")}"><span class="label">${over?"Acima da verba":"Falta contratar"}</span><div class="v num ${aa.falta>0?"wtxt":(over?"neg":"")}">${brl0(Math.abs(aa.falta))}</div><div class="s">${over?`além dos ${brl0(VERBA)} do edital`:`para fechar ${brl0(VERBA)}`}</div></div>`,
    `<div class="card kpi"><span class="label">Realizadas</span><div class="v num">${aa.real} <span class="muted" style="font-size:15px">de ${aa.apres}</span></div><div class="s">${aa.prest} contrato(s) com serviço prestado</div></div>`,
    `<div class="card kpi"><span class="label">Pago aos artistas</span><div class="v num" style="color:var(--ok)">${brl0(aa.pago)}</div><div class="s">A pagar: ${brl0(aa.aPagar)}</div></div>`].join("");
-  const imp=$("#prImport");imp.hidden=!(document.body.classList.contains("admin")&&Store.canWrite&&!contrList().some(c=>c.importado));
+  const imp=$("#prImport");imp.hidden=!(PROJ.legado&&document.body.classList.contains("admin")&&Store.canWrite&&!contrList().some(c=>c.importado));
   const q=($("#prQ").value||"").toLowerCase();
   const rows=[];contrList().filter(c=>c.funcao==="artista").forEach(c=>{const ds=cDatas(c);if(!ds.length)rows.push({c,d:"",h:"",i:-1,ok:false});ds.forEach((x,i)=>rows.push({c,d:x.d,h:x.h,i,ok:!!x.ok}));});
   rows.sort((a,b)=>((a.d||"9")+(a.h||"")).localeCompare((b.d||"9")+(b.h||"")));
@@ -1316,7 +1487,7 @@ function rProg(){const aa=artAgg();const over=aa.contr>VERBA+0.001;
   let html="",last=null;
   list.forEach(r=>{const key=r.d||"sem";if(key!==last){last=key;html+=`<tr class="prog-day ${r.d===TODAY?"today":""}"><td colspan="8">${r.d?`${wdLong(r.d)} · ${fd(r.d)}${r.d===TODAY?" · hoje":""}`:"Sem data definida"}</td></tr>`;}
     const c=r.c;const a=cAgg(c);const past=r.d&&r.d<TODAY&&!r.ok;const idx=cDatas(c).findIndex(x=>x.d===r.d&&x.h===r.h);
-    html+=`<tr class="click ${r.ok?"":(past?"past":"")}" data-id="${esc(c.id)}"><td class="mono">${esc(r.h||"—")}</td><td><b>${esc(c.atracao||c.nome)}</b>${c.atracao?`<span class="sub">${esc(c.nome)}</span>`:""}</td><td>${esc(c.nome)}${isRou(c)?`<span class="sub">${ROU_TXT} · SMTC</span>`:(digits(c.doc||"").length<11?'<span class="sub wtxt">informar CPF/CNPJ</span>':`<span class="sub mono">${esc(c.doc)}</span>`)}</td><td class="muted">${esc(c.estilo||"—")}</td><td class="r">${esc(c.elenco||"—")}</td><td class="r num">${isRou(c)?`<span class="muted">R$ 0,00</span><span class="sub">${ROU_TXT}</span>`:brl(c.diaria)}</td><td>${r.i>=0?`<button class="btn sm ${r.ok?"":"ghost"}" type="button" data-real="${esc(c.id)}" data-i="${idx}" style="${r.ok?"background:var(--ok-tint);color:var(--ok);border-color:transparent":""}">${r.ok?"✓ Realizada":(past?"Confirmar":"Prevista")}</button>`:'<span class="muted">—</span>'}</td><td>${isRou(c)?`<span class="pill info"><i></i>${ROU_TXT}</span>`:payBadge(a)}</td></tr>`;});
+    html+=`<tr class="click ${r.ok?"":(past?"past":"")}" data-id="${esc(c.id)}"><td class="mono">${esc(r.h||"—")}</td><td><b>${esc(c.atracao||c.nome)}</b>${c.atracao?`<span class="sub">${esc(c.nome)}</span>`:""}</td><td>${esc(c.nome)}${isRou(c)?`<span class="sub">${ROU_TXT} · ${esc(ORG)}</span>`:(digits(c.doc||"").length<11?'<span class="sub wtxt">informar CPF/CNPJ</span>':`<span class="sub mono">${esc(c.doc)}</span>`)}</td><td class="muted">${esc(c.estilo||"—")}</td><td class="r">${esc(c.elenco||"—")}</td><td class="r num">${isRou(c)?`<span class="muted">R$ 0,00</span><span class="sub">${ROU_TXT}</span>`:brl(c.diaria)}</td><td>${r.i>=0?`<button class="btn sm ${r.ok?"":"ghost"}" type="button" data-real="${esc(c.id)}" data-i="${idx}" style="${r.ok?"background:var(--ok-tint);color:var(--ok);border-color:transparent":""}">${r.ok?"✓ Realizada":(past?"Confirmar":"Prevista")}</button>`:'<span class="muted">—</span>'}</td><td>${isRou(c)?`<span class="pill info"><i></i>${ROU_TXT}</span>`:payBadge(a)}</td></tr>`;});
   $("#prBody").innerHTML=html||`<tr><td colspan="8"><div class="empty">${q||prF!=="todas"?"Nenhuma apresentação com esse filtro.":"Nenhum artista cadastrado. Use “Cadastrar artista” ou importe a programação oficial."}</div></td></tr>`;
   $$("#prBody tr.click").forEach(tr=>tr.onclick=()=>openContr(tr.dataset.id));
   $$("#prBody [data-real]").forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!Store.canWrite)return;const cid=b.dataset.real;const c=S.contratados[cid];if(!c)return;const ds=cDatas(c);const i=+b.dataset.i;if(!ds[i])return;ds[i]={...ds[i],ok:!ds[i].ok};const all=ds.length&&ds.every(x=>x.ok);const patch={...c,datas:ds};if(all)patch.servico="prestado";else if(c.servico==="prestado"&&!all&&!c._prestadoManual)patch.servico="a_prestar";try{await Store.set("contratados",cid,patch);toast(ds[i].ok?`Apresentação de ${fd(ds[i].d)} marcada como realizada`:"Marcação desfeita");}catch(x){}});}
@@ -1330,9 +1501,9 @@ $("#prImport").onclick=async()=>{const C=PROG_SEED.filter(x=>x.fonte!=="rouanet"
 
 /* ================= RIDERS ================= */
 function rRiders(){const ck=cfg("riders").ck||{};
-  $("#rdKpis").innerHTML=["rider_coreto","rider_matriz"].map(k=>{const f=FN[k];const cs=contrList().filter(c=>c.funcao===k);const a=itemAgg(f);const used=a.qtd;return `<div class="card kpi"><span class="label">${f.n} · ${f.q} diárias</span><div class="s" style="margin-top:2px">${RIDER_INFO[k]}</div><div class="v num">${used} <span class="muted" style="font-size:15px">de ${f.q} diárias contratadas</span></div><div class="s">${cs.length?cs.map(c=>esc(c.nome)).join(", "):"Sem fornecedor cadastrado"} · contratado ${brl(a.contratado)}</div><div class="bar" style="margin-top:10px" title="Diárias contratadas"><i style="width:${Math.min(100,used/f.q*100)}%;background:var(--s-rider)"></i></div><div class="s" style="margin-top:10px">Previsto ${a.prev?brl(a.prev):"—"} · pago ${brl(a.pago)}</div><div style="margin-top:6px">${finBar(a.pago,a.prev,0,8)}</div></div>`;}).join("");
+  $("#rdKpis").innerHTML=(RID?RID.funcs||[]:[]).filter(k=>FN[k]).map(k=>{const f=FN[k];const cs=contrList().filter(c=>c.funcao===k);const a=itemAgg(f);const used=a.qtd;return `<div class="card kpi"><span class="label">${f.n} · ${f.q} diárias</span><div class="s" style="margin-top:2px">${esc(RIDER_INFO[k]||"")}</div><div class="v num">${used} <span class="muted" style="font-size:15px">de ${f.q} diárias contratadas</span></div><div class="s">${cs.length?cs.map(c=>esc(c.nome)).join(", "):"Sem fornecedor cadastrado"} · contratado ${brl(a.contratado)}</div><div class="bar" style="margin-top:10px" title="Diárias contratadas"><i style="width:${Math.min(100,used/f.q*100)}%;background:var(--s-rider)"></i></div><div class="s" style="margin-top:10px">Previsto ${a.prev?brl(a.prev):"—"} · pago ${brl(a.pago)}</div><div style="margin-top:6px">${finBar(a.pago,a.prev,0,8)}</div></div>`;}).join("");
   let n=0,t=0;
-  $("#rdCmp").innerHTML=`<div class="hd">Requisito</div><div class="hd">Coreto</div><div class="hd">Praça da Matriz</div>`+RIDER.map((r,i)=>{const na=/^Não previst/.test(r[2]);t+=na?1:2;n+=(ck["c"+i]?1:0)+(!na&&ck["m"+i]?1:0);return `<div class="rq">${r[0]}</div><div><label><input class="chk" type="checkbox" data-k="c${i}" ${ck["c"+i]?"checked":""}><span>${r[1]}</span></label></div><div>${na?`<span class="wtxt">${r[2]}</span>`:`<label><input class="chk" type="checkbox" data-k="m${i}" ${ck["m"+i]?"checked":""}><span>${r[2]}</span></label>`}</div>`;}).join("");
+  $("#rdCmp").innerHTML=`<div class="hd">Requisito</div>${((RID&&RID.cols)||["",""]).slice(0,2).map(x=>`<div class="hd">${esc(x)}</div>`).join("")}`+RIDER.map((r,i)=>{const na=/^Não previst/.test(r[2]);t+=na?1:2;n+=(ck["c"+i]?1:0)+(!na&&ck["m"+i]?1:0);return `<div class="rq">${r[0]}</div><div><label><input class="chk" type="checkbox" data-k="c${i}" ${ck["c"+i]?"checked":""}><span>${r[1]}</span></label></div><div>${na?`<span class="wtxt">${r[2]}</span>`:`<label><input class="chk" type="checkbox" data-k="m${i}" ${ck["m"+i]?"checked":""}><span>${r[2]}</span></label>`}</div>`;}).join("");
   $("#rdCount").textContent=`${n} de ${t} itens conferidos`;
   $$("#rdCmp .chk").forEach(c=>c.onchange=async()=>{const p={...cfg("riders")};p.ck={...(p.ck||{}),[c.dataset.k]:c.checked};try{await Store.set("config","riders",p);}catch(e){}});}
 
@@ -1349,7 +1520,7 @@ function rDocs(){const D=cfg("documentos").items||{};const lic=contrList().filte
 function fmtLeft(ms){const neg=ms<0;ms=Math.abs(ms);const h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3);return (neg?"estourou há ":"")+`${h}h${pad(m)}`;}
 const dtLocal=ms=>{const d=new Date(ms);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;};
 const fdt=ms=>new Date(ms).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-const multaPrev=o=>({12:.05,24:.02,48:.01}[o.h]||0);
+const multaPrev=o=>{const p=PRAZOS.find(x=>+x.h===+o.h);return p?+p.pct||0:0;};
 function ocPill(o){const st=ocSt(o);if(st==="resolvido")return `<span class="pill ok"><i></i>Resolvido ${o.okEm?fdt(o.okEm):""}</span>`;const l=ocDeadline(o)-Date.now();const cl=l<0?"bad":(l<4*3600e3?"warn":(st==="andamento"?"info":"warn"));return `<span class="pill ${cl}"><i></i>${l<0?"Estourou há "+fmtLeft(l).replace("estourou há ",""):(st==="andamento"?"Em andamento · ":"Aberto · ")+fmtLeft(l)}</span>`;}
 function rOc(){const sel=$("#ocResp");const cur=sel.value;sel.innerHTML=`<option value="">—</option>`+contrList().sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<option value="${esc(c.id)}">${esc(c.nome)} · ${esc((FN[c.funcao]||{}).n||"")}</option>`).join("");sel.value=cur;
   if(!$("#ocT").value)$("#ocT").value=dtLocal(Date.now());
@@ -1379,7 +1550,7 @@ function openOc(id){const o=S.ocorrencias[id];if(!o)return;const c=S.contratados
    <div class="card" style="padding:12px 14px;border-color:${m?(m.st==="quitada"?"rgba(43,211,139,.4)":"rgba(192,48,58,.4)"):(estou?"rgba(232,181,74,.5)":"var(--line)")}">
     <div class="card-h" style="margin-bottom:8px"><h2 style="font-size:15px">Multa</h2>${m?(m.st==="quitada"?'<span class="chip g">Quitada</span>':'<span class="chip b">Pendente</span>'):(estou?'<span class="chip w">Prazo estourado</span>':'<span class="chip">Sem multa</span>')}</div>
     ${m?`<div class="grid g3" style="gap:10px"><div class="kpi"><span class="label">Valor</span><div class="v num neg" style="font-size:18px">${brl(m.valor)}</div></div><div class="kpi"><span class="label">Aplicada em</span><div class="v num" style="font-size:18px">${fd(m.data)}</div></div><div class="kpi"><span class="label">Base</span><div class="v num" style="font-size:18px">${m.pct?pct(m.pct)+(m.dias>1?` × ${m.dias}d`:""):"glosa"}</div></div></div><p class="muted" style="font-size:12.5px;margin:8px 0 0">${esc((MK[m.tipo]||{}).n||"")}${m.obs?" · "+esc(m.obs):""}${m.st==="quitada"?` · quitada em ${fd(m.quitEm)}${m.modo==="glosa"?" (glosa na NF)":""}`:""}</p><div class="row" style="margin-top:10px">${m.st==="quitada"?"":`<button class="btn sm p" type="button" id="ocQuit">Registrar quitação</button>`}<button class="btn sm ghost" type="button" id="ocMultaDel">Remover multa</button></div>`
-    :`<p class="muted" style="font-size:12.5px;margin:0 0 10px">${estou?`O prazo de ${o.h}h estourou. Se a SMTC aplicar a multa de ${pct(mp)} (${brl(TETO*mp)}), registre abaixo: ela passa a somar na planilha, nos pagamentos e no painel.`:"Registre aqui qualquer multa ou glosa que a SMTC aplicar sobre este chamado."}</p><button class="btn sm ${estou?"p":""}" type="button" id="ocMultaNew">Registrar multa</button><div id="ocMultaForm"></div>`}
+    :`<p class="muted" style="font-size:12.5px;margin:0 0 10px">${estou?`O prazo de ${o.h}h estourou. Se ${esc(ORG_F)} aplicar a multa de ${pct(mp)} (${brl(TETO*mp)}), registre abaixo: ela passa a somar na planilha, nos pagamentos e no painel.`:`Registre aqui qualquer multa ou glosa que ${esc(ORG_F)} aplicar sobre este chamado.`}</p><button class="btn sm ${estou?"p":""}" type="button" id="ocMultaNew">Registrar multa</button><div id="ocMultaForm"></div>`}
    </div>
    <span class="err" id="ocMsg"></span>
   </div></div>`;
@@ -1393,9 +1564,9 @@ function openOc(id){const o=S.ocorrencias[id];if(!o)return;const c=S.contratados
   $$("[data-delfoto]").forEach(b=>b.onclick=async()=>{const fotos=[...(o.fotos||[])];fotos.splice(+b.dataset.delfoto,1);await ocSave(id,{fotos});re();});
   if($("#ocQuit"))$("#ocQuit").onclick=()=>multaQuitModal(id);
   if($("#ocMultaDel"))$("#ocMultaDel").onclick=()=>confirmBox("Remover a multa?","Ela sai da planilha, dos pagamentos e do painel.","Remover",async()=>{const n={...S.ocorrencias[id]};delete n.multa;try{await Store.set("ocorrencias",id,n);toast("Multa removida");re();}catch(e){}});
-  if($("#ocMultaNew"))$("#ocMultaNew").onclick=()=>{$("#ocMultaNew").classList.add("hidden");const def=estou?{12:"p12",24:"p24",48:"p48"}[o.h]:"";
+  if($("#ocMultaNew"))$("#ocMultaNew").onclick=()=>{$("#ocMultaNew").classList.add("hidden");const def=estou&&MK["p"+o.h]?"p"+o.h:"";
     $("#ocMultaForm").innerHTML=`<form class="form" id="mfF" style="grid-template-columns:1fr 1fr;margin-top:10px;align-items:start">
-     <label class="f w2" for="mfT">Tipo (TR 6.3.1)<select id="mfT">${MULTAS.map(x=>`<option value="${x.k}" ${x.k===def?"selected":""}>${esc(x.n)} · ${x.livre?"valor livre":pct(x.pct)+(x.dia?" por dia":"")}</option>`).join("")}</select></label>
+     <label class="f w2" for="mfT">Tipo${MUL_REF?` (${esc(MUL_REF)})`:""}<select id="mfT">${MULTAS.map(x=>`<option value="${x.k}" ${x.k===def?"selected":""}>${esc(x.n)} · ${x.livre?"valor livre":pct(x.pct)+(x.dia?" por dia":"")}</option>`).join("")}</select></label>
      <label class="f" for="mfP">Percentual sobre o contrato (%)<input type="number" id="mfP" step="0.01" min="0" max="30" class="in-num" style="max-width:none"></label>
      <label class="f" for="mfD">Dias (multa diária, máx. ${MULTA_DIAS_MAX})<input type="number" id="mfD" min="1" max="${MULTA_DIAS_MAX}" step="1" value="1" class="in-num" style="max-width:none"></label>
      <label class="f" for="mfV">Valor (R$) *<input type="number" id="mfV" step="0.01" min="0.01" class="in-num" style="max-width:none" required></label>
@@ -1409,7 +1580,7 @@ function openOc(id){const o=S.ocorrencias[id];if(!o)return;const c=S.contratados
     $("#mfC").onclick=()=>re();
     $("#mfF").addEventListener("submit",async e=>{e.preventDefault();const tp=MK[$("#mfT").value]||{};const v=r2($("#mfV").value);const data=$("#mfData").value;const dias=tp.dia?Math.min(MULTA_DIAS_MAX,Math.max(1,+$("#mfD").value||1)):1;
       if(!(v>0)||!data){$("#mfMsg").textContent="Informe valor e data.";return;}
-      const mt=multaTotals();if(mt.tot+v>MULTA_TETO+0.001){$("#mfMsg").textContent=`Passa do limite de 30% (${brl(MULTA_TETO)}). Acumulado: ${brl(mt.tot)}. Registre mesmo assim só se a SMTC aplicou.`;if(!$("#mfF").dataset.force){$("#mfF").dataset.force="1";return;}}
+      const mt=multaTotals();if(mt.tot+v>MULTA_TETO+0.001){$("#mfMsg").textContent=`Passa do limite de ${pct(MULTA_PCT)} (${brl(MULTA_TETO)}). Acumulado: ${brl(mt.tot)}. Registre mesmo assim só se ${ORG_F} aplicou.`;if(!$("#mfF").dataset.force){$("#mfF").dataset.force="1";return;}}
       await ocSave(id,{multa:{tipo:$("#mfT").value,pct:tp.livre?0:r2(+$("#mfP").value)/100,dias,valor:v,data,st:"pendente",obs:$("#mfO").value.trim(),em:Date.now()}});
       toast(`Multa de ${brl(v)} registrada: já soma na planilha, nos pagamentos e no painel`);re();});};
 }
@@ -1419,10 +1590,10 @@ setInterval(()=>{if(current()==="ocorrencias")rOc();},30000);
 let rpT="verba";
 $$("#rpType button").forEach(b=>b.onclick=()=>{rpT=b.dataset.t;$$("#rpType button").forEach(x=>x.setAttribute("aria-pressed",x===b));rRep();});
 function repData(){const aa=artAgg(),t=totals();
-  if(rpT==="verba"){const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"").localeCompare(b.data||""));return{t:"Prestação de contas da verba artística",s:`Item 4 do Memorial · ${aa.n} contratações · ${aa.cach} cachês · ${brl(aa.contr)} de ${brl(VERBA)}${aa.nRou?` · ${aa.nRou} atração(ões) pela ${ROU_TXT} (R$ 0,00 no contrato)`:""}`,h:["Datas","Atração","Artista","CPF/CNPJ","Cachês","Total","Pago","Comprovantes"],rows:cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id).filter(p=>p.status==="pago");const ds=cDatas(c);const rou=isRou(c);return[ds.map(x=>fd(x.d)).join(", ")||"—",c.atracao||"—",c.nome,rou?"—":(c.doc||"—"),rou?ROU_TXT:`${c.qtd} × ${brl(c.diaria)}`,brl(a.total),rou?"—":brl(a.pago),rou?ROU_TXT+" · SMTC":(ps.length?`${ps.filter(p=>p.comp).length}/${ps.length}`:"—")];}),foot:`${aa.cach} cachês em ${aa.apresC} apresentações${aa.nRou?` (+${aa.apresRou} pela ${ROU_TXT})`:""} · Pago: ${brl(aa.pago)} · A pagar: ${brl(aa.aPagar)}${aa.contr>VERBA?` · ACIMA DA VERBA: ${brl(aa.contr-VERBA)}`:` · Falta contratar: ${brl(Math.max(0,aa.falta))}`}`};}
+  if(rpT==="verba"){const cs=contrList().filter(c=>c.funcao==="artista").sort((a,b)=>(a.data||"").localeCompare(b.data||""));return{t:"Prestação de contas da verba artística",s:`${ART&&ART.item?ART.item+" · ":""}${aa.n} contratações · ${aa.cach} cachês · ${brl(aa.contr)} de ${brl(VERBA)}${aa.nRou?` · ${aa.nRou} atração(ões) pela ${ROU_TXT} (R$ 0,00 no contrato)`:""}`,h:["Datas","Atração","Artista","CPF/CNPJ","Cachês","Total","Pago","Comprovantes"],rows:cs.map(c=>{const a=cAgg(c);const ps=cPays(c.id).filter(p=>p.status==="pago");const ds=cDatas(c);const rou=isRou(c);return[ds.map(x=>fd(x.d)).join(", ")||"—",c.atracao||"—",c.nome,rou?"—":(c.doc||"—"),rou?ROU_TXT:`${c.qtd} × ${brl(c.diaria)}`,brl(a.total),rou?"—":brl(a.pago),rou?ROU_TXT+" · "+ORG:(ps.length?`${ps.filter(p=>p.comp).length}/${ps.length}`:"—")];}),foot:`${aa.cach} cachês em ${aa.apresC} apresentações${aa.nRou?` (+${aa.apresRou} pela ${ROU_TXT})`:""} · Pago: ${brl(aa.pago)} · A pagar: ${brl(aa.aPagar)}${aa.contr>VERBA?` · ACIMA DA VERBA: ${brl(aa.contr-VERBA)}`:` · Falta contratar: ${brl(Math.max(0,aa.falta))}`}`};}
   if(rpT==="setor")return{t:"Gastos por setor",s:`Homologado ${brl(TETO)} · pago ${brl(t.pago)} (${pct(t.pago/TETO)})`,h:["Setor","Proposta","Previsto","Contratado","Pago","A pagar"],rows:SETORES.map(s=>{const a=setAgg(s.k);return[s.n,brl(a.orc),brl(a.prev),brl(a.contr),brl(a.pago),brl(a.aPagar)];}),foot:`Previsto ${brl(t.prev)} + impostos ${brl(t.imp)} · margem livre ${brl(t.margem)}`};
-  return{t:"Relatório parcial de execução",s:"Medição para nota fiscal",h:["Item","Quantidade","Contratado","Situação"],rows:FUNCS.filter(f=>f.lim!=="sem").map(f=>{const a=itemAgg(f);return[`${f.it} · ${f.n}`,f.lim==="art"?`${a.qtd} cachês`:(f.lim==="qtd"?`${a.qtd}/${f.q} ${unitWord(f)}`:(a.n?"Contratado":"Pendente")),brl(a.contratado),itemStatus(f,a).map(x=>x[1]).join(", ")];}),foot:`NF 1 (20%): ${brl(TETO*.2)} · NF 2 (40%): ${brl(TETO*.4)} · NF 3 (40%): ${brl(TETO*.4)}`};}
-function rRep(){const r=repData();$("#rpBox").innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)"><div><span class="rl">Prefeitura de Canela · SMTC · Pregão 60/2026</span><h3>${esc(r.t)}</h3><span style="color:var(--muted);font-size:13px">${esc(r.s)}</span></div><img class="rep-logo" src="assets/brand/alternativa-cultural-horizontal-cor.svg" alt="Alternativa Cultural · Produção de Eventos" width="240" height="54"></div><div class="tw"><table><thead><tr>${r.h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r.rows.length?r.rows.map(x=>`<tr>${x.map(y=>`<td>${esc(y)}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${r.h.length}">Nenhum registro ainda.</td></tr>`}</tbody></table></div><div class="ft"><span>${esc(r.foot)}</span><span>Gerado em ${new Date().toLocaleDateString("pt-BR")} · Alternativa Cultural · Sistema ST Solutions</span></div>`;}
+  return{t:"Relatório parcial de execução",s:"Medição para nota fiscal",h:["Item","Quantidade","Contratado","Situação"],rows:FUNCS.filter(f=>f.lim!=="sem").map(f=>{const a=itemAgg(f);return[`${f.it} · ${f.n}`,f.lim==="art"?`${a.qtd} cachês`:(f.lim==="qtd"?`${a.qtd}/${f.q} ${unitWord(f)}`:(a.n?"Contratado":"Pendente")),brl(a.contratado),itemStatus(f,a).map(x=>x[1]).join(", ")];}),foot:(PROJ.nfs||[]).map(([n,p])=>`${n} (${pct(p)}): ${brl(TETO*p)}`).join(" · ")||`Homologado ${brl(TETO)}`};}
+function rRep(){const r=repData();$("#rpBox").innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)"><div><span class="rl">${esc(PROJ.relatorio||[PROJ.contratante,PROJ.contrato].filter(Boolean).join(" · "))}</span><h3>${esc(r.t)}</h3><span style="color:var(--muted);font-size:13px">${esc(r.s)}</span></div><img class="rep-logo" src="assets/brand/alternativa-cultural-horizontal-cor.svg" alt="Alternativa Cultural · Produção de Eventos" width="240" height="54"></div><div class="tw"><table><thead><tr>${r.h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r.rows.length?r.rows.map(x=>`<tr>${x.map(y=>`<td>${esc(y)}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${r.h.length}">Nenhum registro ainda.</td></tr>`}</tbody></table></div><div class="ft"><span>${esc(r.foot)}</span><span>Gerado em ${new Date().toLocaleDateString("pt-BR")} · Alternativa Cultural · Sistema ST Solutions</span></div>`;}
 $("#rpCopy").onclick=async()=>{const r=repData();const txt=[r.t,r.s,"",r.h.join(" | "),...r.rows.map(x=>x.join(" | ")),"",r.foot].join("\n");try{await navigator.clipboard.writeText(txt);toast("Texto copiado");}catch(e){toast("Não foi possível copiar aqui.",true);}};
 
 /* ---------- exportação CSV ---------- */
@@ -1431,15 +1602,16 @@ const num=v=>(+v||0).toFixed(2).replace(".",",");
 async function saveCsv(name,rows){const txt="﻿"+rows.map(r=>r.map(csvCell).join(";")).join("\n");
   if(Store.downloads){try{await Store.downloads.save({filename:name,data:txt});toast("Planilha pronta");return;}catch(e){if(e&&e.code==="declined")return;}}
   try{await navigator.clipboard.writeText(txt);toast("Download indisponível aqui: planilha copiada (cole no Excel ou Sheets)");}catch(e){toast("Não foi possível exportar aqui.",true);}}
-$("#expContr").onclick=()=>saveCsv("alternativa-cultural_sonho-de-natal_contratados.csv",[["Nome","CPF/CNPJ","Tipo","Telefone","Setor","Função","Valor unitário","Quantidade","Valor total","Agendado","Pago","Serviço","Data do serviço","Observações"],...contrList().map(c=>{const f=FN[c.funcao]||{};const a=cAgg(c);return[c.nome,c.doc,c.tipo,c.tel,(SET[f.s]||{}).n,f.n,num(c.diaria),c.qtd,num(a.total),num(a.agendado),num(a.pago),c.servico==="prestado"?"Prestado":"A prestar",fd(c.data),c.obs];})]);
-$("#expPlan").onclick=()=>{const t=totals();const rows=[["Setor","Item","Valor da proposta","Valor Real","Previsto","Contratado","Pago","A pagar"]];SETORES.forEach(x=>FUNCS.filter(f=>f.s===x.k).forEach(f=>{const a=itemAgg(f);rows.push([x.n,`${f.it} · ${f.n}`,num(f.tot),a.real==null?"":num(a.real),num(a.prev),num(a.contratado),num(a.pago),num(a.aPagar)]);}));rows.push(["","Impostos estimados","","",num(t.imp),"","",""]);rows.push(["","Multas e glosas","","",num(t.multas),"",num(t.multasPagas),num(t.multasPend)]);rows.push(["","Margem livre","","",num(t.margem),"","",""]);saveCsv("alternativa-cultural_sonho-de-natal_planilha-de-custo.csv",rows);};
-$("#expPag").onclick=()=>saveCsv("alternativa-cultural_sonho-de-natal_pagamentos.csv",[["Data prevista","Data do pagamento","Situação","Valor","Contratado","CPF/CNPJ","Setor","Função","Comprovante"],...payList().sort((a,b)=>a.data.localeCompare(b.data)).map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return[fd(p.data),st==="pago"?fd(p.pagoEm):"",st==="pago"?"Realizado":(st==="atrasado"?"Atrasado":"Pendente"),num(p.valor),c.nome,c.doc,(SET[f.s]||{}).n,f.n,p.comp?p.comp.nome:""];})]);
+$("#expContr").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_contratados.csv",[["Nome","CPF/CNPJ","Tipo","Telefone","Setor","Função","Valor unitário","Quantidade","Valor total","Agendado","Pago","Serviço","Data do serviço","Observações"],...contrList().map(c=>{const f=FN[c.funcao]||{};const a=cAgg(c);return[c.nome,c.doc,c.tipo,c.tel,(SET[f.s]||{}).n,f.n,num(c.diaria),c.qtd,num(a.total),num(a.agendado),num(a.pago),c.servico==="prestado"?"Prestado":"A prestar",fd(c.data),c.obs];})]);
+$("#expPlan").onclick=()=>{const t=totals();const rows=[["Setor","Item","Valor da proposta","Valor Real","Previsto","Contratado","Pago","A pagar"]];SETORES.forEach(x=>FUNCS.filter(f=>f.s===x.k).forEach(f=>{const a=itemAgg(f);rows.push([x.n,`${f.it} · ${f.n}`,num(f.tot),a.real==null?"":num(a.real),num(a.prev),num(a.contratado),num(a.pago),num(a.aPagar)]);}));rows.push(["","Impostos estimados","","",num(t.imp),"","",""]);rows.push(["","Multas e glosas","","",num(t.multas),"",num(t.multasPagas),num(t.multasPend)]);rows.push(["","Margem livre","","",num(t.margem),"","",""]);saveCsv("alternativa-cultural_"+PROJ.arquivo+"_planilha-de-custo.csv",rows);};
+$("#expPag").onclick=()=>saveCsv("alternativa-cultural_"+PROJ.arquivo+"_pagamentos.csv",[["Data prevista","Data do pagamento","Situação","Valor","Contratado","CPF/CNPJ","Setor","Função","Comprovante"],...payList().sort((a,b)=>a.data.localeCompare(b.data)).map(p=>{const c=S.contratados[p.cid]||{};const f=FN[c.funcao]||{};const st=payStatus(p);return[fd(p.data),st==="pago"?fd(p.pagoEm):"",st==="pago"?"Realizado":(st==="atrasado"?"Atrasado":"Pendente"),num(p.valor),c.nome,c.doc,(SET[f.s]||{}).n,f.n,p.comp?p.comp.nome:""];})]);
 
 /* ================= EDITAL ================= */
-function rEdital(){$("#edBody").innerHTML=FUNCS.map(f=>`<tr><td class="mono">${f.it}</td><td><b>${f.n}</b>${f.det?`<span class="sub">${f.det}</span>`:""}</td><td><span class="sdot" style="background:${SET[f.s].c}"></span>${SET[f.s].n}</td><td class="r num">${f.lim==="art"?"100":(f.q||"—")}</td><td>${f.un}</td><td class="r num">${f.d?brl(f.d):"—"}</td><td class="r num">${f.tot?brl(f.tot):"—"}</td><td>${f.lim==="qtd"?`${f.q} ${unitWord(f)}`:f.lim==="count"?`${f.max} contratação(ões)`:f.lim==="art"?`${ART_MIN}–${ART_MAX} cachês · R$ 50.000 exatos`:'<span class="chip w">Sem previsão</span>'}</td></tr>`).join("")+`<tr class="tot"><td></td><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${brl(FUNCS.reduce((a,f)=>a+f.tot,0))}</td><td></td></tr>`;}
+function rEdital(){$("#edBody").innerHTML=FUNCS.map(f=>`<tr><td class="mono">${f.it}</td><td><b>${f.n}</b>${f.det?`<span class="sub">${f.det}</span>`:""}</td><td><span class="sdot" style="background:${(SET[f.s]||{}).c||"var(--gray)"}"></span>${esc((SET[f.s]||{}).n||"—")}</td><td class="r num">${f.lim==="art"?ART_MAX:(f.q||"—")}</td><td>${f.un}</td><td class="r num">${f.d?brl(f.d):"—"}</td><td class="r num">${f.tot?brl(f.tot):"—"}</td><td>${f.lim==="qtd"?`${f.q} ${unitWord(f)}`:f.lim==="count"?`${f.max} contratação(ões)`:f.lim==="art"?`${ART_MIN}–${ART_MAX} cachês · ${brl0(VERBA)} exatos`:'<span class="chip w">Sem previsão</span>'}</td></tr>`).join("")+`<tr class="tot"><td></td><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${brl(FUNCS.reduce((a,f)=>a+f.tot,0))}</td><td></td></tr>`;}
 
 /* ================= INÍCIO ================= */
-syncCForm();show();initStore();
+$$("[data-pt]").forEach(el=>{TXT0[el.dataset.pt]=el.innerHTML;});
+setAtivo(LEGADO,true);show();initStore();
 })();
 </script>
 </body>

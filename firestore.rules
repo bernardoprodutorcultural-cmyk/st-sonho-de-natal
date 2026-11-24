@@ -1,22 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // O papel de cada pessoa fica em usuarios/{e-mail em minúsculas}: { papel: "admin" | "editor" | "leitura", nome: "..." }
+    // Perfil de cada pessoa em usuarios/{e-mail em minúsculas}:
+    //   papel: "admin" (todos os projetos) | "membro" (acesso por projeto)
+    //          "editor" | "leitura" = formato anterior, vale só para o Sonho de Natal, com todas as áreas
+    //   projetos: { <id do projeto>: { papel: "editor" | "leitura", areas: [...], todas: bool, valores: bool } }
+    // O 39º Sonho de Natal (id sonho-natal-2026) guarda os dados nas coleções da raiz.
+    // Os demais projetos guardam em projetos/{id}/contratados, pagamentos, ocorrencias e config.
     function email() { return request.auth.token.email.lower(); }
     function logado() { return request.auth != null && exists(/databases/$(database)/documents/usuarios/$(email())); }
-    function papel() { return get(/databases/$(database)/documents/usuarios/$(email())).data.papel; }
-    function editor() { return logado() && papel() in ['admin', 'editor']; }
-    function admin() { return logado() && papel() == 'admin'; }
+    function perfil() { return get(/databases/$(database)/documents/usuarios/$(email())).data; }
+    function admin() { return logado() && perfil().papel == 'admin'; }
+    function legado(pid) { return pid == 'sonho-natal-2026' && perfil().papel in ['editor', 'leitura']; }
+    function acesso(pid) { return perfil().get('projetos', {}).get(pid, {}); }
+    function membro(pid) { return logado() && (admin() || legado(pid) || acesso(pid).get('papel', '') in ['editor', 'leitura']); }
+    function naArea(pid, areas) { return acesso(pid).get('todas', false) == true || acesso(pid).get('areas', []).hasAny(areas); }
+    function valores(pid) { return logado() && (admin() || legado(pid) || (membro(pid) && acesso(pid).get('valores', false) == true)); }
+    function edita(pid, areas) {
+      return logado() && (admin()
+        || (pid == 'sonho-natal-2026' && perfil().papel == 'editor')
+        || (acesso(pid).get('papel', '') == 'editor' && naArea(pid, areas)));
+    }
+    function leConfig(pid, id) { return id == 'planilha' ? valores(pid) : membro(pid); }
+    function gravaConfig(pid, id) {
+      return id == 'planilha' ? (edita(pid, ['financeiro']) && valores(pid))
+        : id == 'documentos' ? edita(pid, ['documentos'])
+        : id == 'riders' ? edita(pid, ['riders'])
+        : admin();
+    }
 
     match /usuarios/{id} {
       allow get: if request.auth != null && (id == email() || admin());
       allow list: if admin();
       allow write: if admin();
     }
-    match /contratados/{id} { allow read: if logado(); allow write: if editor(); }
-    match /pagamentos/{id}  { allow read: if logado(); allow write: if editor(); }
-    match /ocorrencias/{id} { allow read: if logado(); allow write: if editor(); }
-    match /config/{id}      { allow read: if logado(); allow write: if editor(); }
-    match /{outro=**}       { allow read, write: if false; }
+
+    // ---- 39º Sonho de Natal (coleções da raiz, como sempre foram) ----
+    match /contratados/{id} { allow read: if membro('sonho-natal-2026'); allow write: if edita('sonho-natal-2026', ['contratados', 'programacao', 'riders']); }
+    match /pagamentos/{id}  { allow read: if valores('sonho-natal-2026'); allow write: if edita('sonho-natal-2026', ['financeiro']) && valores('sonho-natal-2026'); }
+    match /ocorrencias/{id} { allow read: if membro('sonho-natal-2026'); allow write: if edita('sonho-natal-2026', ['ocorrencias']); }
+    match /config/{id}      { allow read: if leConfig('sonho-natal-2026', id); allow write: if gravaConfig('sonho-natal-2026', id); }
+
+    // ---- Demais projetos: cada um isolado no próprio caminho ----
+    match /projetos/{pid}/contratados/{id} { allow read: if membro(pid); allow write: if edita(pid, ['contratados', 'programacao', 'riders']); }
+    match /projetos/{pid}/pagamentos/{id}  { allow read: if valores(pid); allow write: if edita(pid, ['financeiro']) && valores(pid); }
+    match /projetos/{pid}/ocorrencias/{id} { allow read: if membro(pid); allow write: if edita(pid, ['ocorrencias']); }
+    match /projetos/{pid}/config/{id}      { allow read: if leConfig(pid, id); allow write: if gravaConfig(pid, id); }
+
+    match /{outro=**} { allow read, write: if false; }
   }
 }

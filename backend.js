@@ -1,4 +1,5 @@
 // ST Solutions · camada de acesso ao Firebase (Auth + Firestore + Storage)
+// Caminhos: o Sonho de Natal usa as coleções da raiz; os demais projetos usam projetos/<id>/<coleção>.
 // Carregado como módulo; expõe window.STBackend e dispara "st-backend-ready".
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -24,16 +25,19 @@ if (ok) {
     signUp(email, pw) { return createUserWithEmailAndPassword(auth, emailKey(email), pw); },
     reset(email) { return sendPasswordResetEmail(auth, emailKey(email)); },
     signOut() { return signOut(auth); },
+    async usuario(email) { try { const s = await getDoc(doc(db, "usuarios", emailKey(email))); return s.exists() ? s.data() : null; } catch (e) { return null; } },
     async papel(email) { try { const s = await getDoc(doc(db, "usuarios", emailKey(email))); return s.exists() ? (s.data().papel || null) : null; } catch (e) { return null; } },
     subscribe(col, cb, err) { return onSnapshot(collection(db, col), snap => { const o = {}; snap.docs.forEach(d => { o[d.id] = d.data(); }); cb(o, snap.metadata.fromCache); }, err); },
+    subscribeDoc(col, id, cb, err) { return onSnapshot(doc(db, col, id), s => cb(s.exists() ? s.data() : null, s.metadata.fromCache), err); },
     set(col, id, data) { return setDoc(doc(db, col, id), data); },
     del(col, id) { return deleteDoc(doc(db, col, id)); },
     setUsuario(email, data) { return setDoc(doc(db, "usuarios", emailKey(email)), data); },
     delUsuario(email) { return deleteDoc(doc(db, "usuarios", emailKey(email))); },
-    async upload(file, type) {
+    async upload(file, type, prefix) {
       if (!storage) throw new Error("storage_off");
       const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(-80);
-      const path = `anexos/${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}_${safe}`;
+      const base = /^(anexos|projetos\/[a-z0-9-]+\/anexos)$/.test(prefix || "") ? prefix : "anexos";
+      const path = `${base}/${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}_${safe}`;
       const r = ref(storage, path);
       await uploadBytes(r, file, { contentType: type || file.type });
       const url = await getDownloadURL(r);

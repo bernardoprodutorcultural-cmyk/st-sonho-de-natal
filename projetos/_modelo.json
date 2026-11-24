@@ -1,0 +1,55 @@
+{
+  "nome": "Nome do projeto como aparece no painel",
+  "curto": "Nome curto",
+  "status": "preparacao",
+  "contratante": "Prefeitura de Exemplo/UF · Secretaria de Cultura",
+  "orgao": "SECULT",
+  "orgaoFrase": "a SECULT",
+  "contrato": "Pregão Eletrônico 00/2027",
+  "local": "Cidade/UF",
+  "relatorio": "Prefeitura de Exemplo · SECULT · Pregão 00/2027",
+  "teto": 100000,
+  "aliquota": 0.125,
+  "vigencia": { "ini": "2027-01-01", "fim": "2027-03-31" },
+  "modulos": ["painel", "contratados", "financeiro", "programacao", "documentos", "ocorrencias", "relatorios", "edital"],
+  "setores": [
+    { "k": "artistico", "n": "Artístico" },
+    { "k": "tecnica", "n": "Técnica" },
+    { "k": "licencas", "n": "Licenças" }
+  ],
+  "funcs": [
+    { "k": "artista", "n": "Artista (cachê)", "s": "artistico", "it": "1", "un": "cachê", "q": 20, "d": 1000, "lim": "art", "det": "Mín. 10 contratações" },
+    { "k": "som_luz", "n": "Som e luz", "s": "tecnica", "it": "2", "un": "diária", "q": 10, "d": 3000, "lim": "qtd" },
+    { "k": "ecad", "n": "Licenciamento ECAD", "s": "licencas", "it": "3", "un": "serviço", "q": 1, "d": 5000, "lim": "count", "max": 1 },
+    { "k": "producao", "n": "Produção", "s": "tecnica", "it": "—", "un": "diária", "q": 0, "d": 0, "lim": "sem", "det": "Sem linha na proposta" }
+  ],
+  "artistico": { "verba": 20000, "min": 10, "max": 20, "rouanet": false, "item": "Item 1 do Termo de Referência", "media": 1000 },
+  "subcontratacao": { "pct": 0.25 },
+  "docs": [
+    { "k": "os", "n": "Contrato assinado e Ordem de Serviço", "pz": "Antes de executar", "r": "Serviço não pago" },
+    { "k": "ecad", "n": "Protocolo do ECAD", "d": "Guia paga antes da 1ª apresentação", "pz": "1 dia antes do início", "r": "Multa" }
+  ],
+  "multas": {
+    "ref": "TR item 0.0",
+    "tetoPct": 0.30,
+    "diasMax": 10,
+    "itens": [
+      { "k": "p24", "n": "Prazo de 24h estourado", "pct": 0.02, "h": 24 },
+      { "k": "a", "n": "Atraso no cronograma", "pct": 0.01, "dia": true },
+      { "k": "glosa", "n": "Glosa definida pelo contratante", "pct": 0, "livre": true }
+    ]
+  },
+  "ocorrencias": {
+    "prazos": [ { "h": 24, "n": "Urgente", "pct": 0.02 }, { "h": 48, "n": "Regular", "pct": 0.01 } ],
+    "locais": ["Palco principal", "Área geral"]
+  },
+  "rider": null,
+  "nfs": [["NF 1", 0.5], ["NF 2", 0.5]],
+  "regras": [
+    { "t": "Verba artística fixa", "d": "R$ 20.000,00 em no mínimo 10 contratações.", "chip": "Fixo", "nivel": "md" }
+  ],
+  "pendencias": [
+    { "t": "Ponto a confirmar com o contratante", "d": "Descrição curta.", "chip": "Pendente", "nivel": "md" }
+  ],
+  "textos": {}
+}
