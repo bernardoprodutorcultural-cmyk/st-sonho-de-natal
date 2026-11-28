@@ -891,6 +891,7 @@ async function initStore(){
   B.onAuth(async user=>{
     stopSubs();document.body.classList.remove("ro","admin","auth");Store.canWrite=true;Store.assets=null;
     if(!user){Store.user=null;Object.keys(DATA).forEach(k=>{DATA[k]=blank();});S=DATA[PROJ.id];USR={};schedule();showLogin();Store.setConn("local","Entre com seu e-mail para acessar os dados.");return;}
+    const last=idleGet();if(!document.body.dataset.fresh&&(!last||Date.now()-last>IDLE_MS)){try{localStorage.removeItem("ac-last");}catch(e){}B.signOut().catch(()=>{});return;}
     const perfil=await B.usuario(user.email);const papel=perfil&&perfil.papel;
     if(!papel){Store.user=null;showLogin("semacesso",user.email);Store.setConn("local","E-mail sem acesso liberado.");return;}
     Store.user={email:user.email,papel,projetos:perfil.projetos||{}};
@@ -944,16 +945,18 @@ function lgState(){try{return JSON.parse(sessionStorage.getItem("ac-lg")||"{}");
 function lgFail(n){try{if(n===0){sessionStorage.removeItem("ac-lg");return;}const s=lgState();s.n=(s.n||0)+1;if(s.n%5===0){s.r=(s.r||0)+1;s.until=Date.now()+Math.min(15,Math.pow(2,s.r-1))*60000;}sessionStorage.setItem("ac-lg",JSON.stringify(s));}catch(e){}}
 function lgLocked(){const u=lgState().until||0;return u>Date.now()?Math.ceil((u-Date.now())/1000):0;}
 // Sessão ociosa: 4 h sem uso encerram o acesso (computador compartilhado ou esquecido aberto).
-const IDLE_MS=4*60*60*1000;let idleT=null,idleLast=Date.now();
-function idleArm(){idleLast=Date.now();if(idleT)return;idleT=setInterval(()=>{if(Store.mode==="web"&&Store.user&&Date.now()-idleLast>IDLE_MS){Store.B.signOut().catch(()=>{});toast("Sessão encerrada por inatividade. Entre de novo.");}},60000);
-  ["pointerdown","keydown","scroll","touchstart"].forEach(ev=>window.addEventListener(ev,()=>{idleLast=Date.now();},{passive:true,capture:true}));}
+const IDLE_MS=4*60*60*1000;let idleT=null,idleLast=Date.now(),idleSaved=0;
+const idleGet=()=>{try{return +localStorage.getItem("ac-last")||0;}catch(e){return 0;}};
+const idleTouch=()=>{idleLast=Date.now();if(idleLast-idleSaved>30000){idleSaved=idleLast;try{localStorage.setItem("ac-last",String(idleLast));}catch(e){}}};
+function idleArm(){idleSaved=0;idleTouch();if(idleT)return;idleT=setInterval(()=>{if(Store.mode==="web"&&Store.user&&Date.now()-idleLast>IDLE_MS){Store.B.signOut().catch(()=>{});toast("Sessão encerrada por inatividade. Entre de novo.");}},60000);
+  ["pointerdown","keydown","scroll","touchstart"].forEach(ev=>window.addEventListener(ev,idleTouch,{passive:true,capture:true}));}
 function showLogin(mode,email){const L=$("#login");L.hidden=false;document.body.style.overflow="hidden";$("#who").hidden=true;
   const na=$("#lgNoAccess");if(mode==="semacesso"){na.hidden=false;na.innerHTML=`<b>${esc(email)}</b> ainda não tem acesso liberado. Peça ao administrador para cadastrar este e-mail na aba Usuários e entre de novo.`;$("#loginSub").textContent="Sua conta existe, mas o acesso ainda não foi liberado.";$("#lgEmail").value=email||"";}else{na.hidden=true;}
   setLgMode("in");}
 function hideLogin(){$("#login").hidden=true;document.body.style.overflow="";}
 function setLgMode(m){lgMode=m;$("#loginT").textContent=m==="new"?"Criar minha conta":"Entrar no sistema";$("#lgOk").textContent=m==="new"?"Criar conta":"Entrar";$("#lgNew").textContent=m==="new"?"Já tenho conta":"Criar minha conta";$("#lgPw").autocomplete=m==="new"?"new-password":"current-password";$("#lgMsg").textContent="";if(m==="new")$("#loginSub").textContent="Use o mesmo e-mail que o administrador cadastrou e escolha uma senha de pelo menos 6 caracteres.";}
 $("#lgNew").onclick=()=>setLgMode(lgMode==="new"?"in":"new");
-$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const B=Store.B;if(!B)return;const em=$("#lgEmail").value.trim(),pw=$("#lgPw").value;const btn=$("#lgOk");const lk=lgLocked();if(lk){$("#lgMsg").textContent=`Muitas tentativas. Aguarde ${lk>60?Math.ceil(lk/60)+" min":lk+" s"} para tentar de novo.`;return;}btn.disabled=true;$("#lgMsg").textContent="";
+$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const B=Store.B;if(!B)return;const em=$("#lgEmail").value.trim(),pw=$("#lgPw").value;const btn=$("#lgOk");document.body.dataset.fresh="1";try{localStorage.removeItem("ac-last");}catch(e){}const lk=lgLocked();if(lk){$("#lgMsg").textContent=`Muitas tentativas. Aguarde ${lk>60?Math.ceil(lk/60)+" min":lk+" s"} para tentar de novo.`;return;}btn.disabled=true;$("#lgMsg").textContent="";
   try{if(lgMode==="new")await B.signUp(em,pw);else await B.signIn(em,pw);}catch(x){lgFail(1);const l2=lgLocked();$("#lgMsg").textContent=l2?"Muitas tentativas. Aguarde 1 min ou mais para tentar de novo.":authMsg(x);}
   btn.disabled=false;});
 $("#lgReset").onclick=async()=>{const em=$("#lgEmail").value.trim();if(!em){$("#lgMsg").textContent="Digite o e-mail para receber o link de redefinição.";return;}try{await Store.B.reset(em);$("#lgMsg").textContent="Enviamos um e-mail com o link para criar uma nova senha.";}catch(x){$("#lgMsg").textContent=authMsg(x);}};
