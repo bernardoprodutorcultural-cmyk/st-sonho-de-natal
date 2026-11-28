@@ -882,10 +882,14 @@ function blobSaver(){return{save:async({filename,data})=>{const bl=new Blob([dat
 const cfgOk=()=>{const c=window.ST_FIREBASE;return !!(c&&c.apiKey&&!/COLE_AQUI/.test(c.apiKey)&&c.projectId&&!/SEU-PROJETO/.test(c.projectId));};
 async function initStore(){
   if(window.claude&&typeof window.claude.use==="function")return initClaude();
-  if(cfgOk()&&window.STBackend===undefined){await new Promise(r=>{window.addEventListener("st-backend-ready",r,{once:true});setTimeout(r,8000);});}
+  if(cfgOk()&&window.STBackend===undefined){await new Promise(r=>{window.addEventListener("st-backend-ready",r,{once:true});setTimeout(r,20000);});}
   Store.downloads=blobSaver();
   const B=window.STBackend;
   await FICHAS_OK;
+  if(!B&&cfgOk()){ // site oficial sem conexão com o banco: nunca abre o sistema; fica na tela de entrada até conectar
+    Store.mode="web";showLogin();$("#lgOk").disabled=true;$("#loginSub").textContent="Não foi possível conectar ao banco de dados agora.";
+    $("#lgMsg").innerHTML='Verifique a internet e recarregue a página. Se continuar, desative bloqueadores de anúncio neste site ou tente outro navegador. <button class="btn sm" type="button" id="lgRetry">Recarregar</button>';
+    $("#lgRetry").onclick=()=>location.reload();window.addEventListener("st-backend-ready",()=>location.reload(),{once:true});return;}
   if(!B){document.body.classList.add("auth");Store.mode="local";Store.loadLocal();setAtivo(escolherAtivo());Store.setConn("local",cfgOk()?"Não foi possível carregar o Firebase. Modo local: dados só neste navegador.":"Firebase não configurado (firebase-config.js). Modo local: dados só neste navegador.");schedule();return;}
   Store.mode="web";Store.B=B;
   B.onAuth(async user=>{
